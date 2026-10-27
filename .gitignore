@@ -1,4 +1,4 @@
-   target/
-   bin/
-   nbproject/private/
-   *.class
+/target/
+bin/
+nbproject/private/
+*.class
