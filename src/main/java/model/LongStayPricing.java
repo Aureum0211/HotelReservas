@@ -1,6 +1,6 @@
 package model;
 
-import exceptions.InvalidDataException;
+import validation.Validator;
 
 public class LongStayPricing implements PricingPolicy {
 
@@ -8,14 +8,8 @@ public class LongStayPricing implements PricingPolicy {
     private final double discountPercent;
 
     public LongStayPricing(int minNights, double discountPercent) {
-        if (minNights <= 0) {
-            throw new InvalidDataException("El minimo de noches debe ser mayor que cero.");
-        }
-        this.minNights = minNights;
-        if (discountPercent <= 0) {
-            throw new InvalidDataException("El porcentaje de descuento debe ser mayor que cero.");
-        }
-        this.discountPercent = discountPercent;
+        this.minNights = Validator.requirePositive(minNights, "El minimo de noches");
+        this.discountPercent = Validator.requirePositive(discountPercent, "El porcentaje de descuento");
     }
 
     @Override

@@ -4,6 +4,7 @@ import exceptions.BusinessRuleException;
 import exceptions.InvalidDataException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import validation.Validator;
 
 public class Reservation implements Identifiable {
 
@@ -21,61 +22,27 @@ public class Reservation implements Identifiable {
 
     public Reservation(int id, Client client, Employee employee, Room room, LocalDate checkIn,
                        LocalDate checkOut, double pricePerNight, double total, Status status) {
-        if (id <= 0) {
-            throw new InvalidDataException("El id de la reserva debe ser mayor que cero.");
-        }
-        this.id = id;
-        if (client == null) {
-            throw new InvalidDataException("El cliente es obligatorio.");
-        }
-        this.client = client;
+        this.id = Validator.requirePositive(id, "El id de la reserva");
+        this.client = Validator.requireNonNull(client, "El cliente");
         this.employee = employee;
-        if (room == null) {
-            throw new InvalidDataException("La habitacion es obligatorio.");
-        }
-        this.room = room;
-        if (checkIn == null) {
-            throw new InvalidDataException("La fecha de entrada es obligatorio.");
-        }
-        this.checkIn = checkIn;
-        if (checkOut == null) {
-            throw new InvalidDataException("La fecha de salida es obligatorio.");
-        }
-        this.checkOut = checkOut;
+        this.room = Validator.requireNonNull(room, "La habitacion");
+        this.checkIn = Validator.requireNonNull(checkIn, "La fecha de entrada");
+        this.checkOut = Validator.requireNonNull(checkOut, "La fecha de salida");
         if (!checkOut.isAfter(checkIn)) {
             throw new InvalidDataException("La fecha de salida debe ser posterior a la de entrada.");
         }
-        if (pricePerNight <= 0) {
-            throw new InvalidDataException("El precio debe ser mayor que cero.");
-        }
-        this.pricePerNight = pricePerNight;
-        if (total <= 0) {
-            throw new InvalidDataException("El total debe ser mayor que cero.");
-        }
-        this.total = total;
-        if (status == null) {
-            throw new InvalidDataException("El estado es obligatorio.");
-        }
-        this.status = status;
+        this.pricePerNight = Validator.requirePositive(pricePerNight, "El precio");
+        this.total = Validator.requirePositive(total, "El total");
+        this.status = Validator.requireNonNull(status, "El estado");
     }
 
     public static Reservation create(int id, Client client, Employee employee, Room room,
                                      LocalDate checkIn, LocalDate checkOut, PricingPolicy policy) {
-        if (client == null) {
-            throw new InvalidDataException("El cliente es obligatorio.");
-        }
-        if (room == null) {
-            throw new InvalidDataException("La habitacion es obligatorio.");
-        }
-        if (checkIn == null) {
-            throw new InvalidDataException("La fecha de entrada es obligatorio.");
-        }
-        if (checkOut == null) {
-            throw new InvalidDataException("La fecha de salida es obligatorio.");
-        }
-        if (policy == null) {
-            throw new InvalidDataException("La politica de precio es obligatorio.");
-        }
+        Validator.requireNonNull(client, "El cliente");
+        Validator.requireNonNull(room, "La habitacion");
+        Validator.requireNonNull(checkIn, "La fecha de entrada");
+        Validator.requireNonNull(checkOut, "La fecha de salida");
+        Validator.requireNonNull(policy, "La politica de precio");
         if (!checkOut.isAfter(checkIn)) {
             throw new InvalidDataException("La fecha de salida debe ser posterior a la de entrada.");
         }

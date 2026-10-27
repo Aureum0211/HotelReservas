@@ -1,6 +1,6 @@
 package model;
 
-import exceptions.InvalidDataException;
+import validation.Validator;
 
 public class Client extends Person {
 
@@ -11,19 +11,13 @@ public class Client extends Person {
     public Client(int id, String name, String documentNumber, String email, String phone,
                   String city, Category category) {
         super(id, name, documentNumber, email, phone, city);
-        if (category == null) {
-            throw new InvalidDataException("La categoria es obligatorio.");
-        }
-        this.category = category;
+        this.category = Validator.requireNonNull(category, "La categoria");
     }
 
     public Category getCategory() { return category; }
 
     public void changeCategory(Category category) {
-        if (category == null) {
-            throw new InvalidDataException("La categoria es obligatorio.");
-        }
-        this.category = category;
+        this.category = Validator.requireNonNull(category, "La categoria");
     }
 
     @Override

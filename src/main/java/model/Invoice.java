@@ -1,8 +1,8 @@
 package model;
 
 import exceptions.BusinessRuleException;
-import exceptions.InvalidDataException;
 import java.time.LocalDate;
+import validation.Validator;
 
 public class Invoice implements Identifiable {
 
@@ -19,36 +19,16 @@ public class Invoice implements Identifiable {
 
     public Invoice(int id, Reservation reservation, LocalDate issueDate, double amount,
                    PaymentMethod paymentMethod, Status status) {
-        if (id <= 0) {
-            throw new InvalidDataException("El id del comprobante debe ser mayor que cero.");
-        }
-        this.id = id;
-        if (reservation == null) {
-            throw new InvalidDataException("La reserva es obligatorio.");
-        }
-        this.reservation = reservation;
-        if (issueDate == null) {
-            throw new InvalidDataException("La fecha de emision es obligatorio.");
-        }
-        this.issueDate = issueDate;
-        if (amount <= 0) {
-            throw new InvalidDataException("El monto debe ser mayor que cero.");
-        }
-        this.amount = amount;
-        if (paymentMethod == null) {
-            throw new InvalidDataException("El metodo de pago es obligatorio.");
-        }
-        this.paymentMethod = paymentMethod;
-        if (status == null) {
-            throw new InvalidDataException("El estado es obligatorio.");
-        }
-        this.status = status;
+        this.id = Validator.requirePositive(id, "El id del comprobante");
+        this.reservation = Validator.requireNonNull(reservation, "La reserva");
+        this.issueDate = Validator.requireNonNull(issueDate, "La fecha de emision");
+        this.amount = Validator.requirePositive(amount, "El monto");
+        this.paymentMethod = Validator.requireNonNull(paymentMethod, "El metodo de pago");
+        this.status = Validator.requireNonNull(status, "El estado");
     }
 
     public static Invoice issue(int id, Reservation reservation, PaymentMethod method) {
-        if (reservation == null) {
-            throw new InvalidDataException("La reserva es obligatorio.");
-        }
+        Validator.requireNonNull(reservation, "La reserva");
         if (!reservation.isActive()) {
             throw new BusinessRuleException("No se puede facturar una reserva cancelada.");
         }

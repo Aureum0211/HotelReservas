@@ -1,6 +1,6 @@
 package model;
 
-import exceptions.InvalidDataException;
+import validation.Validator;
 
 public class Room implements Identifiable {
 
@@ -14,26 +14,11 @@ public class Room implements Identifiable {
     private boolean available;
 
     public Room(int id, String number, Type type, int capacity, double pricePerNight, boolean available) {
-        if (id <= 0) {
-            throw new InvalidDataException("El id de la habitacion debe ser mayor que cero.");
-        }
-        this.id = id;
-        if (number == null || number.isBlank()) {
-            throw new InvalidDataException("El numero de habitacion es obligatorio.");
-        }
-        this.number = number;
-        if (type == null) {
-            throw new InvalidDataException("El tipo de habitacion es obligatorio.");
-        }
-        this.type = type;
-        if (capacity <= 0) {
-            throw new InvalidDataException("La capacidad debe ser mayor que cero.");
-        }
-        this.capacity = capacity;
-        if (pricePerNight <= 0) {
-            throw new InvalidDataException("El precio debe ser mayor que cero.");
-        }
-        this.pricePerNight = pricePerNight;
+        this.id = Validator.requirePositive(id, "El id de la habitacion");
+        this.number = Validator.requireText(number, "El numero de habitacion", 10);
+        this.type = Validator.requireNonNull(type, "El tipo de habitacion");
+        this.capacity = Validator.requirePositive(capacity, "La capacidad");
+        this.pricePerNight = Validator.requirePositive(pricePerNight, "El precio");
         this.available = available;
     }
 
@@ -53,10 +38,7 @@ public class Room implements Identifiable {
     public double getPricePerNight() { return pricePerNight; }
 
     public void setPricePerNight(double pricePerNight) {
-        if (pricePerNight <= 0) {
-            throw new InvalidDataException("El precio debe ser mayor que cero.");
-        }
-        this.pricePerNight = pricePerNight;
+        this.pricePerNight = Validator.requirePositive(pricePerNight, "El precio");
     }
 
     public boolean isAvailable() { return available; }

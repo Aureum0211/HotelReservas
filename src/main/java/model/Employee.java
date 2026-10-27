@@ -1,6 +1,6 @@
 package model;
 
-import exceptions.InvalidDataException;
+import validation.Validator;
 
 public class Employee extends Person {
 
@@ -13,31 +13,16 @@ public class Employee extends Person {
     public Employee(int id, String name, String documentNumber, String email, String phone,
                     String city, Role role, String username, String password) {
         super(id, name, documentNumber, email, phone, city);
-        if (role == null) {
-            throw new InvalidDataException("El rol es obligatorio.");
-        }
-        this.role = role;
-        if (username == null || username.isBlank()) {
-            throw new InvalidDataException("El usuario es obligatorio.");
-        }
-        this.username = username;
-        if (password == null || password.isBlank()) {
-            throw new InvalidDataException("La contrasena es obligatorio.");
-        }
-        this.password = password;
+        this.role = Validator.requireNonNull(role, "El rol");
+        this.username = Validator.requireText(username, "El usuario", 30);
+        this.password = Validator.requireText(password, "La contrasena", 50);
     }
 
     public Role getRole() { return role; }
 
     public void changeRole(Role role) {
 
-        if (role == null) {
-
-            throw new InvalidDataException("El rol es obligatorio.");
-
-        }
-
-        this.role = role;
+        this.role = Validator.requireNonNull(role, "El rol");
 
     }
 
@@ -46,10 +31,7 @@ public class Employee extends Person {
     public String getPassword() { return password; }
 
     public void changePassword(String password) {
-        if (password == null || password.isBlank()) {
-            throw new InvalidDataException("La contrasena es obligatorio.");
-        }
-        this.password = password;
+        this.password = Validator.requireText(password, "La contrasena", 50);
     }
 
     @Override
