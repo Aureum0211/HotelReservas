@@ -1,5 +1,7 @@
 package model;
 
+import exceptions.InvalidDataException;
+
 public class Room implements Identifiable {
 
     public enum Type { SINGLE, DOUBLE, SUITE }
@@ -13,23 +15,23 @@ public class Room implements Identifiable {
 
     public Room(int id, String number, Type type, int capacity, double pricePerNight, boolean available) {
         if (id <= 0) {
-            throw new IllegalArgumentException("El id de la habitación debe ser mayor que cero.");
+            throw new InvalidDataException("El id de la habitacion debe ser mayor que cero.");
         }
         this.id = id;
         if (number == null || number.isBlank()) {
-            throw new IllegalArgumentException("El número de habitación es obligatorio.");
+            throw new InvalidDataException("El numero de habitacion es obligatorio.");
         }
         this.number = number;
         if (type == null) {
-            throw new IllegalArgumentException("El tipo de habitación es obligatorio.");
+            throw new InvalidDataException("El tipo de habitacion es obligatorio.");
         }
         this.type = type;
         if (capacity <= 0) {
-            throw new IllegalArgumentException("La capacidad debe ser mayor que cero.");
+            throw new InvalidDataException("La capacidad debe ser mayor que cero.");
         }
         this.capacity = capacity;
         if (pricePerNight <= 0) {
-            throw new IllegalArgumentException("El precio debe ser mayor que cero.");
+            throw new InvalidDataException("El precio debe ser mayor que cero.");
         }
         this.pricePerNight = pricePerNight;
         this.available = available;
@@ -52,7 +54,7 @@ public class Room implements Identifiable {
 
     public void setPricePerNight(double pricePerNight) {
         if (pricePerNight <= 0) {
-            throw new IllegalArgumentException("El precio debe ser mayor que cero.");
+            throw new InvalidDataException("El precio debe ser mayor que cero.");
         }
         this.pricePerNight = pricePerNight;
     }
@@ -60,5 +62,5 @@ public class Room implements Identifiable {
     public boolean isAvailable() { return available; }
 
     @Override
-    public String toString() { return "Habitación " + number + " (" + type + ")"; }
+    public String toString() { return "Habitacion " + number + " (" + type + ")"; }
 }

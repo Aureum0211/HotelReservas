@@ -1,6 +1,7 @@
 package model;
 
-/** Persona que trabaja en el hotel: tiene rol y usuario de acceso. */
+import exceptions.InvalidDataException;
+
 public class Employee extends Person {
 
     public enum Role { ADMIN, RECEPTIONIST }
@@ -13,15 +14,15 @@ public class Employee extends Person {
                     String city, Role role, String username, String password) {
         super(id, name, documentNumber, email, phone, city);
         if (role == null) {
-            throw new IllegalArgumentException("El rol es obligatorio.");
+            throw new InvalidDataException("El rol es obligatorio.");
         }
         this.role = role;
         if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("El usuario es obligatorio.");
+            throw new InvalidDataException("El usuario es obligatorio.");
         }
         this.username = username;
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("La contraseña es obligatorio.");
+            throw new InvalidDataException("La contrasena es obligatorio.");
         }
         this.password = password;
     }
@@ -32,7 +33,7 @@ public class Employee extends Person {
 
         if (role == null) {
 
-            throw new IllegalArgumentException("El rol es obligatorio.");
+            throw new InvalidDataException("El rol es obligatorio.");
 
         }
 
@@ -46,7 +47,7 @@ public class Employee extends Person {
 
     public void changePassword(String password) {
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("La contraseña es obligatorio.");
+            throw new InvalidDataException("La contrasena es obligatorio.");
         }
         this.password = password;
     }

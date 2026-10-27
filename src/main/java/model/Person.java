@@ -1,8 +1,7 @@
 package model;
 
-/**
- * Persona del hotel. Es abstracta porque toda persona es un Client o un Employee.
- */
+import exceptions.InvalidDataException;
+
 public abstract class Person implements Identifiable {
 
     private final int id;
@@ -15,32 +14,28 @@ public abstract class Person implements Identifiable {
 
     protected Person(int id, String name, String documentNumber, String email, String phone, String city) {
         if (id <= 0) {
-            throw new IllegalArgumentException("El id de la persona debe ser mayor que cero.");
+            throw new InvalidDataException("El id de la persona debe ser mayor que cero.");
         }
         this.id = id;
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("El nombre es obligatorio.");
+            throw new InvalidDataException("El nombre es obligatorio.");
         }
         this.name = name;
         if (documentNumber == null || documentNumber.isBlank()) {
-            throw new IllegalArgumentException("El documento es obligatorio.");
+            throw new InvalidDataException("El documento es obligatorio.");
         }
         this.documentNumber = documentNumber;
         if (email == null || !email.matches("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+$")) {
-            throw new IllegalArgumentException("El correo no tiene un formato válido.");
+            throw new InvalidDataException("El correo no tiene un formato valido.");
         }
         this.email = email;
-        if (phone == null || !phone.matches("\\d{10}")) {
-            throw new IllegalArgumentException("El teléfono debe tener 10 dígitos.");
-        }
-        this.phone = phone;
+        this.phone = validatePhone(phone);
         if (city == null || city.isBlank()) {
-            throw new IllegalArgumentException("La ciudad es obligatorio.");
+            throw new InvalidDataException("La ciudad es obligatorio.");
         }
         this.city = city;
     }
 
-    /** cada subclase agrega sus propios datos. */
     public abstract String describe();
 
     public void activate() { this.active = true; }
@@ -60,7 +55,7 @@ public abstract class Person implements Identifiable {
 
         if (email == null || !email.matches("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+$")) {
 
-            throw new IllegalArgumentException("El correo no tiene un formato válido.");
+            throw new InvalidDataException("El correo no tiene un formato valido.");
 
         }
 
@@ -71,15 +66,7 @@ public abstract class Person implements Identifiable {
     public String getPhone() { return phone; }
 
     public void setPhone(String phone) {
-
-        if (phone == null || !phone.matches("\\d{10}")) {
-
-            throw new IllegalArgumentException("El teléfono debe tener 10 dígitos.");
-
-        }
-
-        this.phone = phone;
-
+        this.phone = validatePhone(phone);
     }
 
     public String getCity() { return city; }
@@ -88,12 +75,27 @@ public abstract class Person implements Identifiable {
 
         if (city == null || city.isBlank()) {
 
-            throw new IllegalArgumentException("La ciudad es obligatorio.");
+            throw new InvalidDataException("La ciudad es obligatorio.");
 
         }
 
         this.city = city;
 
+    }
+
+    private static String validatePhone(String phone) {
+        if (phone == null || phone.length() != 10) {
+            throw new InvalidDataException("El telefono debe tener exactamente 10 digitos.");
+        }
+
+        for (int i = 0; i < phone.length(); i++) {
+            char digit = phone.charAt(i);
+            if (digit < '0' || digit > '9') {
+                throw new InvalidDataException("El telefono solo puede contener digitos.");
+            }
+        }
+
+        return phone;
     }
 
     public boolean isActive() { return active; }

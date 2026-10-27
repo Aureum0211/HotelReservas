@@ -1,6 +1,7 @@
 package model;
 
-/** Descuento por estadía larga: desde cierto número de noches se aplica un porcentaje de descuento. */
+import exceptions.InvalidDataException;
+
 public class LongStayPricing implements PricingPolicy {
 
     private final int minNights;
@@ -8,11 +9,11 @@ public class LongStayPricing implements PricingPolicy {
 
     public LongStayPricing(int minNights, double discountPercent) {
         if (minNights <= 0) {
-            throw new IllegalArgumentException("El mínimo de noches debe ser mayor que cero.");
+            throw new InvalidDataException("El minimo de noches debe ser mayor que cero.");
         }
         this.minNights = minNights;
         if (discountPercent <= 0) {
-            throw new IllegalArgumentException("El porcentaje de descuento debe ser mayor que cero.");
+            throw new InvalidDataException("El porcentaje de descuento debe ser mayor que cero.");
         }
         this.discountPercent = discountPercent;
     }

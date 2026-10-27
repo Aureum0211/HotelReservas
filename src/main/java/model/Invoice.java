@@ -1,8 +1,9 @@
 package model;
 
+import exceptions.BusinessRuleException;
+import exceptions.InvalidDataException;
 import java.time.LocalDate;
 
-/** Comprobante de pago de una reserva. */
 public class Invoice implements Identifiable {
 
     public enum PaymentMethod { CASH, CARD, TRANSFER }
@@ -16,56 +17,54 @@ public class Invoice implements Identifiable {
     private final PaymentMethod paymentMethod;
     private Status status;
 
-    /** Constructor también sirve para reconstruir un comprobante guardado. */
     public Invoice(int id, Reservation reservation, LocalDate issueDate, double amount,
                    PaymentMethod paymentMethod, Status status) {
         if (id <= 0) {
-            throw new IllegalArgumentException("El id del comprobante debe ser mayor que cero.");
+            throw new InvalidDataException("El id del comprobante debe ser mayor que cero.");
         }
         this.id = id;
         if (reservation == null) {
-            throw new IllegalArgumentException("La reserva es obligatorio.");
+            throw new InvalidDataException("La reserva es obligatorio.");
         }
         this.reservation = reservation;
         if (issueDate == null) {
-            throw new IllegalArgumentException("La fecha de emisión es obligatorio.");
+            throw new InvalidDataException("La fecha de emision es obligatorio.");
         }
         this.issueDate = issueDate;
         if (amount <= 0) {
-            throw new IllegalArgumentException("El monto debe ser mayor que cero.");
+            throw new InvalidDataException("El monto debe ser mayor que cero.");
         }
         this.amount = amount;
         if (paymentMethod == null) {
-            throw new IllegalArgumentException("El método de pago es obligatorio.");
+            throw new InvalidDataException("El metodo de pago es obligatorio.");
         }
         this.paymentMethod = paymentMethod;
         if (status == null) {
-            throw new IllegalArgumentException("El estado es obligatorio.");
+            throw new InvalidDataException("El estado es obligatorio.");
         }
         this.status = status;
     }
 
-    /** Creator: el monto sale del total de la reserva; no se digita. Nace pendiente de pago. */
     public static Invoice issue(int id, Reservation reservation, PaymentMethod method) {
         if (reservation == null) {
-            throw new IllegalArgumentException("La reserva es obligatorio.");
+            throw new InvalidDataException("La reserva es obligatorio.");
         }
         if (!reservation.isActive()) {
-            throw new IllegalStateException("No se puede facturar una reserva cancelada.");
+            throw new BusinessRuleException("No se puede facturar una reserva cancelada.");
         }
         return new Invoice(id, reservation, LocalDate.now(), reservation.getTotal(), method, Status.PENDING);
     }
 
     public void pay() {
         if (status != Status.PENDING) {
-            throw new IllegalStateException("Solo se puede pagar un comprobante pendiente.");
+            throw new BusinessRuleException("Solo se puede pagar un comprobante pendiente.");
         }
         this.status = Status.PAID;
     }
 
     public void annul() {
         if (status == Status.VOIDED) {
-            throw new IllegalStateException("El comprobante ya está anulado.");
+            throw new BusinessRuleException("El comprobante ya esta anulado.");
         }
         this.status = Status.VOIDED;
     }

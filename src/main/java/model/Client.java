@@ -1,6 +1,7 @@
 package model;
 
-/** Persona que hace reservas. Su categoría premia la frecuencia de uso. */
+import exceptions.InvalidDataException;
+
 public class Client extends Person {
 
     public enum Category { NEW, FREQUENT, VIP }
@@ -11,7 +12,7 @@ public class Client extends Person {
                   String city, Category category) {
         super(id, name, documentNumber, email, phone, city);
         if (category == null) {
-            throw new IllegalArgumentException("La categoría es obligatorio.");
+            throw new InvalidDataException("La categoria es obligatorio.");
         }
         this.category = category;
     }
@@ -20,7 +21,7 @@ public class Client extends Person {
 
     public void changeCategory(Category category) {
         if (category == null) {
-            throw new IllegalArgumentException("La categoría es obligatorio.");
+            throw new InvalidDataException("La categoria es obligatorio.");
         }
         this.category = category;
     }
@@ -28,6 +29,6 @@ public class Client extends Person {
     @Override
     public String describe() {
         return "Cliente: " + getName() + " | Doc: " + getDocumentNumber() + " | " + getEmail()
-                + " | Categoría: " + category;
+                + " | Categoria: " + category;
     }
 }

@@ -1,5 +1,7 @@
 package model;
 
+import exceptions.BusinessRuleException;
+import exceptions.InvalidDataException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
@@ -9,84 +11,79 @@ public class Reservation implements Identifiable {
 
     private final int id;
     private final Client client;
-    private final Employee employee;          // opcional (ej reserva online)
+    private final Employee employee;
     private final Room room;
     private final LocalDate checkIn;
     private final LocalDate checkOut;
-    private final double pricePerNight;       // se congela al reservar(que no se puede volver a reservar temporalmente)
+    private final double pricePerNight;
     private final double total;
     private Status status;
 
-    /** Constructor completo: también sirve para reconstruir una reserva guardada. */
     public Reservation(int id, Client client, Employee employee, Room room, LocalDate checkIn,
                        LocalDate checkOut, double pricePerNight, double total, Status status) {
         if (id <= 0) {
-            throw new IllegalArgumentException("El id de la reserva debe ser mayor que cero.");
+            throw new InvalidDataException("El id de la reserva debe ser mayor que cero.");
         }
         this.id = id;
         if (client == null) {
-            throw new IllegalArgumentException("El cliente es obligatorio.");
+            throw new InvalidDataException("El cliente es obligatorio.");
         }
         this.client = client;
         this.employee = employee;
         if (room == null) {
-            throw new IllegalArgumentException("La habitación es obligatorio.");
+            throw new InvalidDataException("La habitacion es obligatorio.");
         }
         this.room = room;
         if (checkIn == null) {
-            throw new IllegalArgumentException("La fecha de entrada es obligatorio.");
+            throw new InvalidDataException("La fecha de entrada es obligatorio.");
         }
         this.checkIn = checkIn;
         if (checkOut == null) {
-            throw new IllegalArgumentException("La fecha de salida es obligatorio.");
+            throw new InvalidDataException("La fecha de salida es obligatorio.");
         }
         this.checkOut = checkOut;
         if (!checkOut.isAfter(checkIn)) {
-            throw new IllegalArgumentException("La fecha de salida debe ser posterior a la de entrada.");
+            throw new InvalidDataException("La fecha de salida debe ser posterior a la de entrada.");
         }
         if (pricePerNight <= 0) {
-            throw new IllegalArgumentException("El precio debe ser mayor que cero.");
+            throw new InvalidDataException("El precio debe ser mayor que cero.");
         }
         this.pricePerNight = pricePerNight;
         if (total <= 0) {
-            throw new IllegalArgumentException("El total debe ser mayor que cero.");
+            throw new InvalidDataException("El total debe ser mayor que cero.");
         }
         this.total = total;
         if (status == null) {
-            throw new IllegalArgumentException("El estado es obligatorio.");
+            throw new InvalidDataException("El estado es obligatorio.");
         }
         this.status = status;
     }
 
-    /**
-     * una reserva nueva toma el precio vigente de la habitación y su total
-     * lo calcula la estrategia de precio recibida.
-     */
     public static Reservation create(int id, Client client, Employee employee, Room room,
                                      LocalDate checkIn, LocalDate checkOut, PricingPolicy policy) {
         if (client == null) {
-            throw new IllegalArgumentException("El cliente es obligatorio.");
+            throw new InvalidDataException("El cliente es obligatorio.");
         }
         if (room == null) {
-            throw new IllegalArgumentException("La habitación es obligatorio.");
+            throw new InvalidDataException("La habitacion es obligatorio.");
         }
         if (checkIn == null) {
-            throw new IllegalArgumentException("La fecha de entrada es obligatorio.");
+            throw new InvalidDataException("La fecha de entrada es obligatorio.");
         }
         if (checkOut == null) {
-            throw new IllegalArgumentException("La fecha de salida es obligatorio.");
+            throw new InvalidDataException("La fecha de salida es obligatorio.");
         }
         if (policy == null) {
-            throw new IllegalArgumentException("La política de precio es obligatorio.");
+            throw new InvalidDataException("La politica de precio es obligatorio.");
         }
         if (!checkOut.isAfter(checkIn)) {
-            throw new IllegalArgumentException("La fecha de salida debe ser posterior a la de entrada.");
+            throw new InvalidDataException("La fecha de salida debe ser posterior a la de entrada.");
         }
         if (!client.isActive()) {
-            throw new IllegalStateException("El cliente está inactivo.");
+            throw new BusinessRuleException("El cliente esta inactivo.");
         }
         if (!room.isAvailable()) {
-            throw new IllegalStateException("La habitación " + room.getNumber() + " no está disponible.");
+            throw new BusinessRuleException("La habitacion " + room.getNumber() + " no esta disponible.");
         }
         long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
         double total = policy.calculateTotal(room.getPricePerNight(), nights);
@@ -100,12 +97,11 @@ public class Reservation implements Identifiable {
 
     public void cancel() {
         if (!isActive()) {
-            throw new IllegalStateException("La reserva ya está cancelada.");
+            throw new BusinessRuleException("La reserva ya esta cancelada.");
         }
         this.status = Status.CANCELLED;
     }
 
-    /** ¿Esta reserva bloquea esa habitación en ese periodo? (solo cuenta si está activa) */
     public boolean occupies(Room otherRoom, LocalDate in, LocalDate out) {
         return isActive() && room.getId() == otherRoom.getId() && checkIn.isBefore(out) && in.isBefore(checkOut);
     }
