@@ -8,11 +8,21 @@ import model.Client;
 import model.Invoice;
 import model.Reservation;
 import model.Room;
+import model.Person;
+import model.PricingPolicy;
 import service.HotelService;
 
 public class HotelApp {
     private final Scanner scanner = new Scanner(System.in);
-    private final HotelService hotel = new HotelService();
+    private final HotelService hotel;
+    private final PricingPolicy standardPricing;
+    private final PricingPolicy longStayPricing;
+
+    public HotelApp(HotelService hotel, PricingPolicy standardPricing, PricingPolicy longStayPricing) {
+        this.hotel = hotel;
+        this.standardPricing = standardPricing;
+        this.longStayPricing = longStayPricing;
+    }
 
     public void start() {
         boolean running = true;
@@ -31,6 +41,7 @@ public class HotelApp {
                     case "6" -> showInvoices();
                     case "7" -> payInvoice();
                     case "8" -> cancelReservation();
+                    case "9" -> showPeople();
                     case "0" -> running = false;
                     default -> System.out.println("Opcion no valida.");
                 }
@@ -53,6 +64,7 @@ public class HotelApp {
                 6. Ver comprobantes
                 7. Pagar comprobante
                 8. Cancelar reserva
+                9. Ver personas (clientes y trabajadores)
                 0. Salir
                 """);
         System.out.print("Seleccione una opcion: ");
@@ -61,6 +73,12 @@ public class HotelApp {
     private void showClients() {
         for (Client client : hotel.getClients()) {
             System.out.println(client.describe());
+        }
+    }
+
+    private void showPeople() {
+        for (Person person : hotel.getPeople()) {
+            System.out.println(person.describe());
         }
     }
 
@@ -82,7 +100,8 @@ public class HotelApp {
         System.out.print("¿Aplicar 10% de descuento desde 7 noches? (s/n): ");
         boolean discount = scanner.nextLine().trim().equalsIgnoreCase("s");
 
-        Reservation reservation = hotel.createReservation(clientId, roomId, checkIn, checkOut, discount);
+        PricingPolicy selectedPricing = discount ? longStayPricing : standardPricing;
+        Reservation reservation = hotel.createReservation(clientId, roomId, checkIn, checkOut, selectedPricing);
         System.out.println("Reserva creada correctamente:");
         System.out.println(reservation);
         System.out.println("Noches: " + reservation.nights());
