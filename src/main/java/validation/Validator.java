@@ -21,9 +21,6 @@ public final class Validator {
         if (text.length() > maxLength) {
             throw new InvalidDataException(field + " no puede superar " + maxLength + " caracteres.");
         }
-        if (text.contains(",") || text.contains("\n")) {
-            throw new InvalidDataException(field + " no puede contener comas ni saltos de linea.");
-        }
         return text;
     }
 
@@ -35,8 +32,15 @@ public final class Validator {
     }
 
     public static double requirePositive(double value, String field) {
-        if (value <= 0) {
-            throw new InvalidDataException(field + " debe ser mayor que cero.");
+        if (!Double.isFinite(value) || value <= 0) {
+            throw new InvalidDataException(field + " debe ser un numero mayor que cero.");
+        }
+        return value;
+    }
+
+    public static double requirePercentage(double value, String field) {
+        if (!Double.isFinite(value) || value <= 0 || value >= 100) {
+            throw new InvalidDataException(field + " debe ser mayor que 0 y menor que 100.");
         }
         return value;
     }

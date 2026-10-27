@@ -9,7 +9,7 @@ public class LongStayPricing implements PricingPolicy {
 
     public LongStayPricing(int minNights, double discountPercent) {
         this.minNights = Validator.requirePositive(minNights, "El minimo de noches");
-        this.discountPercent = Validator.requirePositive(discountPercent, "El porcentaje de descuento");
+        this.discountPercent = Validator.requirePercentage(discountPercent, "El porcentaje de descuento");
     }
 
     @Override
