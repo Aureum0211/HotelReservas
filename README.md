@@ -100,4 +100,3 @@ Ejecutar desde la raíz permite que la aplicación encuentre la carpeta `data/`.
 - [`docs/class-diagram.md`](docs/class-diagram.md): diagrama de clases.
 - [`docs/hierarchy-diagram.md`](docs/hierarchy-diagram.md): jerarquías de herencia e interfaces.
 - [`docs/layers-diagram.md`](docs/layers-diagram.md): diagrama de capas y dependencias.
-- [`docs/GRASP_SOLID.md`](docs/GRASP_SOLID.md): aplicación de patrones GRASP y principios SOLID.
