@@ -1,0 +1,2 @@
+1;Carlos Perez;100000001;carlos@example.com;3001234567;Valledupar;FREQUENT;true
+2;Ana Martinez;100000002;ana@example.com;3001234568;Valledupar;NEW;true
