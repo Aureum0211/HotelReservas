@@ -6,8 +6,8 @@ import model.PricingPolicy;
 import model.Reservation;
 import model.Room;
 import model.StandardPricing;
-import repository.InMemoryRepository;
-import repository.Repository;
+import persistence.InMemoryRepository;
+import persistence.Repository;
 import service.HotelService;
 import ui.HotelApp;
 

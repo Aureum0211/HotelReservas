@@ -12,7 +12,7 @@ import model.Person;
 import model.PricingPolicy;
 import model.Reservation;
 import model.Room;
-import repository.Repository;
+import persistence.Repository;
 
 public class HotelService {
 
