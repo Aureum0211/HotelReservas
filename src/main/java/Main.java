@@ -17,7 +17,17 @@ import persistence.TextFileRepository;
 import service.HotelService;
 import ui.HotelApp;
 
+/**
+ * Punto de entrada de la aplicacion. Conecta los repositorios de archivos, el servicio del
+ * hotel, las politicas de precios y el menu de consola.
+ */
 public class Main {
+
+    /**
+     * Inicia la aplicacion, configura los repositorios de archivos, crea el servicio e
+     * inicia el menu de consola.
+     * @param args argumentos recibidos desde la linea de comandos.
+     */
     public static void main(String[] args) {
         Path dataDirectory = Path.of("data");
 

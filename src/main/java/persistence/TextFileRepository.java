@@ -11,12 +11,24 @@ import java.util.List;
 import java.util.Optional;
 import model.Identifiable;
 
+/**
+ * Implementa el almacenamiento de entidades en archivos de texto y conserva el contrato de
+ * Repository.
+ * @param <T> tipo de entidad identificable que se almacena en el archivo.
+ */
 public class TextFileRepository<T extends Identifiable> implements Repository<T> {
 
     private final Path file;
     private final EntityFileMapper<T> mapper;
     private final List<T> entities = new ArrayList<>();
 
+    /**
+     * Crea un repositorio asociado a un archivo y carga sus registros al inicializarse.
+     * @param file ruta del archivo que almacena los registros.
+     * @param mapper convertidor utilizado para leer y escribir entidades.
+     * @throws UncheckedIOException si no se puede leer el archivo.
+     * @throws IllegalStateException si un registro del archivo no se puede interpretar.
+     */
     public TextFileRepository(Path file, EntityFileMapper<T> mapper) {
         this.file = file;
         this.mapper = mapper;
@@ -45,6 +57,12 @@ public class TextFileRepository<T extends Identifiable> implements Repository<T>
         }
     }
 
+    /**
+     * Guarda una entidad nueva y escribe el contenido actualizado en el archivo.
+     * @param entity entidad que se desea almacenar o convertir.
+     * @throws IllegalArgumentException si la entidad es nula o su identificador ya existe.
+     * @throws UncheckedIOException si no se puede escribir el archivo.
+     */
     @Override
     public void save(T entity) {
         if (entity == null) throw new IllegalArgumentException("No se puede guardar un objeto nulo.");
@@ -60,6 +78,12 @@ public class TextFileRepository<T extends Identifiable> implements Repository<T>
         }
     }
 
+    /**
+     * Actualiza una entidad existente y persiste el contenido actualizado.
+     * @param entity entidad que se desea almacenar o convertir.
+     * @throws IllegalArgumentException si la entidad es nula o no existe un registro con ese identificador.
+     * @throws UncheckedIOException si no se puede escribir el archivo.
+     */
     @Override
     public void update(T entity) {
         if (entity == null) throw new IllegalArgumentException("No se puede actualizar un objeto nulo.");
@@ -90,16 +114,29 @@ public class TextFileRepository<T extends Identifiable> implements Repository<T>
         }
     }
 
+    /**
+     * Busca una entidad por su identificador.
+     * @param id identificador numerico del registro.
+     * @return resultado opcional que contiene la entidad si existe.
+     */
     @Override
     public Optional<T> findById(int id) {
         return entities.stream().filter(entity -> entity.getId() == id).findFirst();
     }
 
+    /**
+     * Devuelve una copia no modificable de las entidades cargadas.
+     * @return lista de las entidades almacenadas.
+     */
     @Override
     public List<T> findAll() {
         return List.copyOf(entities);
     }
 
+    /**
+     * Calcula el siguiente identificador disponible a partir de los registros cargados.
+     * @return siguiente identificador disponible.
+     */
     @Override
     public int nextId() {
         return entities.stream().mapToInt(Identifiable::getId).max().orElse(0) + 1;

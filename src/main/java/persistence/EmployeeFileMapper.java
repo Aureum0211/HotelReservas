@@ -3,7 +3,18 @@ package persistence;
 import java.util.List;
 import model.Employee;
 
+/**
+ * Convierte trabajadores entre objetos Java y registros de texto delimitados por punto y
+ * coma.
+ */
 public class EmployeeFileMapper implements EntityFileMapper<Employee> {
+
+    /**
+     * Convierte los datos del trabajador en una linea delimitada para almacenarla en un
+     * archivo.
+     * @param employee trabajador asociado, si existe.
+     * @return representacion textual de la entidad.
+     */
     @Override
     public String toLine(Employee employee) {
         return DelimitedText.join(
@@ -13,6 +24,11 @@ public class EmployeeFileMapper implements EntityFileMapper<Employee> {
                 employee.getUsername(), employee.getPassword());
     }
 
+    /**
+     * Reconstruye un trabajador a partir de una linea del archivo.
+     * @param line linea de texto que se va a interpretar.
+     * @return entidad reconstruida a partir de la linea.
+     */
     @Override
     public Employee fromLine(String line) {
         List<String> f = DelimitedText.requireFieldCount(line, 10);

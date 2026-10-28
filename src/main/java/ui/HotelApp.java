@@ -14,23 +14,38 @@ import model.Reservation;
 import model.Room;
 import service.HotelService;
 
+/**
+ * Presenta el menu de consola y coordina la entrada del usuario con las operaciones
+ * ofrecidas por HotelService.
+ */
 public class HotelApp {
     private final Scanner scanner = new Scanner(System.in);
     private final HotelService hotel;
     private final PricingPolicy standardPricing;
     private final PricingPolicy longStayPricing;
 
+    /**
+     * Construye el menu y recibe el servicio del hotel y las estrategias de precios
+     * disponibles.
+     * @param hotel valor utilizado por la operacion.
+     * @param standardPricing estrategia de tarifa normal.
+     * @param longStayPricing estrategia de tarifa para estancias largas.
+     */
     public HotelApp(HotelService hotel, PricingPolicy standardPricing, PricingPolicy longStayPricing) {
         this.hotel = hotel;
         this.standardPricing = standardPricing;
         this.longStayPricing = longStayPricing;
     }
 
+    /**
+     * Ejecuta el ciclo principal del menu de consola hasta que el usuario selecciona
+     * salir.
+     */
     public void start() {
         boolean running = true;
         System.out.println("=== HOTEL RESERVAS - DEMO ===");
         System.out.println("Los datos se guardan en archivos de texto dentro de la carpeta data.");
-        System.out.println("Hay datos de ejemplo precargados en la carpeta data; puedes agregar mas desde el menu.");
+        System.out.println("Hay datos ficticios de ejemplo en data; puedes agregar mas desde el menu.");
         while (running) {
             printMenu();
             String option = scanner.nextLine().trim();

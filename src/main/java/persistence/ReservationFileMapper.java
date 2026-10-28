@@ -7,11 +7,22 @@ import model.Employee;
 import model.Reservation;
 import model.Room;
 
+/**
+ * Convierte reservas entre objetos Java y registros de texto, resolviendo las entidades
+ * relacionadas por sus identificadores.
+ */
 public class ReservationFileMapper implements EntityFileMapper<Reservation> {
     private final Repository<Client> clients;
     private final Repository<Employee> employees;
     private final Repository<Room> rooms;
 
+    /**
+     * Crea el convertidor de reservas y recibe los repositorios usados para resolver el
+     * cliente, trabajador y habitacion.
+     * @param clients repositorio de clientes.
+     * @param employees repositorio de trabajadores.
+     * @param rooms repositorio de habitaciones.
+     */
     public ReservationFileMapper(Repository<Client> clients, Repository<Employee> employees,
                                  Repository<Room> rooms) {
         this.clients = clients;
@@ -19,6 +30,12 @@ public class ReservationFileMapper implements EntityFileMapper<Reservation> {
         this.rooms = rooms;
     }
 
+    /**
+     * Convierte la reserva en una linea delimitada con los identificadores de sus
+     * entidades relacionadas.
+     * @param reservation reserva relacionada con la operacion.
+     * @return representacion textual de la entidad.
+     */
     @Override
     public String toLine(Reservation reservation) {
         return DelimitedText.join(Integer.toString(reservation.getId()),
@@ -29,6 +46,12 @@ public class ReservationFileMapper implements EntityFileMapper<Reservation> {
                 Double.toString(reservation.getTotal()), reservation.getStatus().name());
     }
 
+    /**
+     * Reconstruye una reserva y resuelve las entidades relacionadas a partir de sus
+     * identificadores.
+     * @param line linea de texto que se va a interpretar.
+     * @return entidad reconstruida a partir de la linea.
+     */
     @Override
     public Reservation fromLine(String line) {
         List<String> f = DelimitedText.requireFieldCount(line, 9);

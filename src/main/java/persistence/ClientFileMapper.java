@@ -3,7 +3,17 @@ package persistence;
 import java.util.List;
 import model.Client;
 
+/**
+ * Convierte clientes entre objetos Java y registros de texto delimitados por punto y coma.
+ */
 public class ClientFileMapper implements EntityFileMapper<Client> {
+
+    /**
+     * Convierte los datos del cliente en una linea delimitada para almacenarla en un
+     * archivo.
+     * @param client cliente de la reserva.
+     * @return representacion textual de la entidad.
+     */
     @Override
     public String toLine(Client client) {
         return DelimitedText.join(
@@ -12,6 +22,11 @@ public class ClientFileMapper implements EntityFileMapper<Client> {
                 Boolean.toString(client.isActive()));
     }
 
+    /**
+     * Reconstruye un cliente a partir de una linea del archivo.
+     * @param line linea de texto que se va a interpretar.
+     * @return entidad reconstruida a partir de la linea.
+     */
     @Override
     public Client fromLine(String line) {
         List<String> f = DelimitedText.requireFieldCount(line, 8);

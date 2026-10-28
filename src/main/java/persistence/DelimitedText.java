@@ -3,10 +3,20 @@ package persistence;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Proporciona operaciones para unir y separar campos de texto, escapando caracteres
+ * especiales.
+ */
 public final class DelimitedText {
 
     private DelimitedText() { }
 
+    /**
+     * Une los campos en una sola linea y escapa los caracteres que puedan confundirse con
+     * separadores.
+     * @param fields campos que se uniran en una linea de texto.
+     * @return linea de texto resultante con los campos escapados.
+     */
     public static String join(String... fields) {
         StringBuilder line = new StringBuilder();
         for (int i = 0; i < fields.length; i++) {
@@ -26,6 +36,11 @@ public final class DelimitedText {
         return line.toString();
     }
 
+    /**
+     * Separa una linea en sus campos y restaura los caracteres escapados.
+     * @param line linea de texto que se va a interpretar.
+     * @return lista de campos recuperados de la linea.
+     */
     public static List<String> split(String line) {
         List<String> fields = new ArrayList<>();
         StringBuilder field = new StringBuilder();
@@ -54,6 +69,13 @@ public final class DelimitedText {
         return fields;
     }
 
+    /**
+     * Comprueba que la linea contenga la cantidad esperada de campos y devuelve los campos
+     * separados.
+     * @param line linea de texto que se va a interpretar.
+     * @param expected cantidad exacta de campos que debe contener la linea.
+     * @return lista de campos separados, si la cantidad es correcta.
+     */
     public static List<String> requireFieldCount(String line, int expected) {
         List<String> fields = split(line);
         if (fields.size() != expected) {
