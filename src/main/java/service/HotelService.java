@@ -122,11 +122,15 @@ public class HotelService {
     }
 
     public void payInvoice(int invoiceId) {
-        findInvoice(invoiceId).pay();
+        Invoice invoice = findInvoice(invoiceId);
+        invoice.pay();
+        invoices.update(invoice);
     }
 
     public void cancelReservation(int reservationId) {
-        findReservation(reservationId).cancel();
+        Reservation reservation = findReservation(reservationId);
+        reservation.cancel();
+        reservations.update(reservation);
     }
 
     private Client findClient(int id) {
