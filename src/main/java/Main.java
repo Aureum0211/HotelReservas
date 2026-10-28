@@ -1,3 +1,4 @@
+import java.nio.file.Path;
 import model.Client;
 import model.Employee;
 import model.Invoice;
@@ -6,28 +7,27 @@ import model.PricingPolicy;
 import model.Reservation;
 import model.Room;
 import model.StandardPricing;
-import persistence.InMemoryRepository;
 import persistence.Repository;
+import persistence.ClientFileMapper;
+import persistence.EmployeeFileMapper;
+import persistence.InvoiceFileMapper;
+import persistence.ReservationFileMapper;
+import persistence.RoomFileMapper;
+import persistence.TextFileRepository;
 import service.HotelService;
 import ui.HotelApp;
 
 public class Main {
     public static void main(String[] args) {
-        Repository<Client> clients = new InMemoryRepository<>();
-        Repository<Employee> employees = new InMemoryRepository<>();
-        Repository<Room> rooms = new InMemoryRepository<>();
-        Repository<Reservation> reservations = new InMemoryRepository<>();
-        Repository<Invoice> invoices = new InMemoryRepository<>();
+        Path dataDirectory = Path.of("data");
 
-        clients.save(new Client(1, "Ana Lopez", "1010123456", "ana@example.com",
-                "3109876543", "Valledupar", Client.Category.VIP));
-        clients.save(new Client(2, "Luis Martinez", "1020987654", "luis@example.com",
-                "3204567890", "Valledupar", Client.Category.NEW));
-        employees.save(new Employee(1, "Carlos Gomez", "1065123456", "carlos@hotel.com",
-                "3001234567", "Valledupar", Employee.Role.RECEPTIONIST, "cgomez", "demo123"));
-        rooms.save(new Room(1, "101", Room.Type.SINGLE, 1, 80000, true));
-        rooms.save(new Room(2, "102", Room.Type.DOUBLE, 2, 120000, true));
-        rooms.save(new Room(3, "201", Room.Type.SUITE, 2, 250000, true));
+        Repository<Client> clients = new TextFileRepository<>(dataDirectory.resolve("clientes.txt"), new ClientFileMapper());
+        Repository<Employee> employees = new TextFileRepository<>(dataDirectory.resolve("trabajadores.txt"), new EmployeeFileMapper());
+        Repository<Room> rooms = new TextFileRepository<>(dataDirectory.resolve("habitaciones.txt"), new RoomFileMapper());
+        Repository<Reservation> reservations = new TextFileRepository<>(dataDirectory.resolve("reservas.txt"),
+                new ReservationFileMapper(clients, employees, rooms));
+        Repository<Invoice> invoices = new TextFileRepository<>(dataDirectory.resolve("comprobantes.txt"),
+                new InvoiceFileMapper(reservations));
 
         HotelService service = new HotelService(clients, employees, rooms, reservations, invoices);
         PricingPolicy standardPricing = new StandardPricing();
