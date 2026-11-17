@@ -230,27 +230,16 @@ public class HotelApp {
         };
     }
 
-    /**
-     * Muestra la pantalla de inicio, donde cada persona elige si entra como huesped o como
-     * trabajador, hasta que se selecciona salir.
-     */
+    /** Inicia el programa y permite entrar al sistema como trabajador. */
     public void start() {
-        System.out.println("=== HOTEL RESERVAS - DEMO ===");
+        System.out.println("=== HOTEL RESERVA ===");
         System.out.println("Los datos se guardan en archivos de texto dentro de la carpeta data.");
-        System.out.println("Hay datos ficticios de ejemplo en data; puedes agregar mas desde el menu.");
         boolean running = true;
         while (running) {
-            System.out.println("""
-
-                    === BIENVENIDO ===
-                    1. Soy huesped
-                    2. Soy trabajador
-                    0. Salir
-                    """);
+            System.out.println("\n1. Iniciar sesion\n0. Salir");
             System.out.print("Seleccione una opcion: ");
             switch (scanner.nextLine().trim()) {
-                case "1" -> guestMenu();
-                case "2" -> {
+                case "1" -> {
                     if (login()) {
                         workerMenu();
                         currentUser = null;
@@ -261,50 +250,6 @@ public class HotelApp {
             }
         }
         System.out.println("Programa finalizado.");
-    }
-
-    /**
-     * Menu de la zona de huespedes. No pide inicio de sesion y solo ofrece acciones
-     * genericas: registrarse y consultar habitaciones disponibles.
-     */
-    private void guestMenu() {
-        boolean inside = true;
-        while (inside) {
-            System.out.println("""
-
-                    === ZONA DE HUESPEDES ===
-                    1. Registrarme
-                    2. Buscar habitaciones disponibles
-                    0. Volver
-                    """);
-            System.out.print("Seleccione una opcion: ");
-            String option = scanner.nextLine().trim();
-            try {
-                switch (option) {
-                    case "1" -> registerGuest();
-                    case "2" -> searchAvailableRooms();
-                    case "0" -> inside = false;
-                    default -> System.out.println("Opcion no valida.");
-                }
-            } catch (HotelException | IllegalArgumentException | UncheckedIOException e) {
-                System.out.println("No se pudo completar la operacion: " + e.getMessage());
-            }
-        }
-    }
-
-    /**
-     * Registro de un huesped por su cuenta. Siempre queda con la categoria Nuevo.
-     */
-    private void registerGuest() {
-        System.out.println("--- Registro de huesped ---");
-        String name = readText("Nombre completo: ");
-        String document = readText("Documento: ");
-        String email = readText("Correo: ");
-        String phone = readText("Telefono (10 digitos): ");
-        String city = readText("Ciudad: ");
-        Client client = hotel.registerGuest(name, document, email, phone, city);
-        System.out.println("Registro exitoso. Tu codigo de cliente es " + client.getId() + ".");
-        System.out.println("Presenta tu documento en recepcion para completar tu reserva.");
     }
 
     /**

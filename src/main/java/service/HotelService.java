@@ -136,22 +136,6 @@ public class HotelService {
     }
 
     /**
-     * Registra a un huesped que se inscribe por su cuenta. Siempre entra con la categoria
-     * NEW, para que nadie se asigne por su cuenta un descuento.
-     * @param name nombre completo.
-     * @param documentNumber numero de documento.
-     * @param email correo electronico.
-     * @param phone telefono de 10 digitos.
-     * @param city ciudad.
-     * @return el cliente registrado.
-     * @throws BusinessRuleException si el documento, correo o telefono ya existen.
-     */
-    public Client registerGuest(String name, String documentNumber, String email,
-                                String phone, String city) {
-        return registerClient(name, documentNumber, email, phone, city, Client.Category.NEW);
-    }
-
-    /**
      * Valida la unicidad de los datos y del usuario, asigna un identificador y registra un
      * trabajador.
      * @param name nombre de la persona.
