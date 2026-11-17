@@ -26,12 +26,10 @@ import validation.Validator;
  */
 public class HotelService {
 
-    /**
-     * Habitacion junto con la cantidad de reservas no canceladas que ha tenido.
-     * @param room habitacion consultada.
-     * @param reservations cantidad de reservas no canceladas de esa habitacion.
-     */
-    public record RoomRanking(Room room, long reservations) { }
+    /** Resumen sencillo del estado actual del hotel. */
+    public record BasicReport(int totalRooms, int occupiedRooms, int reservedRooms,
+                              int freeRooms, int maintenanceRooms, int unavailableRooms,
+                              double income, double pendingBalance) { }
 
     private static final int LONG_STAY_MIN_NIGHTS = 7;
     private static final double LONG_STAY_DISCOUNT = 10;
@@ -307,39 +305,37 @@ public class HotelService {
         };
     }
 
-    /**
-     * Devuelve las habitaciones mas reservadas. Cuenta las reservas no canceladas y, si dos
-     * habitaciones empatan, va primero la de menor numero. Las que nunca se han reservado
-     * no aparecen.
-     * @param limit cantidad maxima de habitaciones que se devuelven.
-     * @return ranking de habitaciones, de la mas reservada a la menos reservada.
-     */
-    public List<RoomRanking> topRooms(int limit) {
-        List<RoomRanking> ranking = new ArrayList<>();
+    /** Calcula la ocupacion de hoy, los ingresos recibidos y el saldo pendiente. */
+    public BasicReport getBasicReport() {
+        LocalDate today = LocalDate.now();
+        int occupied = 0;
+        int reserved = 0;
+        int free = 0;
+        int maintenance = 0;
+        int unavailable = 0;
+
         for (Room room : rooms.findAll()) {
-            long count = reservations.findAll().stream()
-                    .filter(r -> r.getRoom().getId() == room.getId() && !r.isCancelled())
-                    .count();
-            if (count > 0) {
-                ranking.add(new RoomRanking(room, count));
+            if (room.isUnderMaintenance()) {
+                maintenance++;
+            } else if (!room.isAvailable()) {
+                unavailable++;
+            } else {
+                Reservation reservation = reservations.findAll().stream()
+                        .filter(item -> item.occupies(room, today, today.plusDays(1)))
+                        .findFirst().orElse(null);
+                if (reservation == null) free++;
+                else if (reservation.getStatus() == Reservation.Status.CHECKED_IN) occupied++;
+                else reserved++;
             }
         }
-        ranking.sort(Comparator.comparingLong(RoomRanking::reservations).reversed()
-                .thenComparing(item -> item.room().getNumber()));
-        return List.copyOf(ranking.subList(0, Math.min(limit, ranking.size())));
-    }
 
-    /**
-     * Busca la reserva vigente que ocupa una habitacion en un dia concreto.
-     * @param room habitacion que se consulta.
-     * @param day dia que se consulta.
-     * @return la reserva vigente de ese dia, o null si la habitacion esta libre.
-     */
-    public Reservation reservationOn(Room room, LocalDate day) {
-        return reservations.findAll().stream()
-                .filter(r -> r.occupies(room, day, day.plusDays(1)))
-                .findFirst()
-                .orElse(null);
+        double income = invoices.findAll().stream()
+                .mapToDouble(invoice -> invoice.getPaidAmount() - invoice.getRefundAmount()).sum();
+        double pending = invoices.findAll().stream()
+                .mapToDouble(Invoice::getBalance).sum();
+
+        return new BasicReport(rooms.findAll().size(), occupied, reserved, free,
+                maintenance, unavailable, income, pending);
     }
 
     /**

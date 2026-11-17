@@ -6,7 +6,6 @@ import java.io.UncheckedIOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 import model.Client;
@@ -16,7 +15,6 @@ import model.Person;
 import model.Reservation;
 import model.Room;
 import service.HotelService;
-import service.HotelService.RoomRanking;
 
 /**
  * Presenta el menu de consola y coordina la entrada del usuario con las operaciones
@@ -97,90 +95,19 @@ public class HotelApp {
         }
     }
 
-    /**
-     * Muestra el top 5 de habitaciones mas reservadas con su estado de hoy y el calendario
-     * de ocupacion de 10 dias.
-     */
-    private void showDashboard() {
+    /** Muestra un resumen basico de ocupacion e ingresos. */
+    private void showBasicReport() {
         requireRole(Employee.Role.ADMIN);
-        LocalDate today = LocalDate.now();
-        System.out.println("=== TOP 5 HABITACIONES MAS RESERVADAS ===");
-        List<RoomRanking> top = hotel.topRooms(5);
-        if (top.isEmpty()) {
-            System.out.println("Todavia no hay reservas.");
-        }
-        int position = 1;
-        for (RoomRanking item : top) {
-            System.out.printf("%d. %s | %d reservas | %s%n",
-                    position++, item.room(), item.reservations(), describeRoomToday(item.room(), today));
-        }
-        System.out.println();
-        LocalDate start = readDateOrToday("Inicio del calendario (AAAA-MM-DD, Enter = hoy): ", today);
-        printCalendar(start, 10);
-    }
-
-    /**
-     * Describe si una habitacion esta libre, reservada u ocupada el dia indicado.
-     * @param room habitacion que se consulta.
-     * @param today dia que se consulta.
-     * @return texto con el estado de la habitacion.
-     */
-    private String describeRoomToday(Room room, LocalDate today) {
-        Reservation reservation = hotel.reservationOn(room, today);
-        if (reservation == null) {
-            return "LIBRE";
-        }
-        if (reservation.getStatus() == Reservation.Status.CHECKED_IN) {
-            return "OCUPADA hasta " + reservation.getCheckOut();
-        }
-        return "RESERVADA (aun sin check-in)";
-    }
-
-    /**
-     * Dibuja una tabla con las habitaciones en filas y los dias en columnas.
-     * @param start primer dia del calendario.
-     * @param days cantidad de dias que se muestran.
-     */
-    private void printCalendar(LocalDate start, int days) {
-        System.out.println("=== CALENDARIO DE OCUPACION: " + start + " a " + start.plusDays(days - 1) + " ===");
-        StringBuilder header = new StringBuilder(String.format("%-7s|", "Hab."));
-        for (int i = 0; i < days; i++) {
-            header.append(String.format("%3d", start.plusDays(i).getDayOfMonth()));
-        }
-        System.out.println(header);
-        List<Room> sortedRooms = hotel.getRooms().stream()
-                .sorted(Comparator.comparing(Room::getNumber))
-                .toList();
-        for (Room room : sortedRooms) {
-            StringBuilder row = new StringBuilder(String.format("%-7s|", room.getNumber()));
-            for (int i = 0; i < days; i++) {
-                Reservation reservation = hotel.reservationOn(room, start.plusDays(i));
-                String symbol = reservation == null ? "."
-                        : reservation.getStatus() == Reservation.Status.CHECKED_IN ? "#" : "R";
-                row.append(String.format("%3s", symbol));
-            }
-            System.out.println(row);
-        }
-        System.out.println("# = huesped en la habitacion | R = reservada | . = libre");
-    }
-
-    /**
-     * Lee una fecha; si la persona solo presiona Enter, usa la fecha por defecto.
-     * @param prompt mensaje que se muestra.
-     * @param defaultDate fecha que se usa cuando no se escribe nada.
-     * @return fecha escrita o la fecha por defecto.
-     */
-    private LocalDate readDateOrToday(String prompt, LocalDate defaultDate) {
-        System.out.print(prompt);
-        String text = scanner.nextLine().trim();
-        if (text.isEmpty()) {
-            return defaultDate;
-        }
-        try {
-            return LocalDate.parse(text);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Use el formato AAAA-MM-DD.");
-        }
+        HotelService.BasicReport report = hotel.getBasicReport();
+        System.out.println("=== REPORTE BASICO DEL HOTEL ===");
+        System.out.println("Habitaciones registradas: " + report.totalRooms());
+        System.out.println("Ocupadas hoy: " + report.occupiedRooms());
+        System.out.println("Reservadas para hoy: " + report.reservedRooms());
+        System.out.println("Libres hoy: " + report.freeRooms());
+        System.out.println("En mantenimiento: " + report.maintenanceRooms());
+        System.out.println("No disponibles: " + report.unavailableRooms());
+        System.out.printf("Ingresos netos registrados: $%.2f%n", report.income());
+        System.out.printf("Saldo pendiente: $%.2f%n", report.pendingBalance());
     }
 
     /**
@@ -278,7 +205,7 @@ public class HotelApp {
                     case "14" -> searchAvailableRooms();
                     case "15" -> checkIn();
                     case "16" -> checkOut();
-                    case "17" -> showDashboard();
+                    case "17" -> showBasicReport();
                     case "18" -> manageRoomMaintenance();
                     case "0" -> running = false;
                     default -> System.out.println("Opcion no valida.");
@@ -312,7 +239,7 @@ public class HotelApp {
                 14. Buscar habitaciones disponibles
                 15. Registrar check-in
                 16. Registrar check-out
-                17. Panel del hotel: top 5 y calendario (Administrador)
+                17. Reporte basico de ocupacion e ingresos (Administrador)
                 18. Mantenimiento de habitaciones (Administrador)
                 0. Cerrar sesion
                 """);
