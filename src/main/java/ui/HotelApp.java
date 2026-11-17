@@ -477,13 +477,14 @@ public class HotelApp {
         if (hotel.getReservations().isEmpty()) throw new IllegalArgumentException("No hay reservas para cancelar.");
         showReservations();
         int id = readInt("ID de la reserva que desea cancelar: ");
-        if (hotel.hasPaidInvoice(id)) {
+        boolean paid = hotel.hasPaidInvoice(id);
+        if (paid) {
             requireRole(Employee.Role.ADMIN);
         }
-        double refund = hotel.cancelReservation(id);
+        hotel.cancelReservation(id);
         System.out.println("Reserva cancelada y guardada.");
-        if (refund > 0) {
-            System.out.printf("Reembolso al cliente: $%.0f%n", refund);
+        if (paid) {
+            System.out.println("El comprobante pagado permanece registrado. No se realiza un reembolso automatico.");
         }
     }
 

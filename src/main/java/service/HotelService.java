@@ -37,8 +37,6 @@ public class HotelService {
     private static final double LONG_STAY_DISCOUNT = 10;
     private static final double FREQUENT_DISCOUNT = 5;
     private static final double VIP_DISCOUNT = 15;
-    private static final int FULL_REFUND_MIN_DAYS = 2;
-    private static final double PARTIAL_REFUND_PERCENT = 50;
 
     private final Repository<Client> clients;
     private final Repository<Employee> employees;
@@ -394,38 +392,21 @@ public class HotelService {
     }
 
     /**
-     * Cancela una reserva, anula su comprobante pendiente y reembolsa el comprobante pagado.
-     * Politica de reembolso: si faltan 2 dias o mas para la entrada se devuelve el 100 %;
-     * si falta menos, se devuelve el 50 %.
-     * @param reservationId identificador de la reserva.
-     * @return valor reembolsado al cliente; cero si no habia nada pagado.
-     * @throws ResourceNotFoundException si no existe la reserva indicada.
-     * @throws BusinessRuleException si la reserva ya estaba cancelada o ya tuvo check-in.
+     * Cancela una reserva y anula los comprobantes que sigan pendientes.
+     * Los comprobantes pagados se conservan como registro; no hay reembolsos automaticos.
      */
-    public double cancelReservation(int reservationId) {
+    public void cancelReservation(int reservationId) {
         Reservation reservation = findReservation(reservationId);
         reservation.cancel();
         reservations.update(reservation);
 
-        long daysBeforeCheckIn = ChronoUnit.DAYS.between(LocalDate.now(), reservation.getCheckIn());
-        double percent = daysBeforeCheckIn >= FULL_REFUND_MIN_DAYS ? 100 : PARTIAL_REFUND_PERCENT;
-
-        double totalRefund = 0;
         for (Invoice invoice : invoices.findAll()) {
-            if (invoice.getReservation().getId() != reservationId) {
-                continue;
-            }
-            if (invoice.getStatus() == Invoice.Status.PENDING) {
+            if (invoice.getReservation().getId() == reservationId
+                    && invoice.getStatus() == Invoice.Status.PENDING) {
                 invoice.annul();
                 invoices.update(invoice);
-            } else if (invoice.getStatus() == Invoice.Status.PAID) {
-                double refund = invoice.getAmount() * percent / 100;
-                invoice.refund(refund);
-                invoices.update(invoice);
-                totalRefund += refund;
             }
         }
-        return totalRefund;
     }
 
     private Client findClient(int id) {
