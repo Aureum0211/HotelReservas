@@ -82,4 +82,21 @@ public final class DelimitedText {
         }
         return fields;
     }
+
+    /**
+     * Comprueba que la linea contenga una cantidad de campos dentro de un rango y devuelve
+     * los campos separados.
+     * @param line linea de texto que se va a interpretar.
+     * @param min cantidad minima de campos permitida.
+     * @param max cantidad maxima de campos permitida.
+     * @return lista de campos separados, si la cantidad esta dentro del rango.
+     */
+    public static List<String> requireFieldCount(String line, int min, int max) {
+        List<String> fields = split(line);
+        if (fields.size() < min || fields.size() > max) {
+            throw new IllegalArgumentException("Se esperaban entre " + min + " y " + max
+                    + " campos, pero se encontraron " + fields.size() + ".");
+        }
+        return fields;
+    }
 }

@@ -43,7 +43,8 @@ public class ReservationFileMapper implements EntityFileMapper<Reservation> {
                 reservation.getEmployee() == null ? "0" : Integer.toString(reservation.getEmployee().getId()),
                 Integer.toString(reservation.getRoom().getId()), reservation.getCheckIn().toString(),
                 reservation.getCheckOut().toString(), Double.toString(reservation.getPricePerNight()),
-                Double.toString(reservation.getTotal()), reservation.getStatus().name());
+                Double.toString(reservation.getTotal()), Integer.toString(reservation.getGuests()),
+                reservation.getStatus().name());
     }
 
     /**
@@ -54,7 +55,8 @@ public class ReservationFileMapper implements EntityFileMapper<Reservation> {
      */
     @Override
     public Reservation fromLine(String line) {
-        List<String> f = DelimitedText.requireFieldCount(line, 9);
+        List<String> f = DelimitedText.requireFieldCount(line, 9, 10);
+        boolean hasGuests = f.size() == 10;
         int clientId = Integer.parseInt(f.get(1));
         int employeeId = Integer.parseInt(f.get(2));
         int roomId = Integer.parseInt(f.get(3));
@@ -66,6 +68,7 @@ public class ReservationFileMapper implements EntityFileMapper<Reservation> {
                 .orElseThrow(() -> new IllegalArgumentException("No existe la habitacion vinculada #" + roomId));
         return new Reservation(Integer.parseInt(f.get(0)), client, employee, room,
                 LocalDate.parse(f.get(4)), LocalDate.parse(f.get(5)), Double.parseDouble(f.get(6)),
-                Double.parseDouble(f.get(7)), Reservation.Status.valueOf(f.get(8)));
+                Double.parseDouble(f.get(7)), hasGuests ? Integer.parseInt(f.get(8)) : 1,
+                Reservation.Status.valueOf(f.get(hasGuests ? 9 : 8)));
     }
 }
