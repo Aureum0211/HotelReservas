@@ -9,7 +9,9 @@ import java.util.Comparator;
 import java.util.List;
 import model.Client;
 import model.Employee;
+import model.DiscountPricing;
 import model.Invoice;
+import model.LongStayPricing;
 import model.Person;
 import model.PricingPolicy;
 import model.Reservation;
@@ -22,6 +24,11 @@ import validation.Validator;
  * implementacion concreta de almacenamiento.
  */
 public class HotelService {
+
+    private static final int LONG_STAY_MIN_NIGHTS = 7;
+    private static final double LONG_STAY_DISCOUNT = 10;
+    private static final double FREQUENT_DISCOUNT = 5;
+    private static final double VIP_DISCOUNT = 15;
 
     private final Repository<Client> clients;
     private final Repository<Employee> employees;
@@ -182,13 +189,12 @@ public class HotelService {
      * @param checkIn fecha de entrada.
      * @param checkOut fecha de salida.
      * @param guests cantidad de personas que se hospedaran.
-     * @param pricingPolicy estrategia de precios que calcula el total.
      * @return reserva creada y almacenada.
      * @throws ResourceNotFoundException si no existe el cliente o la habitacion solicitados.
      * @throws BusinessRuleException si la habitacion esta ocupada en las fechas indicadas.
      */
     public Reservation createReservation(int clientId, int roomId, LocalDate checkIn,
-                                         LocalDate checkOut, int guests, PricingPolicy pricingPolicy) {
+                                         LocalDate checkOut, int guests) {
         Client client = findClient(clientId);
         Room room = findRoom(roomId);
         Employee employee = employees.findAll().stream().findFirst().orElse(null);
@@ -199,7 +205,7 @@ public class HotelService {
         }
 
         Reservation reservation = Reservation.create(
-                reservations.nextId(), client, employee, room, checkIn, checkOut, pricingPolicy);
+                reservations.nextId(), client, employee, room, checkIn, checkOut, pricingFor(client));
 
         if (isBooked(room, checkIn, checkOut)) {
             throw new BusinessRuleException("La habitacion ya esta reservada en esas fechas.");
@@ -234,6 +240,22 @@ public class HotelService {
         }
         available.sort(Comparator.comparingDouble(Room::getPricePerNight));
         return available;
+    }
+
+    /**
+     * Elige la politica de precios de un cliente. Todos reciben el descuento por estadia
+     * larga y, ademas, los clientes frecuentes y VIP reciben un descuento por categoria.
+     * Ambos descuentos se acumulan.
+     * @param client cliente que reserva.
+     * @return politica de precios que le corresponde.
+     */
+    private PricingPolicy pricingFor(Client client) {
+        PricingPolicy longStay = new LongStayPricing(LONG_STAY_MIN_NIGHTS, LONG_STAY_DISCOUNT);
+        return switch (client.getCategory()) {
+            case NEW -> longStay;
+            case FREQUENT -> new DiscountPricing(longStay, FREQUENT_DISCOUNT);
+            case VIP -> new DiscountPricing(longStay, VIP_DISCOUNT);
+        };
     }
 
     /**

@@ -11,7 +11,6 @@ import model.Client;
 import model.Employee;
 import model.Invoice;
 import model.Person;
-import model.PricingPolicy;
 import model.Reservation;
 import model.Room;
 import service.HotelService;
@@ -23,8 +22,6 @@ import service.HotelService;
 public class HotelApp {
     private final Scanner scanner = new Scanner(System.in);
     private final HotelService hotel;
-    private final PricingPolicy standardPricing;
-    private final PricingPolicy longStayPricing;
 
     /**
      * Construye el menu y recibe el servicio del hotel y las estrategias de precios
@@ -33,10 +30,8 @@ public class HotelApp {
      * @param standardPricing estrategia de tarifa normal.
      * @param longStayPricing estrategia de tarifa para estancias largas.
      */
-    public HotelApp(HotelService hotel, PricingPolicy standardPricing, PricingPolicy longStayPricing) {
+    public HotelApp(HotelService hotel) {
         this.hotel = hotel;
-        this.standardPricing = standardPricing;
-        this.longStayPricing = longStayPricing;
     }
 
     /**
@@ -238,13 +233,14 @@ public class HotelApp {
             return;
         }
         int roomId = readInt("ID de la habitacion: ");
-        System.out.print("¿Aplicar 10% de descuento desde 7 noches? (s/n): ");
-        boolean discount = scanner.nextLine().trim().equalsIgnoreCase("s");
-        PricingPolicy selectedPricing = discount ? longStayPricing : standardPricing;
-        Reservation reservation = hotel.createReservation(clientId, roomId, checkIn, checkOut, guests, selectedPricing);
+        Reservation reservation = hotel.createReservation(clientId, roomId, checkIn, checkOut, guests);
         System.out.println("Reserva creada correctamente:");
         System.out.println(reservation);
+        double base = reservation.getPricePerNight() * reservation.nights();
         System.out.println("Noches: " + reservation.nights());
+        System.out.printf("Precio sin descuento: $%.0f%n", base);
+        System.out.printf("Descuento aplicado:   $%.0f%n", base - reservation.getTotal());
+        System.out.printf("Total a pagar:        $%.0f%n", reservation.getTotal());
     }
 
     private void showReservations() {
