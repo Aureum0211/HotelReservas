@@ -20,8 +20,6 @@ HotelReservas/
 │   ├── class-diagram.md
 │   ├── hierarchy-diagram.md
 │   ├── layers-diagram.md
-│   ├── GRASP_SOLID.md
-│   └── gcode.sql
 ├── README.md
 ├── GUIA_COMMITS.md
 ├── .gitignore
@@ -38,6 +36,7 @@ HotelReservas/
             │   ├── Invoice.java
             │   ├── Identifiable.java
             │   ├── PricingPolicy.java
+            │   ├── DiscountPricing.java
             │   ├── StandardPricing.java
             │   └── LongStayPricing.java
             ├── persistence/
@@ -88,10 +87,11 @@ Ejecutar desde la raíz permite que la aplicación encuentre la carpeta `data/`.
 
 - Registrar y consultar clientes y trabajadores.
 - Registrar y consultar habitaciones.
+- Buscar habitaciones disponibles según fechas y cantidad de personas.
 - Crear, consultar y cancelar reservas.
-- Validar los datos y evitar reservas superpuestas para una misma habitación.
-- Calcular tarifas normales y aplicar la política de descuento para estancias largas.
-- Emitir comprobantes y registrar pagos.
+- Validar los datos, la capacidad de la habitación, las fechas y evitar reservas superpuestas.
+- Aplicar descuentos automáticos: 10 % desde 7 noches, más 5 % para clientes frecuentes o 15 % para VIP.
+- Emitir comprobantes (uno por reserva) y registrar pagos. Al cancelar una reserva se anula su comprobante pendiente.
 - Cargar y guardar los datos al iniciar la aplicación y al realizar cambios.
 
 ## Documentación adicional

@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Proporciona operaciones para unir y separar campos de texto, escapando caracteres
- * especiales.
+ * Proporciona operaciones para unir y separar campos de texto 
  */
 public final class DelimitedText {
 

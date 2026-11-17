@@ -1,24 +1,34 @@
 package service;
 
 import exceptions.BusinessRuleException;
+import exceptions.InvalidDataException;
 import exceptions.ResourceNotFoundException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import model.Client;
 import model.Employee;
+import model.DiscountPricing;
 import model.Invoice;
+import model.LongStayPricing;
 import model.Person;
 import model.PricingPolicy;
 import model.Reservation;
 import model.Room;
 import persistence.Repository;
+import validation.Validator;
 
 /**
  * Coordina las operaciones del hotel y aplica las reglas de negocio sin depender de una
  * implementacion concreta de almacenamiento.
  */
 public class HotelService {
+
+    private static final int LONG_STAY_MIN_NIGHTS = 7;
+    private static final double LONG_STAY_DISCOUNT = 10;
+    private static final double FREQUENT_DISCOUNT = 5;
+    private static final double VIP_DISCOUNT = 15;
 
     private final Repository<Client> clients;
     private final Repository<Employee> employees;
@@ -178,28 +188,85 @@ public class HotelService {
      * @param roomId valor utilizado por la operacion.
      * @param checkIn fecha de entrada.
      * @param checkOut fecha de salida.
-     * @param pricingPolicy estrategia de precios que calcula el total.
+     * @param guests cantidad de personas que se hospedaran.
      * @return reserva creada y almacenada.
      * @throws ResourceNotFoundException si no existe el cliente o la habitacion solicitados.
      * @throws BusinessRuleException si la habitacion esta ocupada en las fechas indicadas.
      */
     public Reservation createReservation(int clientId, int roomId, LocalDate checkIn,
-                                         LocalDate checkOut, PricingPolicy pricingPolicy) {
+                                         LocalDate checkOut, int guests) {
         Client client = findClient(clientId);
         Room room = findRoom(roomId);
         Employee employee = employees.findAll().stream().findFirst().orElse(null);
 
-        Reservation reservation = Reservation.create(
-                reservations.nextId(), client, employee, room, checkIn, checkOut, pricingPolicy);
+        if (guests > room.getCapacity()) {
+            throw new BusinessRuleException("La habitacion " + room.getNumber()
+                    + " admite maximo " + room.getCapacity() + " personas.");
+        }
 
-        for (Reservation existing : reservations.findAll()) {
-            if (existing.occupies(room, checkIn, checkOut)) {
-                throw new BusinessRuleException("La habitacion ya esta reservada en esas fechas.");
-            }
+        Reservation reservation = Reservation.create(
+                reservations.nextId(), client, employee, room, checkIn, checkOut, pricingFor(client));
+
+        if (isBooked(room, checkIn, checkOut)) {
+            throw new BusinessRuleException("La habitacion ya esta reservada en esas fechas.");
         }
 
         reservations.save(reservation);
         return reservation;
+    }
+
+    /**
+     * Busca las habitaciones que se pueden reservar en un periodo para cierta cantidad de
+     * personas. Una habitacion sirve si esta habilitada, tiene capacidad suficiente y no
+     * tiene otra reserva activa en esas fechas.
+     * @param checkIn fecha de entrada.
+     * @param checkOut fecha de salida.
+     * @param guests cantidad de personas que se van a hospedar.
+     * @return habitaciones disponibles, ordenadas de la mas barata a la mas cara.
+     * @throws InvalidDataException si las fechas o la cantidad de personas no son validas.
+     */
+    public List<Room> findAvailableRooms(LocalDate checkIn, LocalDate checkOut, int guests) {
+        Validator.requireNonNull(checkIn, "La fecha de entrada");
+        Validator.requireNonNull(checkOut, "La fecha de salida");
+        Validator.requirePositive(guests, "La cantidad de personas");
+        if (!checkOut.isAfter(checkIn)) {
+            throw new InvalidDataException("La fecha de salida debe ser posterior a la de entrada.");
+        }
+        List<Room> available = new ArrayList<>();
+        for (Room room : rooms.findAll()) {
+            if (room.isAvailable() && room.getCapacity() >= guests && !isBooked(room, checkIn, checkOut)) {
+                available.add(room);
+            }
+        }
+        available.sort(Comparator.comparingDouble(Room::getPricePerNight));
+        return available;
+    }
+
+    /**
+     * Elige la politica de precios de un cliente. Todos reciben el descuento por estadia
+     * larga y, ademas, los clientes frecuentes y VIP reciben un descuento por categoria.
+     * Ambos descuentos se acumulan.
+     * @param client cliente que reserva.
+     * @return politica de precios que le corresponde.
+     */
+    private PricingPolicy pricingFor(Client client) {
+        PricingPolicy longStay = new LongStayPricing(LONG_STAY_MIN_NIGHTS, LONG_STAY_DISCOUNT);
+        return switch (client.getCategory()) {
+            case NEW -> longStay;
+            case FREQUENT -> new DiscountPricing(longStay, FREQUENT_DISCOUNT);
+            case VIP -> new DiscountPricing(longStay, VIP_DISCOUNT);
+        };
+    }
+
+    /**
+     * Indica si la habitacion ya tiene una reserva activa que se cruza con el periodo.
+     * @param room habitacion que se consulta.
+     * @param checkIn fecha de entrada.
+     * @param checkOut fecha de salida.
+     * @return true si la habitacion esta ocupada en algun dia del periodo.
+     */
+    private boolean isBooked(Room room, LocalDate checkIn, LocalDate checkOut) {
+        return reservations.findAll().stream().anyMatch(r -> r.occupies(room, checkIn, checkOut));
     }
 
     /**
@@ -212,6 +279,12 @@ public class HotelService {
      */
     public Invoice issueInvoice(int reservationId, Invoice.PaymentMethod method) {
         Reservation reservation = findReservation(reservationId);
+        boolean alreadyInvoiced = invoices.findAll().stream()
+                .anyMatch(i -> i.getReservation().getId() == reservationId
+                        && i.getStatus() != Invoice.Status.VOIDED);
+        if (alreadyInvoiced) {
+            throw new BusinessRuleException("La reserva #" + reservationId + " ya tiene un comprobante.");
+        }
         Invoice invoice = Invoice.issue(invoices.nextId(), reservation, method);
         invoices.save(invoice);
         return invoice;
@@ -239,6 +312,13 @@ public class HotelService {
         Reservation reservation = findReservation(reservationId);
         reservation.cancel();
         reservations.update(reservation);
+        for (Invoice invoice : invoices.findAll()) {
+            if (invoice.getReservation().getId() == reservationId
+                    && invoice.getStatus() == Invoice.Status.PENDING) {
+                invoice.annul();
+                invoices.update(invoice);
+            }
+        }
     }
 
     private Client findClient(int id) {

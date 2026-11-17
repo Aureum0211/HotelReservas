@@ -2,11 +2,8 @@ import java.nio.file.Path;
 import model.Client;
 import model.Employee;
 import model.Invoice;
-import model.LongStayPricing;
-import model.PricingPolicy;
 import model.Reservation;
 import model.Room;
-import model.StandardPricing;
 import persistence.Repository;
 import persistence.ClientFileMapper;
 import persistence.EmployeeFileMapper;
@@ -19,7 +16,7 @@ import ui.HotelApp;
 
 /**
  * Punto de entrada de la aplicacion. Conecta los repositorios de archivos, el servicio del
- * hotel, las politicas de precios y el menu de consola.
+ * hotel y el menu de consola.
  */
 public class Main {
 
@@ -40,8 +37,6 @@ public class Main {
                 new InvoiceFileMapper(reservations));
 
         HotelService service = new HotelService(clients, employees, rooms, reservations, invoices);
-        PricingPolicy standardPricing = new StandardPricing();
-        PricingPolicy longStayPricing = new LongStayPricing(7, 10);
-        new HotelApp(service, standardPricing, longStayPricing).start();
+        new HotelApp(service).start();
     }
 }

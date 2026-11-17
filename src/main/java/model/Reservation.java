@@ -72,7 +72,7 @@ public class Reservation implements Identifiable {
      * @param checkOut fecha de salida.
      * @param policy estrategia de precios que calcula el total.
      * @return reserva activa creada.
-     * @throws InvalidDataException si las fechas no forman una estancia valida.
+     * @throws InvalidDataException si las fechas no forman una estancia valida o la entrada es anterior a hoy.
      * @throws BusinessRuleException si el cliente esta inactivo o la habitacion no esta disponible.
      */
     public static Reservation create(int id, Client client, Employee employee, Room room,
@@ -84,6 +84,9 @@ public class Reservation implements Identifiable {
         Validator.requireNonNull(policy, "La politica de precio");
         if (!checkOut.isAfter(checkIn)) {
             throw new InvalidDataException("La fecha de salida debe ser posterior a la de entrada.");
+        }
+        if (checkIn.isBefore(LocalDate.now())) {
+            throw new InvalidDataException("La fecha de entrada no puede ser anterior a hoy.");
         }
         if (!client.isActive()) {
             throw new BusinessRuleException("El cliente esta inactivo.");
