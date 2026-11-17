@@ -267,3 +267,12 @@ El polimorfismo está presente en `Person.describe()` y en las implementaciones 
 - Los roles `ADMIN` y `RECEPTIONIST` se guardan para los trabajadores, pero el menú no aplica permisos diferentes por rol.
 - Al crear una reserva, el servicio asocia al primer trabajador registrado si existe; el menú actual no permite seleccionar explícitamente al empleado para cada reserva.
 - La política de descuento por estancia larga está disponible, y el menú permite elegir si se utiliza. El descuento no se selecciona automáticamente solo por la cantidad de noches.
+
+
+## Alcance final de la versión de consola
+
+La versión actual administra únicamente hoteles y habitaciones. Los trabajadores se manejan con dos roles: recepcionista y administrador. Se eliminó el acceso independiente para huéspedes y el cambio de jerarquías de empleados.
+
+Las reservas conservan el ciclo de confirmación, check-in, check-out y cancelación. Las cancelaciones no producen reembolsos automáticos. Los comprobantes permiten registrar abonos parciales y consultar el saldo pendiente. Las habitaciones pueden marcarse temporalmente en mantenimiento y dejan de aparecer en búsquedas de disponibilidad.
+
+El reporte final se limita a la ocupación actual, los ingresos registrados y los saldos pendientes. La persistencia continúa en archivos TXT; Oracle y la interfaz gráfica quedan fuera de esta etapa.

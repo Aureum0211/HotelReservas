@@ -4,6 +4,7 @@ import exceptions.BusinessRuleException;
 import exceptions.InvalidDataException;
 import exceptions.ResourceNotFoundException;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -24,6 +25,11 @@ import validation.Validator;
  * implementacion concreta de almacenamiento.
  */
 public class HotelService {
+
+    /** Resumen sencillo del estado actual del hotel. */
+    public record BasicReport(int totalRooms, int occupiedRooms, int reservedRooms,
+                              int freeRooms, int maintenanceRooms, int unavailableRooms,
+                              double income, double pendingBalance) { }
 
     private static final int LONG_STAY_MIN_NIGHTS = 7;
     private static final double LONG_STAY_DISCOUNT = 10;
@@ -86,6 +92,24 @@ public class HotelService {
      * @return lista de comprobantes registrados.
      */
     public List<Invoice> getInvoices() { return invoices.findAll(); }
+
+    /**
+     * Valida las credenciales de un trabajador.
+     * @param username usuario escrito.
+     * @param password contrasena escrita.
+     * @return el trabajador que inicio sesion.
+     * @throws BusinessRuleException si el usuario o la contrasena no coinciden, o si el
+     *         trabajador esta inactivo.
+     */
+    public Employee login(String username, String password) {
+        for (Employee employee : employees.findAll()) {
+            boolean sameUser = employee.getUsername().equalsIgnoreCase(username.trim());
+            if (sameUser && employee.getPassword().equals(password) && employee.isActive()) {
+                return employee;
+            }
+        }
+        throw new BusinessRuleException("Usuario o contrasena incorrectos.");
+    }
 
     /**
      * Valida la unicidad de los datos, asigna un identificador y registra un nuevo
@@ -189,23 +213,22 @@ public class HotelService {
      * @param checkIn fecha de entrada.
      * @param checkOut fecha de salida.
      * @param guests cantidad de personas que se hospedaran.
+     * @param employee trabajador que registra la reserva.
      * @return reserva creada y almacenada.
      * @throws ResourceNotFoundException si no existe el cliente o la habitacion solicitados.
      * @throws BusinessRuleException si la habitacion esta ocupada en las fechas indicadas.
      */
     public Reservation createReservation(int clientId, int roomId, LocalDate checkIn,
-                                         LocalDate checkOut, int guests) {
+                                         LocalDate checkOut, int guests, Employee employee) {
+        Validator.requireNonNull(employee, "El trabajador");
         Client client = findClient(clientId);
         Room room = findRoom(roomId);
-        Employee employee = employees.findAll().stream().findFirst().orElse(null);
-
-        if (guests > room.getCapacity()) {
-            throw new BusinessRuleException("La habitacion " + room.getNumber()
-                    + " admite maximo " + room.getCapacity() + " personas.");
+        if (room.isUnderMaintenance()) {
+            throw new BusinessRuleException("La habitacion esta en mantenimiento y no se puede reservar.");
         }
 
         Reservation reservation = Reservation.create(
-                reservations.nextId(), client, employee, room, checkIn, checkOut, pricingFor(client));
+                reservations.nextId(), client, employee, room, checkIn, checkOut, guests, pricingFor(client));
 
         if (isBooked(room, checkIn, checkOut)) {
             throw new BusinessRuleException("La habitacion ya esta reservada en esas fechas.");
@@ -213,6 +236,29 @@ public class HotelService {
 
         reservations.save(reservation);
         return reservation;
+    }
+
+    /** Cambia el estado de mantenimiento de una habitacion y guarda el cambio. */
+    public void setRoomMaintenance(int roomId, boolean underMaintenance) {
+        Room room = findRoom(roomId);
+        if (underMaintenance) {
+            if (room.isUnderMaintenance()) {
+                throw new BusinessRuleException("La habitacion ya esta en mantenimiento.");
+            }
+            boolean hasActiveReservation = reservations.findAll().stream()
+                    .anyMatch(reservation -> reservation.getRoom().getId() == roomId
+                            && reservation.isActive());
+            if (hasActiveReservation) {
+                throw new BusinessRuleException("No se puede iniciar mantenimiento: la habitacion tiene reservas activas.");
+            }
+            room.startMaintenance();
+        } else {
+            if (!room.isUnderMaintenance()) {
+                throw new BusinessRuleException("La habitacion no esta en mantenimiento.");
+            }
+            room.finishMaintenance();
+        }
+        rooms.update(room);
     }
 
     /**
@@ -234,7 +280,8 @@ public class HotelService {
         }
         List<Room> available = new ArrayList<>();
         for (Room room : rooms.findAll()) {
-            if (room.isAvailable() && room.getCapacity() >= guests && !isBooked(room, checkIn, checkOut)) {
+            if (room.isAvailable() && !room.isUnderMaintenance()
+                    && room.getCapacity() >= guests && !isBooked(room, checkIn, checkOut)) {
                 available.add(room);
             }
         }
@@ -256,6 +303,39 @@ public class HotelService {
             case FREQUENT -> new DiscountPricing(longStay, FREQUENT_DISCOUNT);
             case VIP -> new DiscountPricing(longStay, VIP_DISCOUNT);
         };
+    }
+
+    /** Calcula la ocupacion de hoy, los ingresos recibidos y el saldo pendiente. */
+    public BasicReport getBasicReport() {
+        LocalDate today = LocalDate.now();
+        int occupied = 0;
+        int reserved = 0;
+        int free = 0;
+        int maintenance = 0;
+        int unavailable = 0;
+
+        for (Room room : rooms.findAll()) {
+            if (room.isUnderMaintenance()) {
+                maintenance++;
+            } else if (!room.isAvailable()) {
+                unavailable++;
+            } else {
+                Reservation reservation = reservations.findAll().stream()
+                        .filter(item -> item.occupies(room, today, today.plusDays(1)))
+                        .findFirst().orElse(null);
+                if (reservation == null) free++;
+                else if (reservation.getStatus() == Reservation.Status.CHECKED_IN) occupied++;
+                else reserved++;
+            }
+        }
+
+        double income = invoices.findAll().stream()
+                .mapToDouble(invoice -> invoice.getPaidAmount() - invoice.getRefundAmount()).sum();
+        double pending = invoices.findAll().stream()
+                .mapToDouble(Invoice::getBalance).sum();
+
+        return new BasicReport(rooms.findAll().size(), occupied, reserved, free,
+                maintenance, unavailable, income, pending);
     }
 
     /**
@@ -296,25 +376,57 @@ public class HotelService {
      * @throws ResourceNotFoundException si no existe el comprobante indicado.
      * @throws BusinessRuleException si el comprobante no puede pagarse.
      */
-    public void payInvoice(int invoiceId) {
+    public void payInvoice(int invoiceId, double amount) {
         Invoice invoice = findInvoice(invoiceId);
-        invoice.pay();
+        invoice.registerPayment(amount);
         invoices.update(invoice);
     }
 
     /**
-     * Cancela una reserva y persiste su nuevo estado.
+     * Registra la llegada del huesped (check-in) usando la fecha de hoy.
      * @param reservationId identificador de la reserva.
-     * @throws ResourceNotFoundException si no existe la reserva indicada.
-     * @throws BusinessRuleException si la reserva ya estaba cancelada.
+     * @throws BusinessRuleException si la reserva no admite check-in en esta fecha.
+     */
+    public void checkIn(int reservationId) {
+        Reservation reservation = findReservation(reservationId);
+        reservation.registerCheckIn(LocalDate.now());
+        reservations.update(reservation);
+    }
+
+    /**
+     * Registra la salida del huesped (check-out) y deja la habitacion libre.
+     * @param reservationId identificador de la reserva.
+     * @throws BusinessRuleException si la reserva no tiene check-in.
+     */
+    public void checkOut(int reservationId) {
+        Reservation reservation = findReservation(reservationId);
+        reservation.registerCheckOut();
+        reservations.update(reservation);
+    }
+
+    /**
+     * Indica si la reserva tiene un comprobante pagado.
+     * @param reservationId identificador de la reserva.
+     * @return true si existe al menos un comprobante pagado para esa reserva.
+     */
+    public boolean hasPayments(int reservationId) {
+        return invoices.findAll().stream().anyMatch(invoice ->
+                invoice.getReservation().getId() == reservationId && invoice.getPaidAmount() > 0);
+    }
+
+    /**
+     * Cancela una reserva y anula los comprobantes que sigan pendientes.
+     * Los comprobantes pagados se conservan como registro; no hay reembolsos automaticos.
      */
     public void cancelReservation(int reservationId) {
         Reservation reservation = findReservation(reservationId);
         reservation.cancel();
         reservations.update(reservation);
+
         for (Invoice invoice : invoices.findAll()) {
             if (invoice.getReservation().getId() == reservationId
-                    && invoice.getStatus() == Invoice.Status.PENDING) {
+                    && (invoice.getStatus() == Invoice.Status.PENDING
+                    || invoice.getStatus() == Invoice.Status.PARTIALLY_PAID)) {
                 invoice.annul();
                 invoices.update(invoice);
             }

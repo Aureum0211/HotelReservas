@@ -26,6 +26,7 @@ public class Room implements Identifiable {
     private final int capacity;
     private double pricePerNight;
     private boolean available;
+    private boolean underMaintenance;
 
     /**
      * Crea una habitacion y valida sus datos principales.
@@ -37,13 +38,26 @@ public class Room implements Identifiable {
      * @param available indica si la habitacion esta disponible.
      */
     public Room(int id, String number, Type type, int capacity, double pricePerNight, boolean available) {
+        this(id, number, type, capacity, pricePerNight, available, false);
+    }
+
+    public Room(int id, String number, Type type, int capacity, double pricePerNight,
+                boolean available, boolean underMaintenance) {
         this.id = Validator.requirePositive(id, "El id de la habitacion");
         this.number = Validator.requireText(number, "El numero de habitacion", 10);
         this.type = Validator.requireNonNull(type, "El tipo de habitacion");
         this.capacity = Validator.requirePositive(capacity, "La capacidad");
         this.pricePerNight = Validator.requirePositive(pricePerNight, "El precio");
         this.available = available;
+        this.underMaintenance = underMaintenance;
     }
+
+    /** Indica si la habitacion esta en mantenimiento. */
+    public boolean isUnderMaintenance() { return underMaintenance; }
+
+    public void startMaintenance() { this.underMaintenance = true; }
+
+    public void finishMaintenance() { this.underMaintenance = false; }
 
     /**
      * Marca la habitacion como disponible para nuevas reservas.

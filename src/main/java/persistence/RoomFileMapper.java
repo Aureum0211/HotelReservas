@@ -18,7 +18,7 @@ public class RoomFileMapper implements EntityFileMapper<Room> {
     public String toLine(Room room) {
         return DelimitedText.join(Integer.toString(room.getId()), room.getNumber(), room.getType().name(),
                 Integer.toString(room.getCapacity()), Double.toString(room.getPricePerNight()),
-                Boolean.toString(room.isAvailable()));
+                Boolean.toString(room.isAvailable()), Boolean.toString(room.isUnderMaintenance()));
     }
 
     /**
@@ -28,8 +28,10 @@ public class RoomFileMapper implements EntityFileMapper<Room> {
      */
     @Override
     public Room fromLine(String line) {
-        List<String> f = DelimitedText.requireFieldCount(line, 6);
+        List<String> f = DelimitedText.requireFieldCount(line, 6, 7);
+        boolean underMaintenance = f.size() == 7 && Boolean.parseBoolean(f.get(6));
         return new Room(Integer.parseInt(f.get(0)), f.get(1), Room.Type.valueOf(f.get(2)),
-                Integer.parseInt(f.get(3)), Double.parseDouble(f.get(4)), Boolean.parseBoolean(f.get(5)));
+                Integer.parseInt(f.get(3)), Double.parseDouble(f.get(4)),
+                Boolean.parseBoolean(f.get(5)), underMaintenance);
     }
 }

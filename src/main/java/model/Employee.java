@@ -9,16 +9,36 @@ import validation.Validator;
 public class Employee extends Person {
 
     /**
-     * Roles que puede tener un trabajador del hotel.
+     * Grados que puede tener un trabajador del hotel. Cada grado incluye todo lo que puede
+     * hacer el grado anterior.
      */
     public enum Role {
-        /** Trabajador con permisos administrativos. */
-        ADMIN,
-        /** Trabajador encargado de la atencion y recepcion. */
-        RECEPTIONIST
+        /** Atiende clientes y gestiona reservas. */
+        RECEPTIONIST("Recepcionista"),
+        /** Puede realizar las operaciones administrativas del hotel. */
+        ADMIN("Administrador");
+
+        private final String label;
+
+        Role(String label) {
+            this.label = label;
+        }
+
+        /**
+         * Devuelve el nombre del grado para mostrarlo en pantalla.
+         * @return nombre del grado en espanol.
+         */
+        public String getLabel() { return label; }
+
+        /**
+         * Indica si este grado es igual o superior al minimo indicado.
+         * @param minimum grado minimo requerido.
+         * @return true si este grado alcanza el minimo.
+         */
+        public boolean isAtLeast(Role minimum) { return this == ADMIN || this == minimum; }
     }
 
-    private Role role;
+    private final Role role;
     private final String username;
     private String password;
 
@@ -49,16 +69,6 @@ public class Employee extends Person {
     public Role getRole() { return role; }
 
     /**
-     * Cambia el rol del trabajador despues de validar el nuevo valor.
-     * @param role rol asignado al trabajador.
-     */
-    public void changeRole(Role role) {
-
-        this.role = Validator.requireNonNull(role, "El rol");
-
-    }
-
-    /**
      * Devuelve el nombre de usuario del trabajador.
      * @return nombre de usuario del trabajador.
      */
@@ -84,6 +94,6 @@ public class Employee extends Person {
      */
     @Override
     public String describe() {
-        return "Trabajador: " + getName() + " | Usuario: " + username + " | Rol: " + role;
+        return "Trabajador: " + getName() + " | Usuario: " + username + " | Grado: " + role.getLabel();
     }
 }

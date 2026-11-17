@@ -16,8 +16,12 @@ public class Reservation implements Identifiable {
      * Estados posibles de una reserva.
      */
     public enum Status {
-        /** Reserva vigente que ocupa la habitacion en las fechas indicadas. */
+        /** Reserva confirmada; el huesped todavia no ha llegado. */
         ACTIVE,
+        /** El huesped ya hizo el check-in y esta en la habitacion. */
+        CHECKED_IN,
+        /** El huesped ya hizo el check-out y la habitacion quedo libre. */
+        CHECKED_OUT,
         /** Reserva cancelada que ya no bloquea la habitacion. */
         CANCELLED
     }
@@ -30,6 +34,7 @@ public class Reservation implements Identifiable {
     private final LocalDate checkOut;
     private final double pricePerNight;
     private final double total;
+    private final int guests;
     private Status status;
 
     /**
@@ -43,10 +48,12 @@ public class Reservation implements Identifiable {
      * @param checkOut fecha de salida.
      * @param pricePerNight precio establecido por cada noche.
      * @param total valor utilizado por la operacion.
+     * @param guests cantidad de personas que se hospedan.
      * @param status estado inicial del registro.
      */
     public Reservation(int id, Client client, Employee employee, Room room, LocalDate checkIn,
-                       LocalDate checkOut, double pricePerNight, double total, Status status) {
+                       LocalDate checkOut, double pricePerNight, double total, int guests,
+                       Status status) {
         this.id = Validator.requirePositive(id, "El id de la reserva");
         this.client = Validator.requireNonNull(client, "El cliente");
         this.employee = employee;
@@ -58,6 +65,7 @@ public class Reservation implements Identifiable {
         }
         this.pricePerNight = Validator.requirePositive(pricePerNight, "El precio");
         this.total = Validator.requirePositive(total, "El total");
+        this.guests = Validator.requirePositive(guests, "La cantidad de personas");
         this.status = Validator.requireNonNull(status, "El estado");
     }
 
@@ -70,13 +78,16 @@ public class Reservation implements Identifiable {
      * @param room habitacion de la reserva.
      * @param checkIn fecha de entrada.
      * @param checkOut fecha de salida.
+     * @param guests cantidad de personas que se hospedaran.
      * @param policy estrategia de precios que calcula el total.
      * @return reserva activa creada.
      * @throws InvalidDataException si las fechas no forman una estancia valida o la entrada es anterior a hoy.
-     * @throws BusinessRuleException si el cliente esta inactivo o la habitacion no esta disponible.
+     * @throws BusinessRuleException si el cliente esta inactivo, la habitacion no esta disponible
+     *         o no tiene capacidad para todas las personas.
      */
     public static Reservation create(int id, Client client, Employee employee, Room room,
-                                     LocalDate checkIn, LocalDate checkOut, PricingPolicy policy) {
+                                     LocalDate checkIn, LocalDate checkOut, int guests,
+                                     PricingPolicy policy) {
         Validator.requireNonNull(client, "El cliente");
         Validator.requireNonNull(room, "La habitacion");
         Validator.requireNonNull(checkIn, "La fecha de entrada");
@@ -94,10 +105,15 @@ public class Reservation implements Identifiable {
         if (!room.isAvailable()) {
             throw new BusinessRuleException("La habitacion " + room.getNumber() + " no esta disponible.");
         }
+        Validator.requirePositive(guests, "La cantidad de personas");
+        if (guests > room.getCapacity()) {
+            throw new BusinessRuleException("La habitacion " + room.getNumber()
+                    + " admite maximo " + room.getCapacity() + " personas.");
+        }
         long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
         double total = policy.calculateTotal(room.getPricePerNight(), nights);
         return new Reservation(id, client, employee, room, checkIn, checkOut,
-                room.getPricePerNight(), total, Status.ACTIVE);
+                room.getPricePerNight(), total, guests, Status.ACTIVE);
     }
 
     /**
@@ -107,24 +123,64 @@ public class Reservation implements Identifiable {
     public long nights() { return ChronoUnit.DAYS.between(checkIn, checkOut); }
 
     /**
-     * Indica si la reserva se encuentra activa.
-     * @return true si la reserva o persona esta activa; de lo contrario, false.
+     * Indica si la reserva esta vigente, es decir, si bloquea la habitacion. Lo esta
+     * mientras el huesped no haya llegado (ACTIVE) o este hospedado (CHECKED_IN).
+     * @return true si la reserva bloquea la habitacion; de lo contrario, false.
      */
-    public boolean isActive() { return status == Status.ACTIVE; }
+    public boolean isActive() { return status == Status.ACTIVE || status == Status.CHECKED_IN; }
 
     /**
-     * Cancela la reserva si todavia esta activa.
-     * @throws BusinessRuleException si la reserva ya esta cancelada.
+     * Indica si la reserva fue cancelada.
+     * @return true si la reserva esta cancelada.
+     */
+    public boolean isCancelled() { return status == Status.CANCELLED; }
+
+    /**
+     * Cancela la reserva mientras el huesped todavia no haya hecho el check-in.
+     * @throws BusinessRuleException si la reserva ya esta cancelada o el huesped ya llego.
      */
     public void cancel() {
-        if (!isActive()) {
+        if (isCancelled()) {
             throw new BusinessRuleException("La reserva ya esta cancelada.");
+        }
+        if (status != Status.ACTIVE) {
+            throw new BusinessRuleException("No se puede cancelar una reserva que ya tuvo check-in.");
         }
         this.status = Status.CANCELLED;
     }
 
     /**
-     * Indica si esta reserva activa ocupa la misma habitacion durante el periodo indicado.
+     * Registra la llegada del huesped. Solo se puede hacer entre la fecha de entrada y la
+     * fecha de salida.
+     * @param today fecha en la que se hace el check-in.
+     * @throws BusinessRuleException si la reserva no esta confirmada o la fecha no corresponde.
+     */
+    public void registerCheckIn(LocalDate today) {
+        if (status != Status.ACTIVE) {
+            throw new BusinessRuleException("Solo se puede hacer check-in de una reserva confirmada.");
+        }
+        if (today.isBefore(checkIn)) {
+            throw new BusinessRuleException("Todavia no es la fecha de entrada (" + checkIn + ").");
+        }
+        if (!today.isBefore(checkOut)) {
+            throw new BusinessRuleException("La fecha de salida de esta reserva ya paso.");
+        }
+        this.status = Status.CHECKED_IN;
+    }
+
+    /**
+     * Registra la salida del huesped y libera la habitacion.
+     * @throws BusinessRuleException si el huesped no ha hecho el check-in.
+     */
+    public void registerCheckOut() {
+        if (status != Status.CHECKED_IN) {
+            throw new BusinessRuleException("Solo se puede hacer check-out de una reserva con check-in.");
+        }
+        this.status = Status.CHECKED_OUT;
+    }
+
+    /**
+     * Indica si esta reserva vigente ocupa la misma habitacion durante el periodo indicado.
      * @param otherRoom habitacion que se desea comparar con la reserva.
      * @param in fecha inicial del periodo que se consulta.
      * @param out fecha final del periodo que se consulta.
@@ -184,6 +240,12 @@ public class Reservation implements Identifiable {
     public double getTotal() { return total; }
 
     /**
+     * Devuelve la cantidad de personas que se hospedan.
+     * @return cantidad de huespedes de la reserva.
+     */
+    public int getGuests() { return guests; }
+
+    /**
      * Devuelve el estado actual de la reserva.
      * @return estado actual del comprobante.
      */
@@ -195,7 +257,7 @@ public class Reservation implements Identifiable {
      */
     @Override
     public String toString() {
-        return "Reserva #" + id + " | " + room + " | " + checkIn + " -> " + checkOut
+        return "Reserva #" + id + " | " + room + " | " + guests + " personas | " + checkIn + " -> " + checkOut
                 + " | $" + total + " [" + status + "]";
     }
 }

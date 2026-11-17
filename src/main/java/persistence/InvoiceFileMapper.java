@@ -30,7 +30,8 @@ public class InvoiceFileMapper implements EntityFileMapper<Invoice> {
     public String toLine(Invoice invoice) {
         return DelimitedText.join(Integer.toString(invoice.getId()),
                 Integer.toString(invoice.getReservation().getId()), invoice.getIssueDate().toString(),
-                Double.toString(invoice.getAmount()), invoice.getPaymentMethod().name(), invoice.getStatus().name());
+                Double.toString(invoice.getAmount()), invoice.getPaymentMethod().name(), invoice.getStatus().name(),
+                Double.toString(invoice.getRefundAmount()), Double.toString(invoice.getPaidAmount()));
     }
 
     /**
@@ -40,12 +41,16 @@ public class InvoiceFileMapper implements EntityFileMapper<Invoice> {
      */
     @Override
     public Invoice fromLine(String line) {
-        List<String> f = DelimitedText.requireFieldCount(line, 6);
+        List<String> f = DelimitedText.requireFieldCount(line, 6, 8);
+        double amount = Double.parseDouble(f.get(3));
+        Invoice.Status status = Invoice.Status.valueOf(f.get(5));
+        double refund = f.size() >= 7 ? Double.parseDouble(f.get(6)) : 0;
+        double paid = f.size() == 8 ? Double.parseDouble(f.get(7))
+                : (status == Invoice.Status.PAID || status == Invoice.Status.REFUNDED ? amount : 0);
         int reservationId = Integer.parseInt(f.get(1));
         Reservation reservation = reservations.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("No existe la reserva vinculada #" + reservationId));
         return new Invoice(Integer.parseInt(f.get(0)), reservation, LocalDate.parse(f.get(2)),
-                Double.parseDouble(f.get(3)), Invoice.PaymentMethod.valueOf(f.get(4)),
-                Invoice.Status.valueOf(f.get(5)));
+                amount, Invoice.PaymentMethod.valueOf(f.get(4)), status, refund, paid);
     }
 }
