@@ -1,1 +1,2 @@
 1;Laura Gomez;200000001;laura@example.com;3001234569;Valledupar;true;RECEPTIONIST;laura;demo123
+2;Edward Carrillo;1067596194;edwardcarrillo@gmail.com;3225398112;valledupar;true;ADMIN;edwardcarri;123

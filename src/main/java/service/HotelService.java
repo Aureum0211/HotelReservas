@@ -1,9 +1,11 @@
 package service;
 
 import exceptions.BusinessRuleException;
+import exceptions.InvalidDataException;
 import exceptions.ResourceNotFoundException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import model.Client;
 import model.Employee;
@@ -13,6 +15,7 @@ import model.PricingPolicy;
 import model.Reservation;
 import model.Room;
 import persistence.Repository;
+import validation.Validator;
 
 /**
  * Coordina las operaciones del hotel y aplica las reglas de negocio sin depender de una
@@ -178,28 +181,70 @@ public class HotelService {
      * @param roomId valor utilizado por la operacion.
      * @param checkIn fecha de entrada.
      * @param checkOut fecha de salida.
+     * @param guests cantidad de personas que se hospedaran.
      * @param pricingPolicy estrategia de precios que calcula el total.
      * @return reserva creada y almacenada.
      * @throws ResourceNotFoundException si no existe el cliente o la habitacion solicitados.
      * @throws BusinessRuleException si la habitacion esta ocupada en las fechas indicadas.
      */
     public Reservation createReservation(int clientId, int roomId, LocalDate checkIn,
-                                         LocalDate checkOut, PricingPolicy pricingPolicy) {
+                                         LocalDate checkOut, int guests, PricingPolicy pricingPolicy) {
         Client client = findClient(clientId);
         Room room = findRoom(roomId);
         Employee employee = employees.findAll().stream().findFirst().orElse(null);
 
+        if (guests > room.getCapacity()) {
+            throw new BusinessRuleException("La habitacion " + room.getNumber()
+                    + " admite maximo " + room.getCapacity() + " personas.");
+        }
+
         Reservation reservation = Reservation.create(
                 reservations.nextId(), client, employee, room, checkIn, checkOut, pricingPolicy);
 
-        for (Reservation existing : reservations.findAll()) {
-            if (existing.occupies(room, checkIn, checkOut)) {
-                throw new BusinessRuleException("La habitacion ya esta reservada en esas fechas.");
-            }
+        if (isBooked(room, checkIn, checkOut)) {
+            throw new BusinessRuleException("La habitacion ya esta reservada en esas fechas.");
         }
 
         reservations.save(reservation);
         return reservation;
+    }
+
+    /**
+     * Busca las habitaciones que se pueden reservar en un periodo para cierta cantidad de
+     * personas. Una habitacion sirve si esta habilitada, tiene capacidad suficiente y no
+     * tiene otra reserva activa en esas fechas.
+     * @param checkIn fecha de entrada.
+     * @param checkOut fecha de salida.
+     * @param guests cantidad de personas que se van a hospedar.
+     * @return habitaciones disponibles, ordenadas de la mas barata a la mas cara.
+     * @throws InvalidDataException si las fechas o la cantidad de personas no son validas.
+     */
+    public List<Room> findAvailableRooms(LocalDate checkIn, LocalDate checkOut, int guests) {
+        Validator.requireNonNull(checkIn, "La fecha de entrada");
+        Validator.requireNonNull(checkOut, "La fecha de salida");
+        Validator.requirePositive(guests, "La cantidad de personas");
+        if (!checkOut.isAfter(checkIn)) {
+            throw new InvalidDataException("La fecha de salida debe ser posterior a la de entrada.");
+        }
+        List<Room> available = new ArrayList<>();
+        for (Room room : rooms.findAll()) {
+            if (room.isAvailable() && room.getCapacity() >= guests && !isBooked(room, checkIn, checkOut)) {
+                available.add(room);
+            }
+        }
+        available.sort(Comparator.comparingDouble(Room::getPricePerNight));
+        return available;
+    }
+
+    /**
+     * Indica si la habitacion ya tiene una reserva activa que se cruza con el periodo.
+     * @param room habitacion que se consulta.
+     * @param checkIn fecha de entrada.
+     * @param checkOut fecha de salida.
+     * @return true si la habitacion esta ocupada en algun dia del periodo.
+     */
+    private boolean isBooked(Room room, LocalDate checkIn, LocalDate checkOut) {
+        return reservations.findAll().stream().anyMatch(r -> r.occupies(room, checkIn, checkOut));
     }
 
     /**

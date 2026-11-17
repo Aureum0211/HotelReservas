@@ -10,7 +10,7 @@ import model.Employee;
 public class EmployeeFileMapper implements EntityFileMapper<Employee> {
 
     /**
-     * Convierte los datos del trabajador en una linea delimitada para almacenarla en un
+     * Convierte los datos del trabajador en una linea para almacenarla en un
      * archivo.
      * @param employee trabajador asociado, si existe.
      * @return representacion textual de la entidad.

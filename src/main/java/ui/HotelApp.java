@@ -4,6 +4,8 @@ import exceptions.HotelException;
 import java.io.UncheckedIOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Scanner;
 import model.Client;
 import model.Employee;
@@ -38,6 +40,40 @@ public class HotelApp {
     }
 
     /**
+     * Pide fechas y cantidad de personas y muestra las habitaciones que se pueden reservar.
+     */
+    private void searchAvailableRooms() {
+        System.out.println("--- Buscar habitaciones disponibles ---");
+        LocalDate checkIn = readDate("Fecha de entrada (AAAA-MM-DD): ");
+        LocalDate checkOut = readDate("Fecha de salida (AAAA-MM-DD): ");
+        int guests = readInt("Cantidad de personas: ");
+        printAvailableRooms(checkIn, checkOut, guests);
+    }
+
+    /**
+     * Muestra las habitaciones disponibles para el periodo y la cantidad de personas.
+     * @param checkIn fecha de entrada.
+     * @param checkOut fecha de salida.
+     * @param guests cantidad de personas.
+     * @return true si habia al menos una habitacion disponible.
+     */
+    private boolean printAvailableRooms(LocalDate checkIn, LocalDate checkOut, int guests) {
+        List<Room> available = hotel.findAvailableRooms(checkIn, checkOut, guests);
+        if (available.isEmpty()) {
+            System.out.println("No hay habitaciones disponibles para esas fechas y esa cantidad de personas.");
+            return false;
+        }
+        long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
+        System.out.println("Habitaciones disponibles (" + nights + " noches, " + guests + " personas):");
+        for (Room room : available) {
+            System.out.printf("ID %d | %s | Capacidad: %d | $%.0f por noche | $%.0f en total%n",
+                    room.getId(), room, room.getCapacity(), room.getPricePerNight(),
+                    room.getPricePerNight() * nights);
+        }
+        return true;
+    }
+
+    /**
      * Ejecuta el ciclo principal del menu de consola hasta que el usuario selecciona
      * salir.
      */
@@ -64,6 +100,7 @@ public class HotelApp {
                     case "11" -> payInvoice();
                     case "12" -> cancelReservation();
                     case "13" -> showPeople();
+                    case "14" -> searchAvailableRooms();
                     case "0" -> running = false;
                     default -> System.out.println("Opcion no valida.");
                 }
@@ -91,6 +128,7 @@ public class HotelApp {
                 11. Registrar pago
                 12. Cancelar reserva
                 13. Listar todas las personas
+                14. Buscar habitaciones disponibles
                 0. Salir
                 """);
         System.out.print("Seleccione una opcion: ");
@@ -193,14 +231,17 @@ public class HotelApp {
         if (hotel.getRooms().isEmpty()) throw new IllegalArgumentException("Primero registra al menos una habitacion.");
         showClients();
         int clientId = readInt("ID del cliente: ");
-        showRooms();
-        int roomId = readInt("ID de la habitacion: ");
         LocalDate checkIn = readDate("Fecha de entrada (AAAA-MM-DD): ");
         LocalDate checkOut = readDate("Fecha de salida (AAAA-MM-DD): ");
+        int guests = readInt("Cantidad de personas: ");
+        if (!printAvailableRooms(checkIn, checkOut, guests)) {
+            return;
+        }
+        int roomId = readInt("ID de la habitacion: ");
         System.out.print("¿Aplicar 10% de descuento desde 7 noches? (s/n): ");
         boolean discount = scanner.nextLine().trim().equalsIgnoreCase("s");
         PricingPolicy selectedPricing = discount ? longStayPricing : standardPricing;
-        Reservation reservation = hotel.createReservation(clientId, roomId, checkIn, checkOut, selectedPricing);
+        Reservation reservation = hotel.createReservation(clientId, roomId, checkIn, checkOut, guests, selectedPricing);
         System.out.println("Reserva creada correctamente:");
         System.out.println(reservation);
         System.out.println("Noches: " + reservation.nights());

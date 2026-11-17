@@ -18,7 +18,7 @@ import service.HotelService;
 import ui.HotelApp;
 
 /**
- * Punto de entrada de la aplicacion. Conecta los repositorios de archivos, el servicio del
+ * Conecta los repositorios de archivos, el servicio del
  * hotel, las politicas de precios y el menu de consola.
  */
 public class Main {
