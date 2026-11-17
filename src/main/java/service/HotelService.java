@@ -380,9 +380,9 @@ public class HotelService {
      * @throws ResourceNotFoundException si no existe el comprobante indicado.
      * @throws BusinessRuleException si el comprobante no puede pagarse.
      */
-    public void payInvoice(int invoiceId) {
+    public void payInvoice(int invoiceId, double amount) {
         Invoice invoice = findInvoice(invoiceId);
-        invoice.pay();
+        invoice.registerPayment(amount);
         invoices.update(invoice);
     }
 
@@ -413,9 +413,9 @@ public class HotelService {
      * @param reservationId identificador de la reserva.
      * @return true si existe al menos un comprobante pagado para esa reserva.
      */
-    public boolean hasPaidInvoice(int reservationId) {
-        return invoices.findAll().stream().anyMatch(i ->
-                i.getReservation().getId() == reservationId && i.getStatus() == Invoice.Status.PAID);
+    public boolean hasPayments(int reservationId) {
+        return invoices.findAll().stream().anyMatch(invoice ->
+                invoice.getReservation().getId() == reservationId && invoice.getPaidAmount() > 0);
     }
 
     /**
@@ -429,7 +429,8 @@ public class HotelService {
 
         for (Invoice invoice : invoices.findAll()) {
             if (invoice.getReservation().getId() == reservationId
-                    && invoice.getStatus() == Invoice.Status.PENDING) {
+                    && (invoice.getStatus() == Invoice.Status.PENDING
+                    || invoice.getStatus() == Invoice.Status.PARTIALLY_PAID)) {
                 invoice.annul();
                 invoices.update(invoice);
             }

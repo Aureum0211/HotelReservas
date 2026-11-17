@@ -92,8 +92,8 @@ public class HotelApp {
         int id = readInt("ID de la reserva que hace check-out: ");
         hotel.checkOut(id);
         System.out.println("Check-out registrado. La habitacion queda libre.");
-        if (!hotel.hasPaidInvoice(id)) {
-            System.out.println("Aviso: esta reserva no tiene un comprobante pagado.");
+        if (!hotel.hasPayments(id)) {
+            System.out.println("Aviso: esta reserva no tiene abonos registrados.");
         }
     }
 
@@ -488,16 +488,17 @@ public class HotelApp {
     private void payInvoice() {
         if (hotel.getInvoices().isEmpty()) throw new IllegalArgumentException("Primero emite un comprobante.");
         showInvoices();
-        int id = readInt("ID del comprobante que desea pagar: ");
-        hotel.payInvoice(id);
-        System.out.println("Pago registrado y guardado correctamente.");
+        int id = readInt("ID del comprobante que desea abonar: ");
+        double amount = readDouble("Monto del abono: ");
+        hotel.payInvoice(id, amount);
+        System.out.println("Abono registrado y guardado correctamente.");
     }
 
     private void cancelReservation() {
         if (hotel.getReservations().isEmpty()) throw new IllegalArgumentException("No hay reservas para cancelar.");
         showReservations();
         int id = readInt("ID de la reserva que desea cancelar: ");
-        boolean paid = hotel.hasPaidInvoice(id);
+        boolean paid = hotel.hasPayments(id);
         if (paid) {
             requireRole(Employee.Role.ADMIN);
         }
