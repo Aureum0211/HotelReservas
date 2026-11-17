@@ -10,7 +10,7 @@ import model.Employee;
 public class EmployeeFileMapper implements EntityFileMapper<Employee> {
 
     /**
-     * Convierte los datos del trabajador en una linea para almacenarla en un
+     * Convierte los datos del trabajador en una linea delimitada para almacenarla en un
      * archivo.
      * @param employee trabajador asociado, si existe.
      * @return representacion textual de la entidad.
@@ -32,8 +32,11 @@ public class EmployeeFileMapper implements EntityFileMapper<Employee> {
     @Override
     public Employee fromLine(String line) {
         List<String> f = DelimitedText.requireFieldCount(line, 10);
+        // Los archivos anteriores pueden contener MANAGER; ese grado ahora equivale a ADMIN.
+        Employee.Role role = f.get(7).equals("MANAGER")
+                ? Employee.Role.ADMIN : Employee.Role.valueOf(f.get(7));
         Employee employee = new Employee(Integer.parseInt(f.get(0)), f.get(1), f.get(2), f.get(3),
-                f.get(4), f.get(5), Employee.Role.valueOf(f.get(7)), f.get(8), f.get(9));
+                f.get(4), f.get(5), role, f.get(8), f.get(9));
         if (!Boolean.parseBoolean(f.get(6))) employee.deactivate();
         return employee;
     }
