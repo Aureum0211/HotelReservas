@@ -279,6 +279,12 @@ public class HotelService {
      */
     public Invoice issueInvoice(int reservationId, Invoice.PaymentMethod method) {
         Reservation reservation = findReservation(reservationId);
+        boolean alreadyInvoiced = invoices.findAll().stream()
+                .anyMatch(i -> i.getReservation().getId() == reservationId
+                        && i.getStatus() != Invoice.Status.VOIDED);
+        if (alreadyInvoiced) {
+            throw new BusinessRuleException("La reserva #" + reservationId + " ya tiene un comprobante.");
+        }
         Invoice invoice = Invoice.issue(invoices.nextId(), reservation, method);
         invoices.save(invoice);
         return invoice;
@@ -306,6 +312,13 @@ public class HotelService {
         Reservation reservation = findReservation(reservationId);
         reservation.cancel();
         reservations.update(reservation);
+        for (Invoice invoice : invoices.findAll()) {
+            if (invoice.getReservation().getId() == reservationId
+                    && invoice.getStatus() == Invoice.Status.PENDING) {
+                invoice.annul();
+                invoices.update(invoice);
+            }
+        }
     }
 
     private Client findClient(int id) {
