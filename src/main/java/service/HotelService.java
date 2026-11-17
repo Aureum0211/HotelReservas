@@ -225,6 +225,9 @@ public class HotelService {
         Validator.requireNonNull(employee, "El trabajador");
         Client client = findClient(clientId);
         Room room = findRoom(roomId);
+        if (room.isUnderMaintenance()) {
+            throw new BusinessRuleException("La habitacion esta en mantenimiento y no se puede reservar.");
+        }
 
         Reservation reservation = Reservation.create(
                 reservations.nextId(), client, employee, room, checkIn, checkOut, guests, pricingFor(client));
@@ -235,6 +238,29 @@ public class HotelService {
 
         reservations.save(reservation);
         return reservation;
+    }
+
+    /** Cambia el estado de mantenimiento de una habitacion y guarda el cambio. */
+    public void setRoomMaintenance(int roomId, boolean underMaintenance) {
+        Room room = findRoom(roomId);
+        if (underMaintenance) {
+            if (room.isUnderMaintenance()) {
+                throw new BusinessRuleException("La habitacion ya esta en mantenimiento.");
+            }
+            boolean hasActiveReservation = reservations.findAll().stream()
+                    .anyMatch(reservation -> reservation.getRoom().getId() == roomId
+                            && reservation.isActive());
+            if (hasActiveReservation) {
+                throw new BusinessRuleException("No se puede iniciar mantenimiento: la habitacion tiene reservas activas.");
+            }
+            room.startMaintenance();
+        } else {
+            if (!room.isUnderMaintenance()) {
+                throw new BusinessRuleException("La habitacion no esta en mantenimiento.");
+            }
+            room.finishMaintenance();
+        }
+        rooms.update(room);
     }
 
     /**
@@ -256,7 +282,8 @@ public class HotelService {
         }
         List<Room> available = new ArrayList<>();
         for (Room room : rooms.findAll()) {
-            if (room.isAvailable() && room.getCapacity() >= guests && !isBooked(room, checkIn, checkOut)) {
+            if (room.isAvailable() && !room.isUnderMaintenance()
+                    && room.getCapacity() >= guests && !isBooked(room, checkIn, checkOut)) {
                 available.add(room);
             }
         }

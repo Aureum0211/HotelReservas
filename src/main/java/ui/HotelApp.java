@@ -279,6 +279,7 @@ public class HotelApp {
                     case "15" -> checkIn();
                     case "16" -> checkOut();
                     case "17" -> showDashboard();
+                    case "18" -> manageRoomMaintenance();
                     case "0" -> running = false;
                     default -> System.out.println("Opcion no valida.");
                 }
@@ -312,6 +313,7 @@ public class HotelApp {
                 15. Registrar check-in
                 16. Registrar check-out
                 17. Panel del hotel: top 5 y calendario (Administrador)
+                18. Mantenimiento de habitaciones (Administrador)
                 0. Cerrar sesion
                 """);
         System.out.print("Seleccione una opcion: ");
@@ -368,6 +370,23 @@ public class HotelApp {
                 room.getId(), room, room.getCapacity(), room.getPricePerNight());
     }
 
+    private void manageRoomMaintenance() {
+        requireRole(Employee.Role.ADMIN);
+        if (hotel.getRooms().isEmpty()) {
+            throw new IllegalArgumentException("No hay habitaciones registradas.");
+        }
+        showRooms();
+        int roomId = readInt("ID de la habitacion: ");
+        System.out.println("1. Iniciar mantenimiento\n2. Finalizar mantenimiento");
+        boolean maintenance = switch (readInt("Seleccione: ")) {
+            case 1 -> true;
+            case 2 -> false;
+            default -> throw new IllegalArgumentException("Opcion no valida.");
+        };
+        hotel.setRoomMaintenance(roomId, maintenance);
+        System.out.println(maintenance ? "Mantenimiento iniciado." : "Mantenimiento finalizado.");
+    }
+
     private void showClients() {
         if (hotel.getClients().isEmpty()) {
             System.out.println("Todavia no hay clientes registrados.");
@@ -402,9 +421,10 @@ public class HotelApp {
             return;
         }
         for (Room room : hotel.getRooms()) {
+            String status = room.isUnderMaintenance() ? "En mantenimiento"
+                    : room.isAvailable() ? "Habilitada" : "No disponible";
             System.out.printf("ID %d | %s | Capacidad: %d | $%.0f por noche | %s%n",
-                    room.getId(), room, room.getCapacity(), room.getPricePerNight(),
-                    room.isAvailable() ? "Habilitada" : "No disponible");
+                    room.getId(), room, room.getCapacity(), room.getPricePerNight(), status);
         }
     }
 
