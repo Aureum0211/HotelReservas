@@ -70,10 +70,27 @@ public class HotelService {
     public List<Client> getClients() { return clients.findAll(); }
 
     /**
-     * Devuelve todos los trabajadores registrados.
+     * Devuelve todos los trabajadores registrados. Solo para administradores.
+     * @param actor trabajador que hace la consulta.
      * @return lista de trabajadores registrados.
      */
-    public List<Employee> getEmployees() { return employees.findAll(); }
+    public List<Employee> getEmployees(Employee actor) {
+        requireRole(actor, Employee.Role.ADMIN);
+        return employees.findAll();
+    }
+
+    /**
+     * Lanza un error si quien actua no tiene al menos el grado indicado. Es publico para que
+     * la interfaz pueda avisar antes de pedir datos; el servicio lo vuelve a comprobar.
+     * @param actor trabajador que intenta la operacion.
+     * @param minimum grado minimo que exige la operacion.
+     */
+    public void requireRole(Employee actor, Employee.Role minimum) {
+        Validator.requireNonNull(actor, "El trabajador");
+        if (!actor.getRole().isAtLeast(minimum)) {
+            throw new BusinessRuleException("Esta operacion requiere el grado " + minimum.getLabel() + " o superior.");
+        }
+    }
 
     /**
      * Devuelve todas las habitaciones registradas.
@@ -158,12 +175,14 @@ public class HotelService {
      * @param role rol asignado al trabajador.
      * @param username nombre de usuario.
      * @param password contrasena del trabajador.
+     * @param actor trabajador que registra; debe ser administrador.
      * @return trabajador registrado.
      * @throws BusinessRuleException si los datos personales o el usuario ya existen.
      */
     public Employee registerEmployee(String name, String documentNumber, String email,
                                      String phone, String city, Employee.Role role,
-                                     String username, String password) {
+                                     String username, String password, Employee actor) {
+        requireRole(actor, Employee.Role.ADMIN);
         ensurePersonIsUnique(documentNumber, email, phone);
         boolean usernameExists = employees.findAll().stream()
                 .anyMatch(employee -> employee.getUsername().equalsIgnoreCase(username.trim()));
@@ -182,10 +201,12 @@ public class HotelService {
      * @param type tipo de habitacion.
      * @param capacity capacidad maxima de personas.
      * @param pricePerNight precio establecido por cada noche.
+     * @param actor trabajador que registra; debe ser administrador.
      * @return habitacion registrada.
      * @throws BusinessRuleException si ya existe una habitacion con ese numero.
      */
-    public Room registerRoom(String number, Room.Type type, int capacity, double pricePerNight) {
+    public Room registerRoom(String number, Room.Type type, int capacity, double pricePerNight, Employee actor) {
+        requireRole(actor, Employee.Role.ADMIN);
         boolean numberExists = rooms.findAll().stream()
                 .anyMatch(room -> room.getNumber().equalsIgnoreCase(number.trim()));
         if (numberExists) {
@@ -197,7 +218,7 @@ public class HotelService {
     }
 
     private void ensurePersonIsUnique(String documentNumber, String email, String phone) {
-        for (Person person : getPeople()) {
+        for (Person person : allPeople()) {
             if (person.getDocumentNumber().equalsIgnoreCase(documentNumber.trim())) {
                 throw new BusinessRuleException("Ya existe una persona con ese documento.");
             }
@@ -211,10 +232,16 @@ public class HotelService {
     }
 
     /**
-     * Combina los clientes y trabajadores en una lista comun de personas.
+     * Combina los clientes y trabajadores en una lista comun de personas. Solo para administradores.
+     * @param actor trabajador que hace la consulta.
      * @return lista no modificable que contiene clientes y trabajadores.
      */
-    public List<Person> getPeople() {
+    public List<Person> getPeople(Employee actor) {
+        requireRole(actor, Employee.Role.ADMIN);
+        return allPeople();
+    }
+
+    private List<Person> allPeople() {
         List<Person> people = new ArrayList<>();
         people.addAll(clients.findAll());
         people.addAll(employees.findAll());
@@ -253,8 +280,9 @@ public class HotelService {
         return reservation;
     }
 
-    /** Cambia el estado de mantenimiento de una habitacion y guarda el cambio. */
-    public void setRoomMaintenance(int roomId, boolean underMaintenance) {
+    /** Cambia el estado de mantenimiento de una habitacion. Solo para administradores. */
+    public void setRoomMaintenance(int roomId, boolean underMaintenance, Employee actor) {
+        requireRole(actor, Employee.Role.ADMIN);
         Room room = findRoom(roomId);
         if (underMaintenance) {
             if (room.isUnderMaintenance()) {
@@ -320,8 +348,9 @@ public class HotelService {
         };
     }
 
-    /** Calcula la ocupacion de hoy, los ingresos recibidos y el saldo pendiente. */
-    public BasicReport getBasicReport() {
+    /** Calcula la ocupacion de hoy, los ingresos recibidos y el saldo pendiente. Solo para administradores. */
+    public BasicReport getBasicReport(Employee actor) {
+        requireRole(actor, Employee.Role.ADMIN);
         LocalDate today = LocalDate.now();
         int occupied = 0;
         int reserved = 0;

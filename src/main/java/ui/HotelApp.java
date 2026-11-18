@@ -98,7 +98,7 @@ public class HotelApp {
     /** Muestra un resumen basico de ocupacion e ingresos. */
     private void showBasicReport() {
         requireRole(Employee.Role.ADMIN);
-        HotelService.BasicReport report = hotel.getBasicReport();
+        HotelService.BasicReport report = hotel.getBasicReport(currentUser);
         System.out.println("=== REPORTE BASICO DEL HOTEL ===");
         System.out.println("Habitaciones registradas: " + report.totalRooms());
         System.out.println("Ocupadas hoy: " + report.occupiedRooms());
@@ -139,9 +139,7 @@ public class HotelApp {
      * @throws BusinessRuleException si el grado del trabajador es inferior.
      */
     private void requireRole(Employee.Role minimum) {
-        if (!currentUser.getRole().isAtLeast(minimum)) {
-            throw new BusinessRuleException("Esta operacion requiere el grado " + minimum.getLabel() + " o superior.");
-        }
+        hotel.requireRole(currentUser, minimum);
     }
 
     /**
@@ -361,7 +359,7 @@ public class HotelApp {
         Employee.Role role = readRole();
         String username = readText("Usuario: ");
         String password = readText("Contrasena (demo academica): ");
-        Employee employee = hotel.registerEmployee(name, document, email, phone, city, role, username, password);
+        Employee employee = hotel.registerEmployee(name, document, email, phone, city, role, username, password, currentUser);
         System.out.println("Trabajador registrado: " + employee.describe() + " | ID: " + employee.getId());
     }
 
@@ -378,7 +376,7 @@ public class HotelApp {
         };
         int capacity = readInt("Capacidad de personas: ");
         double price = readDouble("Precio por noche: ");
-        Room room = hotel.registerRoom(number, type, capacity, price);
+        Room room = hotel.registerRoom(number, type, capacity, price, currentUser);
         System.out.printf("Habitacion registrada: ID %d | %s | Capacidad: %d | $%.0f por noche%n",
                 room.getId(), room, room.getCapacity(), room.getPricePerNight());
     }
@@ -396,7 +394,7 @@ public class HotelApp {
             case 2 -> false;
             default -> throw new IllegalArgumentException("Opcion no valida.");
         };
-        hotel.setRoomMaintenance(roomId, maintenance);
+        hotel.setRoomMaintenance(roomId, maintenance, currentUser);
         System.out.println(maintenance ? "Mantenimiento iniciado." : "Mantenimiento finalizado.");
     }
 
@@ -410,20 +408,20 @@ public class HotelApp {
 
     private void showEmployees() {
         requireRole(Employee.Role.ADMIN);
-        if (hotel.getEmployees().isEmpty()) {
+        if (hotel.getEmployees(currentUser).isEmpty()) {
             System.out.println("Todavia no hay trabajadores registrados.");
             return;
         }
-        hotel.getEmployees().forEach(employee -> System.out.println("ID " + employee.getId() + " | " + employee.describe()));
+        hotel.getEmployees(currentUser).forEach(employee -> System.out.println("ID " + employee.getId() + " | " + employee.describe()));
     }
 
     private void showPeople() {
         requireRole(Employee.Role.ADMIN);
-        if (hotel.getPeople().isEmpty()) {
+        if (hotel.getPeople(currentUser).isEmpty()) {
             System.out.println("Todavia no hay personas registradas.");
             return;
         }
-        for (Person person : hotel.getPeople()) {
+        for (Person person : hotel.getPeople(currentUser)) {
             System.out.println("ID " + person.getId() + " | " + person.describe());
         }
     }
