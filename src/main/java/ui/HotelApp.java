@@ -98,7 +98,7 @@ public class HotelApp {
     /** Muestra un resumen basico de ocupacion e ingresos. */
     private void showBasicReport() {
         requireRole(Employee.Role.ADMIN);
-        HotelService.BasicReport report = hotel.getBasicReport();
+        HotelService.BasicReport report = hotel.getBasicReport(currentUser);
         System.out.println("=== REPORTE BASICO DEL HOTEL ===");
         System.out.println("Habitaciones registradas: " + report.totalRooms());
         System.out.println("Ocupadas hoy: " + report.occupiedRooms());
@@ -139,9 +139,7 @@ public class HotelApp {
      * @throws BusinessRuleException si el grado del trabajador es inferior.
      */
     private void requireRole(Employee.Role minimum) {
-        if (!currentUser.getRole().isAtLeast(minimum)) {
-            throw new BusinessRuleException("Esta operacion requiere el grado " + minimum.getLabel() + " o superior.");
-        }
+        hotel.requireRole(currentUser, minimum);
     }
 
     /**
@@ -157,16 +155,26 @@ public class HotelApp {
         };
     }
 
-    /** Inicia el programa y permite entrar al sistema como trabajador. */
+    /**
+     * Muestra la pantalla de inicio, donde cada persona elige si entra como huesped o como
+     * trabajador, hasta que se selecciona salir.
+     */
     public void start() {
         System.out.println("=== HOTEL RESERVA ===");
-        System.out.println("Los datos se guardan en archivos de texto dentro de la carpeta data.");
+        System.out.println("Los datos se guardan en la base de datos.");
         boolean running = true;
         while (running) {
-            System.out.println("\n1. Iniciar sesion\n0. Salir");
+            System.out.println("""
+
+                    === BIENVENIDO ===
+                    1. Soy huesped
+                    2. Soy trabajador
+                    0. Salir
+                    """);
             System.out.print("Seleccione una opcion: ");
             switch (scanner.nextLine().trim()) {
-                case "1" -> {
+                case "1" -> guestMenu();
+                case "2" -> {
                     if (login()) {
                         workerMenu();
                         currentUser = null;
@@ -180,8 +188,84 @@ public class HotelApp {
     }
 
     /**
-     * Ejecuta el ciclo del menu de un trabajador hasta que cierra la sesion.
+     * Menu de la zona de huespedes. No pide inicio de sesion: el huesped se identifica
+     * con su documento para reservar, ver sus reservas y cancelarlas.
      */
+    private void guestMenu() {
+        boolean inside = true;
+        while (inside) {
+            System.out.println("""
+
+                    === ZONA DE HUESPEDES ===
+                    1. Registrarme
+                    2. Buscar habitaciones disponibles
+                    3. Reservar una habitacion
+                    4. Ver mis reservas
+                    5. Cancelar una reserva
+                    0. Volver
+                    """);
+            System.out.print("Seleccione una opcion: ");
+            String option = scanner.nextLine().trim();
+            try {
+                switch (option) {
+                    case "1" -> registerGuest();
+                    case "2" -> searchAvailableRooms();
+                    case "3" -> guestReserve();
+                    case "4" -> guestShowReservations();
+                    case "5" -> guestCancelReservation();
+                    case "0" -> inside = false;
+                    default -> System.out.println("Opcion no valida.");
+                }
+            } catch (HotelException | IllegalArgumentException | UncheckedIOException e) {
+                System.out.println("No se pudo completar la operacion: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Registro de un huesped por su cuenta. Siempre queda con la categoria Nuevo.
+     */
+    private void registerGuest() {
+        System.out.println("--- Registro de huesped ---");
+        String name = readText("Nombre completo: ");
+        String document = readText("Documento: ");
+        String email = readText("Correo: ");
+        String phone = readText("Telefono (10 digitos): ");
+        String city = readText("Ciudad: ");
+        Client client = hotel.registerGuest(name, document, email, phone, city);
+        System.out.println("Registro exitoso. Tu codigo de cliente es " + client.getId() + ".");
+        System.out.println("Ya puedes reservar desde esta zona usando tu documento.");
+    }
+
+    private void guestReserve() {
+        Client client = hotel.findClientByDocument(readText("Tu documento: "));
+        bookRoom(client.getId(), null);
+        System.out.println("Para pagar, acercate a recepcion.");
+    }
+
+    private void guestShowReservations() {
+        Client client = hotel.findClientByDocument(readText("Tu documento: "));
+        showGuestReservations(client);
+    }
+
+    private void guestCancelReservation() {
+        Client client = hotel.findClientByDocument(readText("Tu documento: "));
+        if (!showGuestReservations(client)) return;
+        hotel.cancelGuestReservation(client.getId(), readInt("ID de la reserva que desea cancelar: "));
+        System.out.println("Reserva cancelada.");
+    }
+
+    /** Muestra las reservas del huesped. Devuelve false si no tiene ninguna. */
+    private boolean showGuestReservations(Client client) {
+        List<Reservation> mine = hotel.getReservationsOf(client.getId());
+        if (mine.isEmpty()) {
+            System.out.println("No tienes reservas.");
+            return false;
+        }
+        mine.forEach(System.out::println);
+        return true;
+    }
+
     private void workerMenu() {
         boolean running = true;
         while (running) {
@@ -275,7 +359,7 @@ public class HotelApp {
         Employee.Role role = readRole();
         String username = readText("Usuario: ");
         String password = readText("Contrasena (demo academica): ");
-        Employee employee = hotel.registerEmployee(name, document, email, phone, city, role, username, password);
+        Employee employee = hotel.registerEmployee(name, document, email, phone, city, role, username, password, currentUser);
         System.out.println("Trabajador registrado: " + employee.describe() + " | ID: " + employee.getId());
     }
 
@@ -292,7 +376,7 @@ public class HotelApp {
         };
         int capacity = readInt("Capacidad de personas: ");
         double price = readDouble("Precio por noche: ");
-        Room room = hotel.registerRoom(number, type, capacity, price);
+        Room room = hotel.registerRoom(number, type, capacity, price, currentUser);
         System.out.printf("Habitacion registrada: ID %d | %s | Capacidad: %d | $%.0f por noche%n",
                 room.getId(), room, room.getCapacity(), room.getPricePerNight());
     }
@@ -310,7 +394,7 @@ public class HotelApp {
             case 2 -> false;
             default -> throw new IllegalArgumentException("Opcion no valida.");
         };
-        hotel.setRoomMaintenance(roomId, maintenance);
+        hotel.setRoomMaintenance(roomId, maintenance, currentUser);
         System.out.println(maintenance ? "Mantenimiento iniciado." : "Mantenimiento finalizado.");
     }
 
@@ -324,20 +408,20 @@ public class HotelApp {
 
     private void showEmployees() {
         requireRole(Employee.Role.ADMIN);
-        if (hotel.getEmployees().isEmpty()) {
+        if (hotel.getEmployees(currentUser).isEmpty()) {
             System.out.println("Todavia no hay trabajadores registrados.");
             return;
         }
-        hotel.getEmployees().forEach(employee -> System.out.println("ID " + employee.getId() + " | " + employee.describe()));
+        hotel.getEmployees(currentUser).forEach(employee -> System.out.println("ID " + employee.getId() + " | " + employee.describe()));
     }
 
     private void showPeople() {
         requireRole(Employee.Role.ADMIN);
-        if (hotel.getPeople().isEmpty()) {
+        if (hotel.getPeople(currentUser).isEmpty()) {
             System.out.println("Todavia no hay personas registradas.");
             return;
         }
-        for (Person person : hotel.getPeople()) {
+        for (Person person : hotel.getPeople(currentUser)) {
             System.out.println("ID " + person.getId() + " | " + person.describe());
         }
     }
@@ -359,7 +443,11 @@ public class HotelApp {
         if (hotel.getClients().isEmpty()) throw new IllegalArgumentException("Primero registra al menos un cliente.");
         if (hotel.getRooms().isEmpty()) throw new IllegalArgumentException("Primero registra al menos una habitacion.");
         showClients();
-        int clientId = readInt("ID del cliente: ");
+        bookRoom(readInt("ID del cliente: "), currentUser);
+    }
+
+    /** Pide fechas, muestra las habitaciones libres y crea la reserva. employee es null si reserva el huesped. */
+    private void bookRoom(int clientId, Employee employee) {
         LocalDate checkIn = readDate("Fecha de entrada (AAAA-MM-DD): ");
         LocalDate checkOut = readDate("Fecha de salida (AAAA-MM-DD): ");
         int guests = readInt("Cantidad de personas: ");
@@ -367,7 +455,7 @@ public class HotelApp {
             return;
         }
         int roomId = readInt("ID de la habitacion: ");
-        Reservation reservation = hotel.createReservation(clientId, roomId, checkIn, checkOut, guests, currentUser);
+        Reservation reservation = hotel.createReservation(clientId, roomId, checkIn, checkOut, guests, employee);
         System.out.println("Reserva creada correctamente:");
         System.out.println(reservation);
         double base = reservation.getPricePerNight() * reservation.nights();
@@ -384,7 +472,7 @@ public class HotelApp {
         }
         for (Reservation reservation : hotel.getReservations()) {
             String attendedBy = reservation.getEmployee() == null
-                    ? "" : " | Atendio: " + reservation.getEmployee().getName();
+                    ? " | Reservada por el huesped" : " | Atendio: " + reservation.getEmployee().getName();
             System.out.println(reservation + attendedBy);
         }
     }
@@ -426,10 +514,7 @@ public class HotelApp {
         showReservations();
         int id = readInt("ID de la reserva que desea cancelar: ");
         boolean paid = hotel.hasPayments(id);
-        if (paid) {
-            requireRole(Employee.Role.ADMIN);
-        }
-        hotel.cancelReservation(id);
+        hotel.cancelReservation(id, currentUser);
         System.out.println("Reserva cancelada y guardada.");
         if (paid) {
             System.out.println("El comprobante pagado permanece registrado. No se realiza un reembolso automatico.");

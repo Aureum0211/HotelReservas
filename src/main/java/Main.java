@@ -1,42 +1,44 @@
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.sql.Connection;
 import model.Client;
 import model.Employee;
 import model.Invoice;
 import model.Reservation;
 import model.Room;
+import persistence.Database;
+import persistence.JdbcRepository;
 import persistence.Repository;
-import persistence.ClientFileMapper;
-import persistence.EmployeeFileMapper;
-import persistence.InvoiceFileMapper;
-import persistence.ReservationFileMapper;
-import persistence.RoomFileMapper;
-import persistence.TextFileRepository;
+import persistence.SqlMappers;
 import service.HotelService;
 import ui.HotelApp;
 
 /**
- * Punto de entrada de la aplicacion. Conecta los repositorios de archivos, el servicio del
+ * Punto de entrada de la aplicacion. Conecta la base de datos Oracle, el servicio del
  * hotel y el menu de consola.
  */
 public class Main {
 
     /**
-     * Inicia la aplicacion, configura los repositorios de archivos, crea el servicio e
+     * Inicia la aplicacion, abre la conexion, crea los repositorios y el servicio e
      * inicia el menu de consola.
      * @param args argumentos recibidos desde la linea de comandos.
      */
     public static void main(String[] args) {
-        Path dataDirectory = Path.of("data");
+        try {
+            Connection connection = Database.open(Path.of("db.properties"));
 
-        Repository<Client> clients = new TextFileRepository<>(dataDirectory.resolve("clientes.txt"), new ClientFileMapper());
-        Repository<Employee> employees = new TextFileRepository<>(dataDirectory.resolve("trabajadores.txt"), new EmployeeFileMapper());
-        Repository<Room> rooms = new TextFileRepository<>(dataDirectory.resolve("habitaciones.txt"), new RoomFileMapper());
-        Repository<Reservation> reservations = new TextFileRepository<>(dataDirectory.resolve("reservas.txt"),
-                new ReservationFileMapper(clients, employees, rooms));
-        Repository<Invoice> invoices = new TextFileRepository<>(dataDirectory.resolve("comprobantes.txt"),
-                new InvoiceFileMapper(reservations));
+            Repository<Client> clients = new JdbcRepository<>(connection, SqlMappers.clients());
+            Repository<Employee> employees = new JdbcRepository<>(connection, SqlMappers.employees());
+            Repository<Room> rooms = new JdbcRepository<>(connection, SqlMappers.rooms());
+            Repository<Reservation> reservations = new JdbcRepository<>(connection,
+                    SqlMappers.reservations(clients, employees, rooms));
+            Repository<Invoice> invoices = new JdbcRepository<>(connection, SqlMappers.invoices(reservations));
 
-        HotelService service = new HotelService(clients, employees, rooms, reservations, invoices);
-        new HotelApp(service).start();
+            HotelService service = new HotelService(clients, employees, rooms, reservations, invoices);
+            new HotelApp(service).start();
+        } catch (UncheckedIOException | IllegalStateException error) {
+            System.out.println("No se pudo iniciar el programa: " + error.getMessage());
+        }
     }
 }

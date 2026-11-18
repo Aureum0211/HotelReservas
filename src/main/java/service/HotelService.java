@@ -70,10 +70,27 @@ public class HotelService {
     public List<Client> getClients() { return clients.findAll(); }
 
     /**
-     * Devuelve todos los trabajadores registrados.
+     * Devuelve todos los trabajadores registrados. Solo para administradores.
+     * @param actor trabajador que hace la consulta.
      * @return lista de trabajadores registrados.
      */
-    public List<Employee> getEmployees() { return employees.findAll(); }
+    public List<Employee> getEmployees(Employee actor) {
+        requireRole(actor, Employee.Role.ADMIN);
+        return employees.findAll();
+    }
+
+    /**
+     * Lanza un error si quien actua no tiene al menos el grado indicado. Es publico para que
+     * la interfaz pueda avisar antes de pedir datos; el servicio lo vuelve a comprobar.
+     * @param actor trabajador que intenta la operacion.
+     * @param minimum grado minimo que exige la operacion.
+     */
+    public void requireRole(Employee actor, Employee.Role minimum) {
+        Validator.requireNonNull(actor, "El trabajador");
+        if (!actor.getRole().isAtLeast(minimum)) {
+            throw new BusinessRuleException("Esta operacion requiere el grado " + minimum.getLabel() + " o superior.");
+        }
+    }
 
     /**
      * Devuelve todas las habitaciones registradas.
@@ -132,6 +149,22 @@ public class HotelService {
     }
 
     /**
+     * Registra a un huesped que se inscribe por su cuenta. Siempre entra con la categoria
+     * NEW, para que nadie se asigne por su cuenta un descuento.
+     * @param name nombre completo.
+     * @param documentNumber numero de documento.
+     * @param email correo electronico.
+     * @param phone telefono de 10 digitos.
+     * @param city ciudad.
+     * @return cliente registrado.
+     * @throws BusinessRuleException si ya existe una persona con el mismo documento, correo o telefono.
+     */
+    public Client registerGuest(String name, String documentNumber, String email,
+                                String phone, String city) {
+        return registerClient(name, documentNumber, email, phone, city, Client.Category.NEW);
+    }
+
+    /**
      * Valida la unicidad de los datos y del usuario, asigna un identificador y registra un
      * trabajador.
      * @param name nombre de la persona.
@@ -142,12 +175,14 @@ public class HotelService {
      * @param role rol asignado al trabajador.
      * @param username nombre de usuario.
      * @param password contrasena del trabajador.
+     * @param actor trabajador que registra; debe ser administrador.
      * @return trabajador registrado.
      * @throws BusinessRuleException si los datos personales o el usuario ya existen.
      */
     public Employee registerEmployee(String name, String documentNumber, String email,
                                      String phone, String city, Employee.Role role,
-                                     String username, String password) {
+                                     String username, String password, Employee actor) {
+        requireRole(actor, Employee.Role.ADMIN);
         ensurePersonIsUnique(documentNumber, email, phone);
         boolean usernameExists = employees.findAll().stream()
                 .anyMatch(employee -> employee.getUsername().equalsIgnoreCase(username.trim()));
@@ -166,10 +201,12 @@ public class HotelService {
      * @param type tipo de habitacion.
      * @param capacity capacidad maxima de personas.
      * @param pricePerNight precio establecido por cada noche.
+     * @param actor trabajador que registra; debe ser administrador.
      * @return habitacion registrada.
      * @throws BusinessRuleException si ya existe una habitacion con ese numero.
      */
-    public Room registerRoom(String number, Room.Type type, int capacity, double pricePerNight) {
+    public Room registerRoom(String number, Room.Type type, int capacity, double pricePerNight, Employee actor) {
+        requireRole(actor, Employee.Role.ADMIN);
         boolean numberExists = rooms.findAll().stream()
                 .anyMatch(room -> room.getNumber().equalsIgnoreCase(number.trim()));
         if (numberExists) {
@@ -181,7 +218,7 @@ public class HotelService {
     }
 
     private void ensurePersonIsUnique(String documentNumber, String email, String phone) {
-        for (Person person : getPeople()) {
+        for (Person person : allPeople()) {
             if (person.getDocumentNumber().equalsIgnoreCase(documentNumber.trim())) {
                 throw new BusinessRuleException("Ya existe una persona con ese documento.");
             }
@@ -195,10 +232,16 @@ public class HotelService {
     }
 
     /**
-     * Combina los clientes y trabajadores en una lista comun de personas.
+     * Combina los clientes y trabajadores en una lista comun de personas. Solo para administradores.
+     * @param actor trabajador que hace la consulta.
      * @return lista no modificable que contiene clientes y trabajadores.
      */
-    public List<Person> getPeople() {
+    public List<Person> getPeople(Employee actor) {
+        requireRole(actor, Employee.Role.ADMIN);
+        return allPeople();
+    }
+
+    private List<Person> allPeople() {
         List<Person> people = new ArrayList<>();
         people.addAll(clients.findAll());
         people.addAll(employees.findAll());
@@ -213,14 +256,13 @@ public class HotelService {
      * @param checkIn fecha de entrada.
      * @param checkOut fecha de salida.
      * @param guests cantidad de personas que se hospedaran.
-     * @param employee trabajador que registra la reserva.
+     * @param employee trabajador que registra la reserva; null si la hace el propio huesped.
      * @return reserva creada y almacenada.
      * @throws ResourceNotFoundException si no existe el cliente o la habitacion solicitados.
      * @throws BusinessRuleException si la habitacion esta ocupada en las fechas indicadas.
      */
     public Reservation createReservation(int clientId, int roomId, LocalDate checkIn,
                                          LocalDate checkOut, int guests, Employee employee) {
-        Validator.requireNonNull(employee, "El trabajador");
         Client client = findClient(clientId);
         Room room = findRoom(roomId);
         if (room.isUnderMaintenance()) {
@@ -238,8 +280,9 @@ public class HotelService {
         return reservation;
     }
 
-    /** Cambia el estado de mantenimiento de una habitacion y guarda el cambio. */
-    public void setRoomMaintenance(int roomId, boolean underMaintenance) {
+    /** Cambia el estado de mantenimiento de una habitacion. Solo para administradores. */
+    public void setRoomMaintenance(int roomId, boolean underMaintenance, Employee actor) {
+        requireRole(actor, Employee.Role.ADMIN);
         Room room = findRoom(roomId);
         if (underMaintenance) {
             if (room.isUnderMaintenance()) {
@@ -305,8 +348,9 @@ public class HotelService {
         };
     }
 
-    /** Calcula la ocupacion de hoy, los ingresos recibidos y el saldo pendiente. */
-    public BasicReport getBasicReport() {
+    /** Calcula la ocupacion de hoy, los ingresos recibidos y el saldo pendiente. Solo para administradores. */
+    public BasicReport getBasicReport(Employee actor) {
+        requireRole(actor, Employee.Role.ADMIN);
         LocalDate today = LocalDate.now();
         int occupied = 0;
         int reserved = 0;
@@ -415,10 +459,22 @@ public class HotelService {
     }
 
     /**
+     * Cancela una reserva. Si ya tiene pagos, solo un administrador puede cancelarla.
+     * @param reservationId identificador de la reserva.
+     * @param actor trabajador que cancela.
+     */
+    public void cancelReservation(int reservationId, Employee actor) {
+        if (hasPayments(reservationId)) {
+            requireRole(actor, Employee.Role.ADMIN);
+        }
+        cancel(reservationId);
+    }
+
+    /**
      * Cancela una reserva y anula los comprobantes que sigan pendientes.
      * Los comprobantes pagados se conservan como registro; no hay reembolsos automaticos.
      */
-    public void cancelReservation(int reservationId) {
+    private void cancel(int reservationId) {
         Reservation reservation = findReservation(reservationId);
         reservation.cancel();
         reservations.update(reservation);
@@ -431,6 +487,32 @@ public class HotelService {
                 invoices.update(invoice);
             }
         }
+    }
+
+    /** Busca un cliente por su numero de documento. */
+    public Client findClientByDocument(String documentNumber) {
+        return clients.findAll().stream()
+                .filter(c -> c.getDocumentNumber().equalsIgnoreCase(documentNumber.trim()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No hay un huesped registrado con ese documento. Registrate primero."));
+    }
+
+    /** Devuelve las reservas de un cliente. */
+    public List<Reservation> getReservationsOf(int clientId) {
+        return reservations.findAll().stream().filter(r -> r.getClient().getId() == clientId).toList();
+    }
+
+    /** Cancela una reserva a nombre del huesped: debe ser suya y no tener pagos todavia. */
+    public void cancelGuestReservation(int clientId, int reservationId) {
+        Reservation reservation = findReservation(reservationId);
+        if (reservation.getClient().getId() != clientId) {
+            throw new BusinessRuleException("No encontramos esa reserva entre tus reservas.");
+        }
+        if (hasPayments(reservationId)) {
+            throw new BusinessRuleException("La reserva ya tiene pagos. Comunicate con recepcion para cancelarla.");
+        }
+        cancel(reservationId);
     }
 
     private Client findClient(int id) {
