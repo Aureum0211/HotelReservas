@@ -514,10 +514,7 @@ public class HotelApp {
         showReservations();
         int id = readInt("ID de la reserva que desea cancelar: ");
         boolean paid = hotel.hasPayments(id);
-        if (paid) {
-            requireRole(Employee.Role.ADMIN);
-        }
-        hotel.cancelReservation(id);
+        hotel.cancelReservation(id, currentUser);
         System.out.println("Reserva cancelada y guardada.");
         if (paid) {
             System.out.println("El comprobante pagado permanece registrado. No se realiza un reembolso automatico.");

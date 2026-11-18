@@ -459,10 +459,22 @@ public class HotelService {
     }
 
     /**
+     * Cancela una reserva. Si ya tiene pagos, solo un administrador puede cancelarla.
+     * @param reservationId identificador de la reserva.
+     * @param actor trabajador que cancela.
+     */
+    public void cancelReservation(int reservationId, Employee actor) {
+        if (hasPayments(reservationId)) {
+            requireRole(actor, Employee.Role.ADMIN);
+        }
+        cancel(reservationId);
+    }
+
+    /**
      * Cancela una reserva y anula los comprobantes que sigan pendientes.
      * Los comprobantes pagados se conservan como registro; no hay reembolsos automaticos.
      */
-    public void cancelReservation(int reservationId) {
+    private void cancel(int reservationId) {
         Reservation reservation = findReservation(reservationId);
         reservation.cancel();
         reservations.update(reservation);
@@ -500,7 +512,7 @@ public class HotelService {
         if (hasPayments(reservationId)) {
             throw new BusinessRuleException("La reserva ya tiene pagos. Comunicate con recepcion para cancelarla.");
         }
-        cancelReservation(reservationId);
+        cancel(reservationId);
     }
 
     private Client findClient(int id) {
