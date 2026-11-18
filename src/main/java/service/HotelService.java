@@ -132,6 +132,22 @@ public class HotelService {
     }
 
     /**
+     * Registra a un huesped que se inscribe por su cuenta. Siempre entra con la categoria
+     * NEW, para que nadie se asigne por su cuenta un descuento.
+     * @param name nombre completo.
+     * @param documentNumber numero de documento.
+     * @param email correo electronico.
+     * @param phone telefono de 10 digitos.
+     * @param city ciudad.
+     * @return cliente registrado.
+     * @throws BusinessRuleException si ya existe una persona con el mismo documento, correo o telefono.
+     */
+    public Client registerGuest(String name, String documentNumber, String email,
+                                String phone, String city) {
+        return registerClient(name, documentNumber, email, phone, city, Client.Category.NEW);
+    }
+
+    /**
      * Valida la unicidad de los datos y del usuario, asigna un identificador y registra un
      * trabajador.
      * @param name nombre de la persona.
@@ -213,14 +229,13 @@ public class HotelService {
      * @param checkIn fecha de entrada.
      * @param checkOut fecha de salida.
      * @param guests cantidad de personas que se hospedaran.
-     * @param employee trabajador que registra la reserva.
+     * @param employee trabajador que registra la reserva; null si la hace el propio huesped.
      * @return reserva creada y almacenada.
      * @throws ResourceNotFoundException si no existe el cliente o la habitacion solicitados.
      * @throws BusinessRuleException si la habitacion esta ocupada en las fechas indicadas.
      */
     public Reservation createReservation(int clientId, int roomId, LocalDate checkIn,
                                          LocalDate checkOut, int guests, Employee employee) {
-        Validator.requireNonNull(employee, "El trabajador");
         Client client = findClient(clientId);
         Room room = findRoom(roomId);
         if (room.isUnderMaintenance()) {
@@ -431,6 +446,32 @@ public class HotelService {
                 invoices.update(invoice);
             }
         }
+    }
+
+    /** Busca un cliente por su numero de documento. */
+    public Client findClientByDocument(String documentNumber) {
+        return clients.findAll().stream()
+                .filter(c -> c.getDocumentNumber().equalsIgnoreCase(documentNumber.trim()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No hay un huesped registrado con ese documento. Registrate primero."));
+    }
+
+    /** Devuelve las reservas de un cliente. */
+    public List<Reservation> getReservationsOf(int clientId) {
+        return reservations.findAll().stream().filter(r -> r.getClient().getId() == clientId).toList();
+    }
+
+    /** Cancela una reserva a nombre del huesped: debe ser suya y no tener pagos todavia. */
+    public void cancelGuestReservation(int clientId, int reservationId) {
+        Reservation reservation = findReservation(reservationId);
+        if (reservation.getClient().getId() != clientId) {
+            throw new BusinessRuleException("No encontramos esa reserva entre tus reservas.");
+        }
+        if (hasPayments(reservationId)) {
+            throw new BusinessRuleException("La reserva ya tiene pagos. Comunicate con recepcion para cancelarla.");
+        }
+        cancelReservation(reservationId);
     }
 
     private Client findClient(int id) {
