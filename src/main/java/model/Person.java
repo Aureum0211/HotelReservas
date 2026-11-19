@@ -27,10 +27,10 @@ public abstract class Person implements Identifiable {
     protected Person(int id, String name, String documentNumber, String email, String phone, String city) {
         this.id = Validator.requirePositive(id, "El id de la persona");
         this.name = Validator.requireText(name, "El nombre", 60);
-        this.documentNumber = Validator.requireText(documentNumber, "El documento", 20);
+        this.documentNumber = Validator.requireText(documentNumber, "El documento", 15);
         this.email = Validator.requireEmail(email);
         this.phone = Validator.requirePhone(phone);
-        this.city = Validator.requireText(city, "La ciudad", 50);
+        this.city = Validator.requireText(city, "La ciudad", 40);
     }
 
     /**
@@ -113,7 +113,7 @@ public abstract class Person implements Identifiable {
      */
     public void setCity(String city) {
 
-        this.city = Validator.requireText(city, "La ciudad", 50);
+        this.city = Validator.requireText(city, "La ciudad", 40);
 
     }
 
