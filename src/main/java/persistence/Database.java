@@ -84,61 +84,61 @@ public final class Database {
     private static void createSchema(Statement s) throws SQLException {
         createTable(s, """
                 CREATE TABLE clientes (
-                    id NUMBER(10) PRIMARY KEY,
-                    nombre VARCHAR2(100) NOT NULL,
-                    documento VARCHAR2(30) NOT NULL,
-                    correo VARCHAR2(100) NOT NULL,
-                    telefono VARCHAR2(20) NOT NULL,
-                    ciudad VARCHAR2(60) NOT NULL,
-                    categoria VARCHAR2(10) NOT NULL CHECK (categoria IN ('NEW', 'FREQUENT', 'VIP')),
-                    activo NUMBER(1) DEFAULT 1 NOT NULL CHECK (activo IN (0, 1))
+                        id NUMBER(10) CONSTRAINT pk_clientes PRIMARY KEY,
+                        nombre VARCHAR2(60 CHAR) NOT NULL,
+                        documento VARCHAR2(15 CHAR) NOT NULL,
+                        correo VARCHAR2(50 CHAR) NOT NULL,
+                        telefono VARCHAR2(10) NOT NULL,
+                        ciudad VARCHAR2(40 CHAR) NOT NULL,
+                        categoria VARCHAR2(8) NOT NULL CONSTRAINT ck_clientes_categoria CHECK (categoria IN ('NEW', 'FREQUENT', 'VIP')),
+                        activo NUMBER(1) DEFAULT 1 NOT NULL CONSTRAINT ck_clientes_activo CHECK (activo IN (0, 1))
                 )""");
         createTable(s, """
                 CREATE TABLE trabajadores (
-                    id NUMBER(10) PRIMARY KEY,
-                    nombre VARCHAR2(100) NOT NULL,
-                    documento VARCHAR2(30) NOT NULL,
-                    correo VARCHAR2(100) NOT NULL,
-                    telefono VARCHAR2(20) NOT NULL,
-                    ciudad VARCHAR2(60) NOT NULL,
-                    activo NUMBER(1) DEFAULT 1 NOT NULL CHECK (activo IN (0, 1)),
-                    rol VARCHAR2(15) NOT NULL CHECK (rol IN ('RECEPTIONIST', 'ADMIN')),
-                    usuario VARCHAR2(30) NOT NULL UNIQUE,
-                    contrasena VARCHAR2(50) NOT NULL
+                        id NUMBER(10) CONSTRAINT pk_trabajadores PRIMARY KEY,
+                        nombre VARCHAR2(60 CHAR) NOT NULL,
+                        documento VARCHAR2(15 CHAR) NOT NULL,
+                        correo VARCHAR2(50 CHAR) NOT NULL,
+                        telefono VARCHAR2(10) NOT NULL,
+                        ciudad VARCHAR2(40 CHAR) NOT NULL,
+                        activo NUMBER(1) DEFAULT 1 NOT NULL CONSTRAINT ck_trabajadores_activo CHECK (activo IN (0, 1)),
+                        rol VARCHAR2(12) NOT NULL CONSTRAINT ck_trabajadores_rol CHECK (rol IN ('RECEPTIONIST', 'ADMIN')),
+                        usuario VARCHAR2(20 CHAR) NOT NULL CONSTRAINT uq_trabajadores_usuario UNIQUE,
+                        contrasena VARCHAR2(30 CHAR) NOT NULL
                 )""");
         createTable(s, """
                 CREATE TABLE habitaciones (
-                    id NUMBER(10) PRIMARY KEY,
-                    numero VARCHAR2(20) NOT NULL UNIQUE,
-                    tipo VARCHAR2(10) NOT NULL CHECK (tipo IN ('SINGLE', 'DOUBLE', 'SUITE')),
-                    capacidad NUMBER(5) NOT NULL CHECK (capacidad > 0),
-                    precio_noche NUMBER NOT NULL CHECK (precio_noche > 0),
-                    disponible NUMBER(1) DEFAULT 1 NOT NULL CHECK (disponible IN (0, 1)),
-                    en_mantenimiento NUMBER(1) DEFAULT 0 NOT NULL CHECK (en_mantenimiento IN (0, 1))
+                        id NUMBER(10) CONSTRAINT pk_habitaciones PRIMARY KEY,
+                        numero VARCHAR2(6 CHAR) NOT NULL CONSTRAINT uq_habitaciones_numero UNIQUE,
+                        tipo VARCHAR2(6) NOT NULL CONSTRAINT ck_habitaciones_tipo CHECK (tipo IN ('SINGLE', 'DOUBLE', 'SUITE')),
+                        capacidad NUMBER(2) NOT NULL CONSTRAINT ck_habitaciones_capacidad CHECK (capacidad > 0),
+                        precio_noche NUMBER(10,2) NOT NULL CONSTRAINT ck_habitaciones_precio CHECK (precio_noche > 0),
+                        disponible NUMBER(1) DEFAULT 1 NOT NULL CONSTRAINT ck_habitaciones_disponible CHECK (disponible IN (0, 1)),
+                        en_mantenimiento NUMBER(1) DEFAULT 0 NOT NULL CONSTRAINT ck_habitaciones_mant CHECK (en_mantenimiento IN (0, 1))
                 )""");
         createTable(s, """
                 CREATE TABLE reservas (
-                    id NUMBER(10) PRIMARY KEY,
-                    cliente_id NUMBER(10) NOT NULL REFERENCES clientes(id),
-                    trabajador_id NUMBER(10) REFERENCES trabajadores(id),
-                    habitacion_id NUMBER(10) NOT NULL REFERENCES habitaciones(id),
-                    entrada VARCHAR2(10) NOT NULL,
-                    salida VARCHAR2(10) NOT NULL,
-                    precio_noche NUMBER NOT NULL,
-                    total NUMBER NOT NULL,
-                    huespedes NUMBER(5) NOT NULL CHECK (huespedes > 0),
-                    estado VARCHAR2(15) NOT NULL CHECK (estado IN ('ACTIVE', 'CHECKED_IN', 'CHECKED_OUT', 'CANCELLED'))
+                        id NUMBER(10) CONSTRAINT pk_reservas PRIMARY KEY,
+                        cliente_id NUMBER(10) NOT NULL CONSTRAINT fk_reservas_cliente REFERENCES clientes(id),
+                        trabajador_id NUMBER(10) CONSTRAINT fk_reservas_trabajador REFERENCES trabajadores(id),
+                        habitacion_id NUMBER(10) NOT NULL CONSTRAINT fk_reservas_habitacion REFERENCES habitaciones(id),
+                        entrada VARCHAR2(10) NOT NULL,
+                        salida VARCHAR2(10) NOT NULL,
+                        precio_noche NUMBER(10,2) NOT NULL,
+                        total NUMBER(12,2) NOT NULL,
+                        huespedes NUMBER(2) NOT NULL CONSTRAINT ck_reservas_huespedes CHECK (huespedes > 0),
+                        estado VARCHAR2(11) NOT NULL CONSTRAINT ck_reservas_estado CHECK (estado IN ('ACTIVE', 'CHECKED_IN', 'CHECKED_OUT', 'CANCELLED'))
                 )""");
         createTable(s, """
                 CREATE TABLE comprobantes (
-                    id NUMBER(10) PRIMARY KEY,
-                    reserva_id NUMBER(10) NOT NULL REFERENCES reservas(id),
-                    fecha_emision VARCHAR2(10) NOT NULL,
-                    monto NUMBER NOT NULL,
-                    metodo_pago VARCHAR2(10) NOT NULL CHECK (metodo_pago IN ('CASH', 'CARD', 'TRANSFER')),
-                    estado VARCHAR2(15) NOT NULL CHECK (estado IN ('PENDING', 'PARTIALLY_PAID', 'PAID', 'REFUNDED', 'VOIDED')),
-                    reembolso NUMBER DEFAULT 0 NOT NULL,
-                    pagado NUMBER DEFAULT 0 NOT NULL
+                        id NUMBER(10) CONSTRAINT pk_comprobantes PRIMARY KEY,
+                        reserva_id NUMBER(10) NOT NULL CONSTRAINT fk_comprobantes_reserva REFERENCES reservas(id),
+                        fecha_emision VARCHAR2(10) NOT NULL,
+                        monto NUMBER(12,2) NOT NULL,
+                        metodo_pago VARCHAR2(8) NOT NULL CONSTRAINT ck_comprobantes_metodo CHECK (metodo_pago IN ('CASH', 'CARD', 'TRANSFER')),
+                        estado VARCHAR2(14) NOT NULL CONSTRAINT ck_comprobantes_estado CHECK (estado IN ('PENDING', 'PARTIALLY_PAID', 'PAID', 'REFUNDED', 'VOIDED')),
+                        reembolso NUMBER(12,2) DEFAULT 0 NOT NULL,
+                        pagado NUMBER(12,2) DEFAULT 0 NOT NULL
                 )""");
     }
 

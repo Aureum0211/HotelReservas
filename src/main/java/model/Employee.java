@@ -58,8 +58,8 @@ public class Employee extends Person {
                     String city, Role role, String username, String password) {
         super(id, name, documentNumber, email, phone, city);
         this.role = Validator.requireNonNull(role, "El rol");
-        this.username = Validator.requireText(username, "El usuario", 30);
-        this.password = Validator.requireText(password, "La contrasena", 50);
+        this.username = Validator.requireText(username, "El usuario", 20);
+        this.password = Validator.requireText(password, "La contrasena", 30);
     }
 
     /**
@@ -85,7 +85,7 @@ public class Employee extends Person {
      * @param password contrasena del trabajador.
      */
     public void changePassword(String password) {
-        this.password = Validator.requireText(password, "La contrasena", 50);
+        this.password = Validator.requireText(password, "La contrasena", 30);
     }
 
     /**

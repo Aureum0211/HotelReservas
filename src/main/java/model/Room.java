@@ -44,7 +44,7 @@ public class Room implements Identifiable {
     public Room(int id, String number, Type type, int capacity, double pricePerNight,
                 boolean available, boolean underMaintenance) {
         this.id = Validator.requirePositive(id, "El id de la habitacion");
-        this.number = Validator.requireText(number, "El numero de habitacion", 10);
+        this.number = Validator.requireText(number, "El numero de habitacion", 6);
         this.type = Validator.requireNonNull(type, "El tipo de habitacion");
         this.capacity = Validator.requirePositive(capacity, "La capacidad");
         this.pricePerNight = Validator.requirePositive(pricePerNight, "El precio");
