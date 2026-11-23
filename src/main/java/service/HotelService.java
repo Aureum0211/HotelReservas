@@ -1,518 +1,238 @@
 package service;
 
-import exceptions.BusinessRuleException;
 import exceptions.InvalidDataException;
 import exceptions.ResourceNotFoundException;
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import model.Client;
 import model.Employee;
-import model.DiscountPricing;
 import model.Invoice;
-import model.LongStayPricing;
-import model.Person;
-import model.PricingPolicy;
+import model.ReportRows;
 import model.Reservation;
 import model.Room;
+import persistence.JdbcRepository;
+import persistence.OracleHotelProcedures;
 import persistence.Repository;
-import validation.Validator;
+import persistence.SqlMappers;
 
-/**
- * Coordina las operaciones del hotel y aplica las reglas de negocio sin depender de una
- * implementacion concreta de almacenamiento.
- */
-public class HotelService {
-
-    /** Resumen sencillo del estado actual del hotel. */
-    public record BasicReport(int totalRooms, int occupiedRooms, int reservedRooms,
-                              int freeRooms, int maintenanceRooms, int unavailableRooms,
-                              double income, double pendingBalance) { }
-
-    private static final int LONG_STAY_MIN_NIGHTS = 7;
-    private static final double LONG_STAY_DISCOUNT = 10;
-    private static final double FREQUENT_DISCOUNT = 5;
-    private static final double VIP_DISCOUNT = 15;
+/** Coordina las operaciones entre la interfaz y Oracle. */
+public class HotelService implements AutoCloseable {
 
     private final Repository<Client> clients;
     private final Repository<Employee> employees;
     private final Repository<Room> rooms;
     private final Repository<Reservation> reservations;
     private final Repository<Invoice> invoices;
+    private final OracleHotelProcedures oracle;
+    private final Connection connection;
 
-    /**
-     * Construye el servicio recibiendo los repositorios de clientes, trabajadores,
-     * habitaciones, reservas y comprobantes.
-     * @param clients repositorio de clientes.
-     * @param employees repositorio de trabajadores.
-     * @param rooms repositorio de habitaciones.
-     * @param reservations repositorio de reservas.
-     * @param invoices repositorio de comprobantes.
-     */
-    public HotelService(Repository<Client> clients,
+    public HotelService(Connection connection,
+                        Repository<Client> clients,
                         Repository<Employee> employees,
                         Repository<Room> rooms,
                         Repository<Reservation> reservations,
-                        Repository<Invoice> invoices) {
+                        Repository<Invoice> invoices,
+                        OracleHotelProcedures oracle) {
+        this.connection = connection;
         this.clients = clients;
         this.employees = employees;
         this.rooms = rooms;
         this.reservations = reservations;
         this.invoices = invoices;
+        this.oracle = oracle;
     }
 
-    /**
-     * Devuelve todos los clientes registrados.
-     * @return lista de clientes registrados.
-     */
+    public static HotelService forConnection(Connection connection) {
+        OracleHotelProcedures.requireInstalled(connection);
+        Repository<Client> clients = new JdbcRepository<>(connection, SqlMappers.clients());
+        Repository<Employee> employees = new JdbcRepository<>(connection, SqlMappers.employees());
+        Repository<Room> rooms = new JdbcRepository<>(connection, SqlMappers.rooms());
+        Repository<Reservation> reservations = new JdbcRepository<>(connection,
+                SqlMappers.reservations(clients, employees, rooms));
+        Repository<Invoice> invoices = new JdbcRepository<>(connection, SqlMappers.invoices(reservations));
+        return new HotelService(connection, clients, employees, rooms, reservations, invoices,
+                new OracleHotelProcedures(connection));
+    }
+
+    @Override
+    public void close() throws SQLException {
+        connection.close();
+    }
+
+    // ------------------------------------------------------------------ consultas
+
     public List<Client> getClients() { return clients.findAll(); }
 
-    /**
-     * Devuelve todos los trabajadores registrados. Solo para administradores.
-     * @param actor trabajador que hace la consulta.
-     * @return lista de trabajadores registrados.
-     */
     public List<Employee> getEmployees(Employee actor) {
-        requireRole(actor, Employee.Role.ADMIN);
+        requireAdmin(actor);
         return employees.findAll();
     }
 
-    /**
-     * Lanza un error si quien actua no tiene al menos el grado indicado. Es publico para que
-     * la interfaz pueda avisar antes de pedir datos; el servicio lo vuelve a comprobar.
-     * @param actor trabajador que intenta la operacion.
-     * @param minimum grado minimo que exige la operacion.
-     */
-    public void requireRole(Employee actor, Employee.Role minimum) {
-        Validator.requireNonNull(actor, "El trabajador");
-        if (!actor.getRole().isAtLeast(minimum)) {
-            throw new BusinessRuleException("Esta operacion requiere el grado " + minimum.getLabel() + " o superior.");
-        }
-    }
-
-    /**
-     * Devuelve todas las habitaciones registradas.
-     * @return lista de habitaciones registradas.
-     */
     public List<Room> getRooms() { return rooms.findAll(); }
 
-    /**
-     * Devuelve todas las reservas registradas.
-     * @return lista de reservas registradas.
-     */
     public List<Reservation> getReservations() { return reservations.findAll(); }
 
-    /**
-     * Devuelve todos los comprobantes registrados.
-     * @return lista de comprobantes registrados.
-     */
     public List<Invoice> getInvoices() { return invoices.findAll(); }
 
-    /**
-     * Valida las credenciales de un trabajador.
-     * @param username usuario escrito.
-     * @param password contrasena escrita.
-     * @return el trabajador que inicio sesion.
-     * @throws BusinessRuleException si el usuario o la contrasena no coinciden, o si el
-     *         trabajador esta inactivo.
-     */
-    public Employee login(String username, String password) {
-        for (Employee employee : employees.findAll()) {
-            boolean sameUser = employee.getUsername().equalsIgnoreCase(username.trim());
-            if (sameUser && employee.getPassword().equals(password) && employee.isActive()) {
-                return employee;
-            }
-        }
-        throw new BusinessRuleException("Usuario o contrasena incorrectos.");
-    }
-
-    /**
-     * Valida la unicidad de los datos, asigna un identificador y registra un nuevo
-     * cliente.
-     * @param name nombre de la persona.
-     * @param documentNumber numero de documento.
-     * @param email correo electronico.
-     * @param phone numero de telefono.
-     * @param city ciudad asociada a la persona.
-     * @param category categoria asignada al cliente.
-     * @return cliente registrado.
-     * @throws BusinessRuleException si ya existe una persona con el mismo documento, correo o telefono.
-     */
-    public Client registerClient(String name, String documentNumber, String email,
-                                 String phone, String city, Client.Category category) {
-        ensurePersonIsUnique(documentNumber, email, phone);
-        Client client = new Client(clients.nextId(), name, documentNumber, email, phone, city, category);
-        clients.save(client);
-        return client;
-    }
-
-    /**
-     * Registra a un huesped que se inscribe por su cuenta. Siempre entra con la categoria
-     * NEW, para que nadie se asigne por su cuenta un descuento.
-     * @param name nombre completo.
-     * @param documentNumber numero de documento.
-     * @param email correo electronico.
-     * @param phone telefono de 10 digitos.
-     * @param city ciudad.
-     * @return cliente registrado.
-     * @throws BusinessRuleException si ya existe una persona con el mismo documento, correo o telefono.
-     */
-    public Client registerGuest(String name, String documentNumber, String email,
-                                String phone, String city) {
-        return registerClient(name, documentNumber, email, phone, city, Client.Category.NEW);
-    }
-
-    /**
-     * Valida la unicidad de los datos y del usuario, asigna un identificador y registra un
-     * trabajador.
-     * @param name nombre de la persona.
-     * @param documentNumber numero de documento.
-     * @param email correo electronico.
-     * @param phone numero de telefono.
-     * @param city ciudad asociada a la persona.
-     * @param role rol asignado al trabajador.
-     * @param username nombre de usuario.
-     * @param password contrasena del trabajador.
-     * @param actor trabajador que registra; debe ser administrador.
-     * @return trabajador registrado.
-     * @throws BusinessRuleException si los datos personales o el usuario ya existen.
-     */
-    public Employee registerEmployee(String name, String documentNumber, String email,
-                                     String phone, String city, Employee.Role role,
-                                     String username, String password, Employee actor) {
-        requireRole(actor, Employee.Role.ADMIN);
-        ensurePersonIsUnique(documentNumber, email, phone);
-        boolean usernameExists = employees.findAll().stream()
-                .anyMatch(employee -> employee.getUsername().equalsIgnoreCase(username.trim()));
-        if (usernameExists) {
-            throw new BusinessRuleException("Ya existe un trabajador con ese usuario.");
-        }
-        Employee employee = new Employee(employees.nextId(), name, documentNumber, email,
-                phone, city, role, username, password);
-        employees.save(employee);
-        return employee;
-    }
-
-    /**
-     * Comprueba que el numero no este repetido y registra una habitacion disponible.
-     * @param number numero visible de la habitacion.
-     * @param type tipo de habitacion.
-     * @param capacity capacidad maxima de personas.
-     * @param pricePerNight precio establecido por cada noche.
-     * @param actor trabajador que registra; debe ser administrador.
-     * @return habitacion registrada.
-     * @throws BusinessRuleException si ya existe una habitacion con ese numero.
-     */
-    public Room registerRoom(String number, Room.Type type, int capacity, double pricePerNight, Employee actor) {
-        requireRole(actor, Employee.Role.ADMIN);
-        boolean numberExists = rooms.findAll().stream()
-                .anyMatch(room -> room.getNumber().equalsIgnoreCase(number.trim()));
-        if (numberExists) {
-            throw new BusinessRuleException("Ya existe una habitacion con ese numero.");
-        }
-        Room room = new Room(rooms.nextId(), number, type, capacity, pricePerNight, true);
-        rooms.save(room);
-        return room;
-    }
-
-    private void ensurePersonIsUnique(String documentNumber, String email, String phone) {
-        for (Person person : allPeople()) {
-            if (person.getDocumentNumber().equalsIgnoreCase(documentNumber.trim())) {
-                throw new BusinessRuleException("Ya existe una persona con ese documento.");
-            }
-            if (person.getEmail().equalsIgnoreCase(email.trim())) {
-                throw new BusinessRuleException("Ya existe una persona con ese correo.");
-            }
-            if (person.getPhone().equals(phone.trim())) {
-                throw new BusinessRuleException("Ya existe una persona con ese telefono.");
-            }
-        }
-    }
-
-    /**
-     * Combina los clientes y trabajadores en una lista comun de personas. Solo para administradores.
-     * @param actor trabajador que hace la consulta.
-     * @return lista no modificable que contiene clientes y trabajadores.
-     */
-    public List<Person> getPeople(Employee actor) {
-        requireRole(actor, Employee.Role.ADMIN);
-        return allPeople();
-    }
-
-    private List<Person> allPeople() {
-        List<Person> people = new ArrayList<>();
-        people.addAll(clients.findAll());
-        people.addAll(employees.findAll());
-        return List.copyOf(people);
-    }
-
-    /**
-     * Busca el cliente y la habitacion, valida las fechas y los cruces de reserva, y
-     * guarda la nueva reserva.
-     * @param clientId valor utilizado por la operacion.
-     * @param roomId valor utilizado por la operacion.
-     * @param checkIn fecha de entrada.
-     * @param checkOut fecha de salida.
-     * @param guests cantidad de personas que se hospedaran.
-     * @param employee trabajador que registra la reserva; null si la hace el propio huesped.
-     * @return reserva creada y almacenada.
-     * @throws ResourceNotFoundException si no existe el cliente o la habitacion solicitados.
-     * @throws BusinessRuleException si la habitacion esta ocupada en las fechas indicadas.
-     */
-    public Reservation createReservation(int clientId, int roomId, LocalDate checkIn,
-                                         LocalDate checkOut, int guests, Employee employee) {
-        Client client = findClient(clientId);
-        Room room = findRoom(roomId);
-        if (room.isUnderMaintenance()) {
-            throw new BusinessRuleException("La habitacion esta en mantenimiento y no se puede reservar.");
-        }
-
-        Reservation reservation = Reservation.create(
-                reservations.nextId(), client, employee, room, checkIn, checkOut, guests, pricingFor(client));
-
-        if (isBooked(room, checkIn, checkOut)) {
-            throw new BusinessRuleException("La habitacion ya esta reservada en esas fechas.");
-        }
-
-        reservations.save(reservation);
-        return reservation;
-    }
-
-    /** Cambia el estado de mantenimiento de una habitacion. Solo para administradores. */
-    public void setRoomMaintenance(int roomId, boolean underMaintenance, Employee actor) {
-        requireRole(actor, Employee.Role.ADMIN);
-        Room room = findRoom(roomId);
-        if (underMaintenance) {
-            if (room.isUnderMaintenance()) {
-                throw new BusinessRuleException("La habitacion ya esta en mantenimiento.");
-            }
-            boolean hasActiveReservation = reservations.findAll().stream()
-                    .anyMatch(reservation -> reservation.getRoom().getId() == roomId
-                            && reservation.isActive());
-            if (hasActiveReservation) {
-                throw new BusinessRuleException("No se puede iniciar mantenimiento: la habitacion tiene reservas activas.");
-            }
-            room.startMaintenance();
-        } else {
-            if (!room.isUnderMaintenance()) {
-                throw new BusinessRuleException("La habitacion no esta en mantenimiento.");
-            }
-            room.finishMaintenance();
-        }
-        rooms.update(room);
-    }
-
-    /**
-     * Busca las habitaciones que se pueden reservar en un periodo para cierta cantidad de
-     * personas. Una habitacion sirve si esta habilitada, tiene capacidad suficiente y no
-     * tiene otra reserva activa en esas fechas.
-     * @param checkIn fecha de entrada.
-     * @param checkOut fecha de salida.
-     * @param guests cantidad de personas que se van a hospedar.
-     * @return habitaciones disponibles, ordenadas de la mas barata a la mas cara.
-     * @throws InvalidDataException si las fechas o la cantidad de personas no son validas.
-     */
-    public List<Room> findAvailableRooms(LocalDate checkIn, LocalDate checkOut, int guests) {
-        Validator.requireNonNull(checkIn, "La fecha de entrada");
-        Validator.requireNonNull(checkOut, "La fecha de salida");
-        Validator.requirePositive(guests, "La cantidad de personas");
-        if (!checkOut.isAfter(checkIn)) {
-            throw new InvalidDataException("La fecha de salida debe ser posterior a la de entrada.");
-        }
-        List<Room> available = new ArrayList<>();
-        for (Room room : rooms.findAll()) {
-            if (room.isAvailable() && !room.isUnderMaintenance()
-                    && room.getCapacity() >= guests && !isBooked(room, checkIn, checkOut)) {
-                available.add(room);
-            }
-        }
-        available.sort(Comparator.comparingDouble(Room::getPricePerNight));
-        return available;
-    }
-
-    /**
-     * Elige la politica de precios de un cliente. Todos reciben el descuento por estadia
-     * larga y, ademas, los clientes frecuentes y VIP reciben un descuento por categoria.
-     * Ambos descuentos se acumulan.
-     * @param client cliente que reserva.
-     * @return politica de precios que le corresponde.
-     */
-    private PricingPolicy pricingFor(Client client) {
-        PricingPolicy longStay = new LongStayPricing(LONG_STAY_MIN_NIGHTS, LONG_STAY_DISCOUNT);
-        return switch (client.getCategory()) {
-            case NEW -> longStay;
-            case FREQUENT -> new DiscountPricing(longStay, FREQUENT_DISCOUNT);
-            case VIP -> new DiscountPricing(longStay, VIP_DISCOUNT);
-        };
-    }
-
-    /** Calcula la ocupacion de hoy, los ingresos recibidos y el saldo pendiente. Solo para administradores. */
-    public BasicReport getBasicReport(Employee actor) {
-        requireRole(actor, Employee.Role.ADMIN);
-        LocalDate today = LocalDate.now();
-        int occupied = 0;
-        int reserved = 0;
-        int free = 0;
-        int maintenance = 0;
-        int unavailable = 0;
-
-        for (Room room : rooms.findAll()) {
-            if (room.isUnderMaintenance()) {
-                maintenance++;
-            } else if (!room.isAvailable()) {
-                unavailable++;
-            } else {
-                Reservation reservation = reservations.findAll().stream()
-                        .filter(item -> item.occupies(room, today, today.plusDays(1)))
-                        .findFirst().orElse(null);
-                if (reservation == null) free++;
-                else if (reservation.getStatus() == Reservation.Status.CHECKED_IN) occupied++;
-                else reserved++;
-            }
-        }
-
-        double income = invoices.findAll().stream()
-                .mapToDouble(invoice -> invoice.getPaidAmount() - invoice.getRefundAmount()).sum();
-        double pending = invoices.findAll().stream()
-                .mapToDouble(Invoice::getBalance).sum();
-
-        return new BasicReport(rooms.findAll().size(), occupied, reserved, free,
-                maintenance, unavailable, income, pending);
-    }
-
-    /**
-     * Indica si la habitacion ya tiene una reserva activa que se cruza con el periodo.
-     * @param room habitacion que se consulta.
-     * @param checkIn fecha de entrada.
-     * @param checkOut fecha de salida.
-     * @return true si la habitacion esta ocupada en algun dia del periodo.
-     */
-    private boolean isBooked(Room room, LocalDate checkIn, LocalDate checkOut) {
-        return reservations.findAll().stream().anyMatch(r -> r.occupies(room, checkIn, checkOut));
-    }
-
-    /**
-     * Emite y guarda un comprobante para una reserva existente.
-     * @param reservationId identificador de la reserva.
-     * @param method metodo de pago seleccionado.
-     * @return comprobante emitido y almacenado.
-     * @throws ResourceNotFoundException si no existe la reserva indicada.
-     * @throws BusinessRuleException si la reserva no puede facturarse.
-     */
-    public Invoice issueInvoice(int reservationId, Invoice.PaymentMethod method) {
-        Reservation reservation = findReservation(reservationId);
-        boolean alreadyInvoiced = invoices.findAll().stream()
-                .anyMatch(i -> i.getReservation().getId() == reservationId
-                        && i.getStatus() != Invoice.Status.VOIDED);
-        if (alreadyInvoiced) {
-            throw new BusinessRuleException("La reserva #" + reservationId + " ya tiene un comprobante.");
-        }
-        Invoice invoice = Invoice.issue(invoices.nextId(), reservation, method);
-        invoices.save(invoice);
-        return invoice;
-    }
-
-    /**
-     * Registra el pago de un comprobante y persiste su nuevo estado.
-     * @param invoiceId valor utilizado por la operacion.
-     * @throws ResourceNotFoundException si no existe el comprobante indicado.
-     * @throws BusinessRuleException si el comprobante no puede pagarse.
-     */
-    public void payInvoice(int invoiceId, double amount) {
-        Invoice invoice = findInvoice(invoiceId);
-        invoice.registerPayment(amount);
-        invoices.update(invoice);
-    }
-
-    /**
-     * Registra la llegada del huesped (check-in) usando la fecha de hoy.
-     * @param reservationId identificador de la reserva.
-     * @throws BusinessRuleException si la reserva no admite check-in en esta fecha.
-     */
-    public void checkIn(int reservationId) {
-        Reservation reservation = findReservation(reservationId);
-        reservation.registerCheckIn(LocalDate.now());
-        reservations.update(reservation);
-    }
-
-    /**
-     * Registra la salida del huesped (check-out) y deja la habitacion libre.
-     * @param reservationId identificador de la reserva.
-     * @throws BusinessRuleException si la reserva no tiene check-in.
-     */
-    public void checkOut(int reservationId) {
-        Reservation reservation = findReservation(reservationId);
-        reservation.registerCheckOut();
-        reservations.update(reservation);
-    }
-
-    /**
-     * Indica si la reserva tiene un comprobante pagado.
-     * @param reservationId identificador de la reserva.
-     * @return true si existe al menos un comprobante pagado para esa reserva.
-     */
-    public boolean hasPayments(int reservationId) {
-        return invoices.findAll().stream().anyMatch(invoice ->
-                invoice.getReservation().getId() == reservationId && invoice.getPaidAmount() > 0);
-    }
-
-    /**
-     * Cancela una reserva. Si ya tiene pagos, solo un administrador puede cancelarla.
-     * @param reservationId identificador de la reserva.
-     * @param actor trabajador que cancela.
-     */
-    public void cancelReservation(int reservationId, Employee actor) {
-        if (hasPayments(reservationId)) {
-            requireRole(actor, Employee.Role.ADMIN);
-        }
-        cancel(reservationId);
-    }
-
-    /**
-     * Cancela una reserva y anula los comprobantes que sigan pendientes.
-     * Los comprobantes pagados se conservan como registro; no hay reembolsos automaticos.
-     */
-    private void cancel(int reservationId) {
-        Reservation reservation = findReservation(reservationId);
-        reservation.cancel();
-        reservations.update(reservation);
-
-        for (Invoice invoice : invoices.findAll()) {
-            if (invoice.getReservation().getId() == reservationId
-                    && (invoice.getStatus() == Invoice.Status.PENDING
-                    || invoice.getStatus() == Invoice.Status.PARTIALLY_PAID)) {
-                invoice.annul();
-                invoices.update(invoice);
-            }
-        }
-    }
-
-    /** Busca un cliente por su numero de documento. */
-    public Client findClientByDocument(String documentNumber) {
-        return clients.findAll().stream()
-                .filter(c -> c.getDocumentNumber().equalsIgnoreCase(documentNumber.trim()))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "No hay un huesped registrado con ese documento. Registrate primero."));
-    }
-
-    /** Devuelve las reservas de un cliente. */
     public List<Reservation> getReservationsOf(int clientId) {
         return reservations.findAll().stream().filter(r -> r.getClient().getId() == clientId).toList();
     }
 
-    /** Cancela una reserva a nombre del huesped: debe ser suya y no tener pagos todavia. */
+    public void requireAdmin(Employee actor) {
+        oracle.requireAdmin(idOf(actor));
+    }
+
+    // ------------------------------------------------------------------ personas (PKG_PERSONAS)
+
+    public Employee login(String username, String password) {
+        int id = oracle.login(username, password);
+        return employees.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el trabajador #" + id));
+    }
+
+    public Client registerClient(String name, String documentNumber, String email,
+                                 String phone, String city, Client.Category category) {
+        int id = oracle.registerClient(name, documentNumber, email, phone, city, nameOf(category));
+        return findClient(id);
+    }
+
+    public Client registerGuest(String name, String documentNumber, String email,
+                                String phone, String city) {
+        int id = oracle.registerGuest(name, documentNumber, email, phone, city);
+        return findClient(id);
+    }
+
+    public Employee registerEmployee(String name, String documentNumber, String email,
+                                     String phone, String city, Employee.Role role,
+                                     String username, String password, Employee actor) {
+        int id = oracle.registerEmployee(idOf(actor), name, documentNumber, email, phone, city,
+                nameOf(role), username, password);
+        return employees.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el trabajador #" + id));
+    }
+
+    public Client findClientByDocument(String documentNumber) {
+        return findClient(oracle.findClientIdByDocument(documentNumber));
+    }
+
+    // ------------------------------------------------------------------ habitaciones (PKG_HABITACIONES)
+
+    public Room registerRoom(String number, Room.Type type, int capacity, double pricePerNight, Employee actor) {
+        if (!Double.isFinite(pricePerNight)) {
+            throw new InvalidDataException("El precio debe ser un numero mayor que cero.");
+        }
+        int id = oracle.registerRoom(idOf(actor), number, nameOf(type), capacity, BigDecimal.valueOf(pricePerNight));
+        return findRoom(id);
+    }
+
+    public void setRoomMaintenance(int roomId, boolean underMaintenance, Employee actor) {
+        if (underMaintenance) {
+            oracle.startMaintenance(idOf(actor), roomId);
+        } else {
+            oracle.finishMaintenance(idOf(actor), roomId);
+        }
+    }
+
+    // ------------------------------------------------------------------ reservas (PKG_RESERVAS)
+
+    public Reservation createReservation(int clientId, int roomId, LocalDate checkIn,
+                                         LocalDate checkOut, int guests, Employee employee) {
+        Integer employeeId = employee == null ? null : employee.getId();
+        int id = oracle.createReservation(clientId, employeeId, roomId, text(checkIn), text(checkOut), guests);
+        return findReservation(id);
+    }
+
+    public List<Room> findAvailableRooms(LocalDate checkIn, LocalDate checkOut, int guests) {
+        return oracle.freeRooms(text(checkIn), text(checkOut), guests);
+    }
+
+    public double calculateTotal(double pricePerNight, int nights, Client.Category category) {
+        if (!Double.isFinite(pricePerNight)) {
+            throw new InvalidDataException("El precio debe ser un numero mayor que cero.");
+        }
+        return oracle.calculateTotal(BigDecimal.valueOf(pricePerNight), nights, nameOf(category)).doubleValue();
+    }
+
+    public void checkIn(int reservationId) {
+        oracle.checkIn(reservationId);
+    }
+
+    public void checkOut(int reservationId) {
+        oracle.checkOut(reservationId);
+    }
+
+    public boolean hasPayments(int reservationId) {
+        return oracle.hasPayments(reservationId);
+    }
+
+    public void cancelReservation(int reservationId, Employee actor) {
+        oracle.cancelReservation(reservationId, idOf(actor));
+    }
+
     public void cancelGuestReservation(int clientId, int reservationId) {
-        Reservation reservation = findReservation(reservationId);
-        if (reservation.getClient().getId() != clientId) {
-            throw new BusinessRuleException("No encontramos esa reserva entre tus reservas.");
+        oracle.cancelGuestReservation(clientId, reservationId);
+    }
+
+    public Invoice issueInvoice(int reservationId, Invoice.PaymentMethod method) {
+        int id = oracle.issueInvoice(reservationId, nameOf(method));
+        return findInvoice(id);
+    }
+
+    public void payInvoice(int invoiceId, double amount) {
+        if (!Double.isFinite(amount)) {
+            throw new InvalidDataException("El abono debe ser un numero mayor que cero.");
         }
-        if (hasPayments(reservationId)) {
-            throw new BusinessRuleException("La reserva ya tiene pagos. Comunicate con recepcion para cancelarla.");
+        oracle.payInvoice(invoiceId, BigDecimal.valueOf(amount));
+    }
+
+    // ------------------------------------------------------------------ reportes (PKG_REPORTES)
+
+    public ReportRows.BasicReport getBasicReport(Employee actor) {
+        return oracle.generalStats(idOf(actor));
+    }
+
+    public List<ReportRows.ReservationsByStatus> reservationsByStatus(Employee actor, LocalDate from, LocalDate to) {
+        return oracle.reservationsByStatus(idOf(actor), text(from), text(to));
+    }
+
+    public List<ReportRows.MonthlyIncome> monthlyIncome(Employee actor, LocalDate from, LocalDate to) {
+        return oracle.monthlyIncome(idOf(actor), text(from), text(to));
+    }
+
+    public List<ReportRows.RoomUsage> roomUsage(Employee actor, LocalDate from, LocalDate to) {
+        return oracle.roomUsage(idOf(actor), text(from), text(to));
+    }
+
+    public List<ReportRows.TopClient> topClients(Employee actor, LocalDate from, LocalDate to) {
+        return oracle.topClients(idOf(actor), text(from), text(to));
+    }
+
+    public List<ReportRows.PendingBalance> pendingBalances(Employee actor, LocalDate from, LocalDate to) {
+        return oracle.pendingBalances(idOf(actor), text(from), text(to));
+    }
+
+    public List<ReportRows.RoomRanking> getRoomRanking(LocalDate from, Integer limit) {
+        return oracle.roomRanking(text(from), limit);
+    }
+
+    // ------------------------------------------------------------------ apoyo (solo conversion de tipos)
+
+    private static String text(LocalDate date) {
+        return date == null ? null : date.toString();
+    }
+
+    private static String nameOf(Enum<?> value) {
+        return value == null ? null : value.name();
+    }
+
+    private static int idOf(Employee actor) {
+        if (actor == null) {
+            throw new InvalidDataException("El trabajador es obligatorio.");
         }
-        cancel(reservationId);
+        return actor.getId();
     }
 
     private Client findClient(int id) {

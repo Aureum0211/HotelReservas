@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="ui.ReportesController" spacing="12">
+   <padding><Insets topRightBottomLeft="22"/></padding>
+   <children>
+      <Label text="Reportes" styleClass="titulo-seccion"/>
+      <HBox spacing="10" alignment="CENTER_LEFT" styleClass="panel-claro">
+         <children>
+            <Label text="Reporte" styleClass="seccion"/>
+            <ComboBox fx:id="cmbReporte" prefWidth="210"/>
+            <Label text="Desde" styleClass="seccion"/>
+            <DatePicker fx:id="dpDesde" promptText="Inicio" prefWidth="130"/>
+            <Label text="Hasta" styleClass="seccion"/>
+            <DatePicker fx:id="dpHasta" promptText="Fin" prefWidth="130"/>
+            <Button text="Quitar fechas" onAction="#quitarFechas"/>
+            <Button text="Generar reporte" styleClass="boton-principal" onAction="#generar"/>
+            <Button text="Guardar en Excel (CSV)" styleClass="boton-oscuro" onAction="#exportar"/>
+         </children>
+      </HBox>
+      <Label fx:id="lblResumen" styleClass="resumen" wrapText="true"/>
+      <TableView fx:id="tblReporte" VBox.vgrow="ALWAYS">
+         <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+      </TableView>
+   </children>
+</VBox>

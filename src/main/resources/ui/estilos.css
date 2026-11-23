@@ -1,0 +1,135 @@
+/* ===== Hotel Reserva - estilos (paleta tomada del afiche) =====
+   verde #1b2c20 | dorado #eab252 | crema #fdebd0 | fondo #fff7e8
+   Para cambiar los colores de toda la aplicacion, edita estos valores. */
+
+.root {
+    -fx-font-family: "Segoe UI", "System";
+    -fx-font-size: 13px;
+    -fx-base: #fff7e8;
+    -fx-accent: #eab252;
+    -fx-focus-color: #eab252;
+    -fx-faint-focus-color: rgba(234, 178, 82, 0.25);
+    -fx-control-inner-background: white;
+    -fx-text-fill: #1b2c20;
+}
+
+.fondo { -fx-background-color: #fff7e8; }
+.label { -fx-text-fill: #1b2c20; }
+
+/* ---------- barra superior ---------- */
+.barra { -fx-background-color: #1b2c20; -fx-border-color: #eab252; -fx-border-width: 0 0 3 0; }
+.barra-titulo { -fx-font-family: "Georgia"; -fx-text-fill: #fdebd0; -fx-font-size: 20px; -fx-font-weight: bold; }
+.barra-texto { -fx-text-fill: #fdebd0; -fx-font-weight: bold; }
+
+/* ---------- textos ---------- */
+.titulo { -fx-font-family: "Georgia"; -fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #1b2c20; }
+.titulo-seccion { -fx-font-family: "Georgia"; -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1b2c20; }
+.lema { -fx-font-family: "Georgia"; -fx-font-style: italic; -fx-font-size: 17px; -fx-text-fill: #fdebd0; }
+.lema-dorado { -fx-font-family: "Georgia"; -fx-font-style: italic; -fx-font-weight: bold; -fx-font-size: 22px; -fx-text-fill: #eab252; }
+.texto-claro { -fx-text-fill: #fdebd0; }
+.texto-claro-pequeno { -fx-text-fill: #cdbf9f; -fx-font-size: 11px; }
+.subtitulo { -fx-font-size: 15px; -fx-text-fill: #555555; }
+.seccion { -fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1b2c20; }
+.nota { -fx-text-fill: #7a6a4a; }
+.resumen { -fx-text-fill: #1b2c20; -fx-font-weight: bold; }
+.error { -fx-text-fill: #a63a3a; }
+.saludo { -fx-font-weight: bold; -fx-text-fill: #2d6a45; }
+
+/* ---------- pantalla de bienvenida y login ---------- */
+.panel-verde { -fx-background-color: #1b2c20; }
+.panel-imagen { -fx-background-color: #fdebd0; }
+
+/* ---------- botones ---------- */
+.button {
+    -fx-background-color: #f3e3c3; -fx-text-fill: #1b2c20; -fx-font-weight: bold;
+    -fx-background-radius: 8; -fx-padding: 7 14 7 14; -fx-cursor: hand;
+}
+.button:hover { -fx-background-color: #ecd6a8; }
+.boton-principal { -fx-background-color: #eab252; -fx-text-fill: #1b2c20; }
+.boton-principal:hover { -fx-background-color: #f2c372; }
+.boton-oscuro { -fx-background-color: #1b2c20; -fx-text-fill: #fdebd0; }
+.boton-oscuro:hover { -fx-background-color: #2f4b39; }
+.boton-peligro { -fx-background-color: #8c2f2f; -fx-text-fill: white; }
+.boton-peligro:hover { -fx-background-color: #a83a3a; }
+.boton-barra { -fx-background-color: transparent; -fx-text-fill: #eab252; -fx-border-color: #eab252; -fx-border-radius: 8; }
+.boton-barra:hover { -fx-background-color: rgba(234, 178, 82, 0.2); }
+.boton-grande { -fx-font-size: 16px; -fx-padding: 14 28 14 28; }
+
+/* ---------- campos ---------- */
+.text-field, .password-field {
+    -fx-background-color: white; -fx-background-radius: 6;
+    -fx-border-color: #dcc592; -fx-border-radius: 6; -fx-padding: 6 8 6 8;
+}
+.text-field:focused, .password-field:focused { -fx-border-color: #eab252; }
+.combo-box-base, .date-picker { -fx-background-color: white; -fx-background-radius: 6; -fx-border-color: #dcc592; -fx-border-radius: 6; }
+.date-picker > .text-field, .combo-box-base > .text-field { -fx-background-color: transparent; -fx-border-color: transparent; }
+.spinner { -fx-background-radius: 6; }
+
+/* ---------- pestanas ---------- */
+.tab-pane > .tab-header-area > .tab-header-background { -fx-background-color: #f3e3c3; }
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: #f3e3c3; -fx-background-radius: 0; -fx-padding: 7 18 7 18;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab .tab-label { -fx-text-fill: #1b2c20; -fx-font-weight: bold; }
+.tab-pane > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: #ecd6a8; }
+.tab-pane > .tab-header-area > .headers-region > .tab:selected { -fx-background-color: #1b2c20; }
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .tab-label { -fx-text-fill: #eab252; }
+.tab-pane > .tab-header-area > .headers-region > .tab .focus-indicator { -fx-border-width: 0; }
+.tab-pane > .tab-content-area { -fx-background-color: #fff7e8; }
+
+/* ---------- tablas ---------- */
+.table-view { -fx-background-color: white; -fx-border-color: #e3d0a3; -fx-border-radius: 8; -fx-background-radius: 8; }
+.table-view .column-header-background { -fx-background-color: #1b2c20; }
+.table-view .column-header, .table-view .filler { -fx-background-color: #1b2c20; -fx-border-color: transparent; }
+.table-view .column-header .label { -fx-text-fill: #fdebd0; -fx-font-weight: bold; }
+.table-view .placeholder .label { -fx-text-fill: #7a6a4a; }
+.table-row-cell { -fx-background-color: white; -fx-table-cell-border-color: transparent; }
+.table-row-cell:odd { -fx-background-color: #fff7e8; }
+.table-row-cell:hover { -fx-background-color: #fbeccb; }
+.table-row-cell:filled:selected { -fx-background-color: #f6dca3; }
+.table-row-cell:filled:selected .table-cell { -fx-text-fill: #1b2c20; }
+
+/* ---------- tarjetas y paneles ---------- */
+.tarjeta {
+    -fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
+    -fx-border-color: #eab252; -fx-border-width: 0 0 4 0; -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(27, 44, 32, 0.15), 10, 0, 0, 2);
+}
+.tarjeta-titulo { -fx-text-fill: #7a6a4a; }
+.tarjeta-valor { -fx-font-family: "Georgia"; -fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1b2c20; }
+.panel-claro { -fx-background-color: #f8ebcf; -fx-background-radius: 10; -fx-padding: 12; }
+
+/* ---------- top de habitaciones ---------- */
+.rank {
+    -fx-background-color: #1b2c20; -fx-text-fill: #eab252; -fx-background-radius: 20;
+    -fx-min-width: 32; -fx-min-height: 32; -fx-alignment: center; -fx-font-weight: bold; -fx-font-size: 14px;
+}
+.rank-1 { -fx-background-color: #eab252; -fx-text-fill: #1b2c20; }
+.top-nombre { -fx-font-weight: bold; -fx-text-fill: #1b2c20; }
+.barra-top { -fx-background-color: #cfb27a; -fx-background-radius: 6; }
+.barra-top-1 { -fx-background-color: linear-gradient(to right, #c8912c, #f2c372); }
+.top-valor { -fx-text-fill: #7a6a4a; }
+
+/* ---------- inicio de sesion ---------- */
+.titulo-login { -fx-font-family: "Georgia"; -fx-font-size: 36px; -fx-text-fill: #1b2c20; }
+.boton-ancho { -fx-font-size: 15px; -fx-background-radius: 8; }
+.boton-contorno { -fx-background-color: white; -fx-border-color: #1b2c20; -fx-border-radius: 8; -fx-text-fill: #1b2c20; -fx-font-size: 15px; }
+.boton-contorno:hover { -fx-background-color: #f3e3c3; }
+.campo-grande { -fx-font-size: 14px; -fx-pref-height: 46; }
+.separador-o .separator .line { -fx-border-color: #d8c493; -fx-border-width: 1 0 0 0; }
+
+/* ---------- etiquetas de estado en las tablas ---------- */
+.badge { -fx-padding: 2 10 2 10; -fx-background-radius: 10; -fx-font-size: 12px; -fx-font-weight: bold; }
+.badge-ok { -fx-background-color: #d6ecd9; -fx-text-fill: #1f6a3a; }
+.badge-aviso { -fx-background-color: #fbe6b8; -fx-text-fill: #7a5410; }
+.badge-medio { -fx-background-color: #fcd9b8; -fx-text-fill: #8a4a10; }
+.badge-malo { -fx-background-color: #f3cfcf; -fx-text-fill: #8c2f2f; }
+.badge-neutro { -fx-background-color: #e5e1d6; -fx-text-fill: #555555; }
+
+/* ---------- barra de progreso (ocupacion) ---------- */
+.progress-bar > .track { -fx-background-color: #eadfc4; -fx-background-radius: 8; -fx-background-insets: 0; }
+.progress-bar > .bar { -fx-background-color: linear-gradient(to right, #c8912c, #f2c372); -fx-background-radius: 8; -fx-background-insets: 0; -fx-padding: 0.4em; }
+
+/* ---------- zona con scroll transparente (sin tocar -fx-background, que fija el color del texto) ---------- */
+.scroll-transparente { -fx-background-color: transparent; -fx-padding: 0; }
+.scroll-transparente > .viewport { -fx-background-color: transparent; }

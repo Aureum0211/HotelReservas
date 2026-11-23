@@ -1,4 +1,5 @@
-target/
-*.class
+/target/
+/db.properties
+*.log
 .idea/
-.vscode/
+nbproject/private/

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ui.HuespedController" styleClass="fondo" prefWidth="1120" prefHeight="720">
+   <top>
+      <HBox alignment="CENTER_LEFT" spacing="12" styleClass="barra">
+         <padding><Insets top="10" right="16" bottom="10" left="16"/></padding>
+         <children>
+            <ImageView fitHeight="44" preserveRatio="true" smooth="true"><image><Image url="@images/logo_hr.png"/></image></ImageView>
+            <Label text="Zona de huéspedes" styleClass="barra-titulo" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Button text="Volver al inicio" styleClass="boton-barra" onAction="#volver"/>
+         </children>
+      </HBox>
+   </top>
+   <center>
+      <VBox spacing="12">
+         <padding><Insets topRightBottomLeft="16"/></padding>
+         <children>
+
+            <!-- Identificación del huésped (sin contraseña: solo el documento) -->
+            <HBox spacing="8" alignment="CENTER_LEFT" styleClass="panel-claro">
+               <children>
+                  <Label text="Mi documento" styleClass="seccion"/>
+                  <TextField fx:id="txtDocumento" promptText="Número de documento" prefWidth="190"/>
+                  <Button text="Ingresar" styleClass="boton-principal" onAction="#ingresar"/>
+                  <Label fx:id="lblSaludo" styleClass="saludo"/>
+               </children>
+            </HBox>
+
+            <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+               <tabs>
+
+                  <!-- ======================= BUSCAR Y RESERVAR ======================= -->
+                  <Tab text="Buscar y reservar">
+                     <content>
+                        <VBox spacing="10">
+                           <padding><Insets topRightBottomLeft="14"/></padding>
+                           <children>
+                              <HBox spacing="8" alignment="CENTER_LEFT">
+                                 <children>
+                                    <Label text="Entrada"/>
+                                    <DatePicker fx:id="dpEntrada" prefWidth="140"/>
+                                    <Label text="Salida"/>
+                                    <DatePicker fx:id="dpSalida" prefWidth="140"/>
+                                    <Label text="Personas"/>
+                                    <Spinner fx:id="spPersonas" min="1" max="10" initialValue="1" prefWidth="70"/>
+                                 </children>
+                              </HBox>
+                              <Label fx:id="lblResumen" styleClass="nota" wrapText="true"/>
+                              <TableView fx:id="tblLibres" VBox.vgrow="ALWAYS">
+                                 <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+                                 <columns>
+                                    <TableColumn text="Número"/>
+                                    <TableColumn text="Tipo"/>
+                                    <TableColumn text="Capacidad"/>
+                                    <TableColumn text="Precio por noche"/>
+                                    <TableColumn text="Total de la estadía (sin descuento)"/>
+                                 </columns>
+                              </TableView>
+                              <HBox spacing="10" alignment="CENTER_LEFT">
+                                 <children>
+                                    <Button text="Reservar la habitación seleccionada" styleClass="boton-principal" onAction="#reservar"/>
+                                    <Label text="El pago se realiza en recepción." styleClass="nota"/>
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </content>
+                  </Tab>
+
+                  <!-- ======================= MIS RESERVAS ======================= -->
+                  <Tab text="Mis reservas">
+                     <content>
+                        <VBox spacing="10">
+                           <padding><Insets topRightBottomLeft="14"/></padding>
+                           <children>
+                              <HBox spacing="8" alignment="CENTER_LEFT">
+                                 <children>
+                                    <Button text="Actualizar" onAction="#actualizarMisReservas"/>
+                                    <Button text="Cancelar la reserva seleccionada" styleClass="boton-peligro" onAction="#cancelarReserva"/>
+                                    <Label text="Si la reserva ya tiene pagos, la cancelación se hace en recepción." styleClass="nota"/>
+                                 </children>
+                              </HBox>
+                              <TableView fx:id="tblMisReservas" VBox.vgrow="ALWAYS">
+                                 <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+                                 <columns>
+                                    <TableColumn text="#"/>
+                                    <TableColumn text="Habitación"/>
+                                    <TableColumn text="Entrada"/>
+                                    <TableColumn text="Salida"/>
+                                    <TableColumn text="Personas"/>
+                                    <TableColumn text="Total"/>
+                                    <TableColumn text="Estado"/>
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </VBox>
+                     </content>
+                  </Tab>
+
+                  <!-- ======================= REGISTRARME ======================= -->
+                  <Tab text="Registrarme">
+                     <content>
+                        <HBox alignment="TOP_CENTER">
+                        <VBox spacing="8" maxWidth="360" prefWidth="360">
+                           <padding><Insets topRightBottomLeft="20"/></padding>
+                           <children>
+                              <Label text="¿Primera vez? Regístrate para poder reservar" styleClass="seccion"/>
+                              <Label text="Nombre completo"/>
+                              <TextField fx:id="txtNombre"/>
+                              <Label text="Documento"/>
+                              <TextField fx:id="txtDocRegistro"/>
+                              <Label text="Correo"/>
+                              <TextField fx:id="txtCorreo"/>
+                              <Label text="Teléfono (10 dígitos)"/>
+                              <TextField fx:id="txtTelefono"/>
+                              <Label text="Ciudad"/>
+                              <TextField fx:id="txtCiudad"/>
+                              <Button text="Registrarme" styleClass="boton-principal" maxWidth="Infinity" onAction="#registrarme"/>
+                           </children>
+                        </VBox>
+                        </HBox>
+                     </content>
+                  </Tab>
+
+               </tabs>
+            </TabPane>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>
