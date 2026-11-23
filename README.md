@@ -1,92 +1,132 @@
 # HotelReservas
 
-Sistema de gestión hotelera desarrollado con **Java 17+, JavaFX, JDBC y Oracle Database**.
-La interfaz permite gestionar huéspedes, trabajadores, habitaciones, reservas, comprobantes,
-pagos, mantenimiento y reportes.
+Sistema de gestión hotelera desarrollado con **Java 17, JavaFX, JDBC y Oracle Database**. Permite administrar huéspedes, trabajadores, habitaciones, reservas, comprobantes, pagos, mantenimiento y reportes.
+
+## Funcionalidades
+
+- Inicio de sesión de trabajadores con roles `ADMIN` y `RECEPTIONIST`.
+- Registro e identificación de huéspedes.
+- Gestión independiente de clientes y trabajadores.
+- Registro y consulta de habitaciones.
+- Búsqueda de habitaciones disponibles por fechas y capacidad.
+- Creación y cancelación de reservas.
+- Check-in y check-out.
+- Gestión de mantenimiento de habitaciones.
+- Generación de comprobantes y registro de pagos parciales o completos.
+- Reportes de reservas, ingresos, uso de habitaciones, mejores clientes y saldos pendientes.
+- Ranking de habitaciones populares.
+- Auditoría de cambios de estado de reservas en Oracle.
+
+## Tecnologías y requisitos
+
+- JDK 17 o superior.
+- Apache Maven 3.8 o superior.
+- Oracle Database con soporte PL/SQL y un servicio accesible desde el equipo.
+- SQL Developer (recomendado para instalar y administrar los scripts; no es necesario en los equipos que solo ejecutan la aplicación).
+- NetBeans es opcional; también se puede ejecutar desde una terminal.
 
 ## Arquitectura
 
-- **JavaFX:** pantallas, formularios, tablas, navegación y mensajes.
-- **HotelService:** fachada entre los controladores y la persistencia.
-- **OracleHotelProcedures:** centraliza las llamadas JDBC a los paquetes PL/SQL.
-- **JdbcRepository / SqlMappers:** consultas de solo lectura y conversión de filas Oracle a modelos Java.
-- **Oracle:** reglas de negocio, validaciones, cálculos, operaciones de escritura, triggers, auditoría y almacenamiento.
+La aplicación separa la interfaz, la comunicación y la lógica de negocio:
 
-Paquetes principales: `PKG_RESERVAS`, `PKG_PERSONAS`, `PKG_HABITACIONES` y `PKG_REPORTES`.
+- **JavaFX:** ventanas, formularios, tablas, navegación y mensajes.
+- **`HotelService`:** fachada entre los controladores y la persistencia; adapta los datos de Java a los parámetros que espera Oracle.
+- **`OracleHotelProcedures`:** centraliza las llamadas JDBC a procedimientos y funciones PL/SQL.
+- **`JdbcRepository` y `SqlMappers`:** consultan registros y convierten filas de Oracle en modelos Java.
+- **Oracle Database:** almacena la información y ejecuta las reglas de negocio, validaciones, cálculos, operaciones de escritura, triggers y auditoría.
 
-## Requisitos
+Los paquetes principales son `PKG_RESERVAS`, `PKG_PERSONAS`, `PKG_HABITACIONES` y `PKG_REPORTES`.
 
-- JDK 17 o superior.
-- Apache Maven 3.8+.
-- Oracle Database accesible desde el equipo.
-- NetBeans (opcional).
+## Instalación de Oracle
 
-## Preparar la base de datos
+Los scripts SQL/PLSQL están en [`oracle/`](oracle/). Antes de ejecutar la aplicación, prepara un esquema Oracle y ejecuta los scripts siguiendo la guía:
 
-1. Abre SQL Developer y conéctate al esquema que usará la aplicación.
-2. Sigue el orden y las precauciones de [`oracle/LEEME.md`](oracle/LEEME.md).
-3. Ejecuta las pruebas del script `16_pruebas_paquetes.sql` y confirma que indique `0 fallan`.
+**[Guía de instalación, configuración y conexión multi-PC](oracle/README.md)**
 
-La aplicación ya no crea tablas ni inserta trabajadores desde Java. El esquema y los usuarios iniciales
-se preparan con scripts SQL. No ejecutes scripts históricos de recreación sobre una base que contenga datos.
+La guía explica cómo crear un usuario/esquema, ejecutar los diez scripts en orden, comprobar los paquetes y conectar varios equipos a una única instancia Oracle.
 
-## Configurar conexión
+> Los scripts preparan los objetos de HotelReservas dentro de una instancia Oracle existente. No instalan Oracle Database ni crean el servidor de base de datos.
 
-En la raíz del proyecto, crea o edita `db.properties` con los parámetros de tu Oracle:
+## Configurar la conexión
 
-```properties
-db.url=jdbc:oracle:thin:@//HOST:PUERTO/SERVICIO
-db.user=USUARIO_ESQUEMA
-db.password=CONTRASENA
+En la raíz del proyecto (junto a `pom.xml`), crea `db.properties` a partir de la plantilla:
+
+**Windows PowerShell:**
+
+```powershell
+Copy-Item db.properties.example db.properties
 ```
 
-Sustituye los valores por los de tu conexión. No publiques credenciales reales.
+**Windows CMD:**
 
-## Ejecutar
+```cmd
+copy db.properties.example db.properties
+```
 
-Desde la raíz del proyecto:
+Edita `db.properties` y completa los tres valores de tu conexión:
+
+```properties
+db.url=jdbc:oracle:thin:@//HOST:1521/SERVICE_NAME
+db.user=HOTEL
+db.password=TU_CLAVE_DEL_ESQUEMA
+```
+
+Usa el host, puerto y service name reales de tu instalación. `localhost` solo sirve si Oracle está en el mismo equipo que ejecuta HotelReservas. Para una computadora cliente, utiliza la IP privada o el nombre de red del equipo que aloja Oracle.
+
+**No publiques `db.properties` ni incluyas contraseñas reales en GitHub.** El repositorio contiene únicamente `db.properties.example`, que es una plantilla sin credenciales válidas. El archivo local `db.properties` está excluido mediante `.gitignore`.
+
+## Ejecutar la aplicación
+
+Desde una terminal ubicada en la carpeta que contiene `pom.xml` y `db.properties`:
 
 ```bash
 mvn clean javafx:run
 ```
 
-También puedes abrir el proyecto Maven en NetBeans y ejecutar el objetivo `javafx:run`.
+En NetBeans, abre el proyecto como proyecto Maven y ejecuta el objetivo `javafx:run`.
 
-La aplicación comprueba al iniciar que los cuatro paquetes Oracle estén instalados y válidos. Si falta alguno,
-mostrará un mensaje indicando que debes ejecutar los scripts de `oracle/`.
+La aplicación utiliza el lanzador JavaFX `ui.AppFxmlLauncher`. No es necesario iniciar un menú de consola.
 
-## Funcionalidades
+## Instalación en varias computadoras
 
-- Inicio de sesión de trabajadores con roles ADMIN y RECEPTIONIST.
-- Registro e identificación de huéspedes.
-- Registro y consulta de clientes, trabajadores y habitaciones.
-- Búsqueda de habitaciones disponibles por fechas y capacidad.
-- Creación y cancelación de reservas.
-- Check-in y check-out.
-- Gestión de mantenimiento.
-- Comprobantes y pagos parciales o completos.
-- Reportes de reservas, ingresos, uso de habitaciones, mejores clientes y saldos pendientes.
-- Ranking de habitaciones populares.
-- Auditoría de cambios de estado de reservas en Oracle.
+HotelReservas puede ejecutarse en varios equipos conectados a una misma instancia Oracle. Una computadora aloja Oracle Database; las demás ejecutan la aplicación y apuntan al mismo host, puerto, servicio y esquema mediante su propio `db.properties`.
 
-## Estructura
+Los equipos cliente no necesitan instalar otra base de datos ni ejecutar los scripts SQL. Solo necesitan Java, Maven (si ejecutan desde el código fuente), el proyecto y una configuración de conexión válida.
+
+Consulta la sección **Conectar varias computadoras a la misma base de datos** de [`oracle/README.md`](oracle/README.md) para configurar listener, firewall y red local. No expongas el puerto Oracle directamente a Internet.
+
+## Estructura principal
 
 ```text
-src/main/java/
-├── Main.java
-├── exceptions/       Excepciones de la aplicación
-├── model/            Modelos de datos y resultados de reportes
-├── persistence/      Conexión, consultas, mappers y llamadas PL/SQL
-├── service/          Fachada HotelService
-├── ui/               JavaFX, controladores y FXML
-└── validation/       Validaciones básicas de entrada/modelo
-
-oracle/               Scripts SQL y PL/SQL de instalación y pruebas
+HotelReservas/
+├── src/
+│   └── main/
+│       ├── java/             Código Java
+│       └── resources/        FXML, CSS e imágenes
+├── oracle/                   Scripts SQL/PLSQL y guía de instalación
+├── docs/                     Análisis, diagramas y notas de pruebas
+├── db.properties.example     Plantilla de conexión
+├── pom.xml                   Dependencias y ejecución Maven
+├── .gitignore
+└── README.md
 ```
 
-## Notas
+## Cuentas de demostración
 
-- Las operaciones de negocio se ejecutan en Oracle, no en los controladores Java.
-- Los repositorios Java consultan y reconstruyen modelos; las escrituras de negocio se delegan a PL/SQL.
-- Se conserva el esquema académico de contraseñas en texto plano indicado para esta entrega.
-- Las fechas de las tablas se mantienen como texto `AAAA-MM-DD`, según el esquema existente.
+En una instalación nueva, `04_base_comun.sql` agrega trabajadores de demostración solo si la tabla `TRABAJADORES` está vacía:
+
+| Usuario | Contraseña | Rol |
+|---|---|---|
+| `admin` | `admin123` | `ADMIN` |
+| `recepcion1` | `recep123` | `RECEPTIONIST` |
+| `recepcion2` | `recep456` | `RECEPTIONIST` |
+
+Son credenciales de demostración académica para iniciar sesión en HotelReservas. No son las credenciales de conexión de Oracle configuradas en `db.properties`.
+
+## Documentación adicional
+
+- [`docs/analisis.md`](docs/analisis.md): propósito, modelo de dominio y responsabilidades de Java y Oracle.
+- [`docs/layers-diagram.md`](docs/layers-diagram.md): arquitectura por capas.
+- [`docs/class-diagram.md`](docs/class-diagram.md): clases y relaciones.
+- [`docs/hierarchy-diagram.md`](docs/hierarchy-diagram.md): jerarquía de modelos y excepciones.
+- [`docs/REVISION_Y_PRUEBAS.md`](docs/REVISION_Y_PRUEBAS.md): comprobaciones y lista de verificación.

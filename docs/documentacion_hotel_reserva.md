@@ -4,96 +4,103 @@
 **Institución:** Universidad Popular del Cesar  
 **Programa:** Ingeniería de Sistemas  
 **Asignatura:** Programación III  
-**Autor:** edward carrillo 
-**Docente:** alfredo bautista  
+**Autor:** Edward Carrillo  
+**Docente:** Alfredo Bautista  
 **Lugar y año:** Valledupar, Cesar — 2026
 
 ---
 
 ## Resumen
 
-Hotel Reservas es una aplicación de consola desarrollada en Java para administrar información básica de un hotel. Su alcance comprende el registro y consulta de clientes, trabajadores y habitaciones, la creación y consulta de reservas, la validación de fechas para evitar reservas superpuestas, el cálculo de tarifas, la emisión de comprobantes y el registro de pagos. La información se carga y conserva mediante archivos de texto locales.
+Hotel Reservas es una aplicación de escritorio desarrollada en Java 17 con JavaFX, JDBC y Oracle Database. Permite administrar huéspedes, trabajadores, habitaciones, reservas, comprobantes y pagos. También incluye consulta de disponibilidad, control de mantenimiento, reportes y un ranking de habitaciones populares.
 
-El proyecto se construyó con fines académicos para aplicar conceptos de programación orientada a objetos, separación de responsabilidades, manejo de excepciones, repositorios, estrategias de precios y organización por capas. El sistema distingue la interfaz de usuario, la lógica de negocio, el modelo y la persistencia. No constituye una plataforma hotelera comercial: no ofrece reservas por Internet, integración con pasarelas de pago, sincronización entre sedes ni conexión activa con una base de datos SQL.
+La aplicación utiliza JavaFX para la interfaz y JDBC para comunicarse con Oracle. La lógica de negocio se concentra principalmente en paquetes PL/SQL, donde se realizan las validaciones, los cálculos y las operaciones de escritura. Java organiza las solicitudes, recupera los resultados y los presenta al usuario. La base de datos conserva la información entre ejecuciones.
 
-**Palabras clave:** reservas hoteleras, Java, programación orientada a objetos, persistencia, arquitectura por capas, gestión de habitaciones.
+El proyecto se desarrolló con fines académicos para aplicar programación orientada a objetos, separación de responsabilidades, manejo de excepciones, acceso a datos y diseño por capas. La solución puede ejecutarse desde distintos equipos cuando todos tienen acceso de red a una misma instancia Oracle y cuentan con su propia configuración de conexión.
+
+**Palabras clave:** gestión hotelera, Java, JavaFX, JDBC, Oracle Database, PL/SQL, reservas.
 
 ## 1. Introducción
 
-La gestión de reservas requiere relacionar los datos de los huéspedes, las habitaciones disponibles, los periodos de estancia y los valores que debe pagar cada cliente. Si estos datos se llevan de forma desorganizada, puede resultar difícil consultar registros anteriores, mantener la información consistente o detectar que una habitación ya tiene una reserva para determinadas fechas.
+La gestión de un hotel requiere mantener relacionados los datos de los huéspedes, trabajadores, habitaciones, reservas, fechas de entrada y salida, comprobantes y pagos. También es necesario conocer la disponibilidad de cada habitación, evitar reservas incompatibles y conservar un registro de las operaciones realizadas.
 
-Hotel Reservas propone una solución académica de alcance acotado para organizar esas operaciones mediante un programa de consola. El sistema modela los conceptos principales del dominio hotelero y centraliza las operaciones en una capa de servicio, mientras que el almacenamiento se gestiona a través de componentes de persistencia.
+Hotel Reservas reúne estas operaciones en una aplicación de escritorio. La interfaz permite interactuar con los módulos del sistema, mientras que Oracle Database almacena la información y ejecuta las reglas principales del negocio mediante funciones, procedimientos, paquetes y triggers.
 
-El desarrollo se utiliza, además, como ejercicio de aplicación de los temas de Programación III: clases y objetos, herencia, interfaces, enumeraciones, excepciones, polimorfismo, diseño por responsabilidades, principios SOLID y control de versiones con Git.
+El desarrollo permite aplicar los temas de Programación III en un caso práctico: clases y objetos, herencia, interfaces, enumeraciones, excepciones, separación de responsabilidades, persistencia y comunicación entre una aplicación Java y una base de datos relacional.
 
 ## 2. Planteamiento del problema
 
 ### 2.1 Descripción del problema
 
-La administración de habitaciones y reservas exige mantener relacionados los datos de las personas, las habitaciones, las fechas de entrada y salida, los importes y los pagos. Cuando la información se encuentra dispersa o se registra sin validaciones, aumenta el riesgo de duplicidad, errores de fecha y dificultades para consultar el estado de una reserva.
+La administración de habitaciones y reservas requiere mantener actualizada la información de las personas, las habitaciones, los periodos de estancia, los importes y los pagos. Cuando estos datos se registran sin una estructura común o sin validaciones, pueden aparecer duplicidades, errores en las fechas, reservas superpuestas y dificultades para consultar el estado de una operación.
 
-En el contexto del ejercicio académico, se plantea la necesidad de construir un sistema que permita organizar estas operaciones y demostrar reglas básicas del negocio hotelero, sin depender de una infraestructura web o de una base de datos externa.
+En el contexto académico, se plantea desarrollar un sistema que permita organizar estos procesos mediante una interfaz gráfica y una base de datos relacional. Además de almacenar los registros, el sistema debe aplicar reglas que mantengan la coherencia de las reservas, los comprobantes y los pagos.
 
 ### 2.2 Pregunta orientadora
 
-¿Cómo desarrollar una aplicación de consola en Java que permita administrar clientes, trabajadores, habitaciones, reservas y comprobantes, aplique validaciones básicas del negocio y conserve la información entre ejecuciones?
+¿Cómo desarrollar una aplicación de escritorio en Java que permita administrar las operaciones principales de un hotel, mantenga la información en una base de datos Oracle y aplique de forma centralizada las reglas de negocio?
 
 ### 2.3 Alcance del problema
 
-El proyecto aborda la administración local de información mediante una aplicación ejecutada desde un equipo. No pretende resolver todos los procesos de un hotel real ni reemplazar un sistema comercial de gestión hotelera.
+El proyecto cubre la gestión de huéspedes, trabajadores, habitaciones, reservas, comprobantes, pagos, mantenimiento y reportes. La aplicación se ejecuta como programa de escritorio y se conecta directamente a Oracle mediante JDBC.
+
+La solución puede utilizarse desde varios equipos si estos pueden acceder a la misma instancia Oracle a través de la red y se configuran con las credenciales correspondientes. No incluye una aplicación web, una API intermedia ni integración con pasarelas bancarias o plataformas externas de reservas.
 
 ## 3. Justificación
 
-El proyecto permite convertir conceptos de programación en una aplicación funcional con un dominio reconocible. La separación entre la interfaz, los servicios, el modelo y la persistencia facilita explicar qué responsabilidad corresponde a cada parte y reduce la necesidad de concentrar todas las operaciones en una única clase.
+El proyecto permite aplicar conceptos de programación en un sistema con procesos relacionados entre sí. La separación de la interfaz, los servicios, la persistencia y la base de datos facilita organizar el código y asignar responsabilidades a cada componente.
 
-El uso de interfaces y repositorios permite definir contratos para las operaciones de almacenamiento, mientras que las políticas de precio ilustran cómo encapsular comportamientos que pueden variar. Las excepciones específicas ayudan a distinguir errores de datos, incumplimientos de reglas y búsquedas sin resultados.
+El uso de Oracle permite conservar los registros, establecer relaciones entre las tablas y centralizar reglas que deben cumplirse en las operaciones del hotel. Los procedimientos y funciones PL/SQL se encargan de operaciones como crear reservas, calcular importes, registrar pagos y generar reportes. De esta manera, Java no necesita mantener una segunda implementación de esas reglas.
 
-La persistencia en archivos de texto mantiene la solución sencilla de ejecutar y revisar en un entorno académico. Esta elección también establece una limitación deliberada: no ofrece las garantías de concurrencia, administración, consultas ni seguridad de una base de datos diseñada para producción.
+La integración entre JavaFX, JDBC y Oracle también permite estudiar cómo una aplicación de escritorio puede trabajar con una base de datos centralizada y cómo varios equipos pueden consultar y actualizar la misma información cuando existe conectividad con el servidor.
 
 ## 4. Objetivos
 
 ### 4.1 Objetivo general
 
-Desarrollar una aplicación de consola en Java para gestionar información básica de un hotel mediante un modelo orientado a objetos, validaciones de negocio, una arquitectura por capas y persistencia local en archivos de texto.
+Desarrollar una aplicación de escritorio para gestionar las operaciones principales de un hotel mediante Java, JavaFX y Oracle Database, utilizando una arquitectura organizada y paquetes PL/SQL para centralizar las reglas de negocio.
 
 ### 4.2 Objetivos específicos
 
-1. Modelar las entidades principales del dominio hotelero, como clientes, trabajadores, habitaciones, reservas y comprobantes.
-2. Implementar operaciones para registrar y consultar información y gestionar el ciclo básico de una reserva.
-3. Validar datos y aplicar reglas para reducir inconsistencias, incluida la detección de reservas superpuestas para una misma habitación.
-4. Separar la interfaz de usuario, la lógica de negocio y el acceso a los datos mediante clases e interfaces con responsabilidades definidas.
-5. Conservar los registros en archivos de texto y recuperarlos al iniciar la aplicación.
-6. Documentar el diseño, las decisiones técnicas, las limitaciones y las pruebas realizadas o pendientes.
+1. Modelar las entidades principales del sistema, como personas, clientes, trabajadores, habitaciones, reservas y comprobantes.
+2. Implementar una interfaz gráfica para registrar, consultar y gestionar la información del hotel.
+3. Establecer la comunicación entre Java y Oracle mediante JDBC.
+4. Implementar funciones, procedimientos, paquetes y triggers para validar y procesar las operaciones del negocio.
+5. Gestionar reservas, disponibilidad, cancelaciones, check-in, check-out, comprobantes y pagos.
+6. Generar reportes y estadísticas a partir de la información almacenada en Oracle.
+7. Documentar la arquitectura, la instalación, las pruebas y las limitaciones del sistema.
 
 ## 5. Estado del arte
 
 ### 5.1 Sistemas de gestión hotelera
 
-Los sistemas de gestión hotelera (*Property Management Systems*, PMS) apoyan procesos como la administración de reservas, habitaciones, huéspedes, tarifas y pagos. En sistemas de mayor alcance, estas funciones pueden estar integradas con mecanismos de autenticación, control de acceso y protección de información. El Instituto Nacional de Estándares y Tecnología de Estados Unidos (NIST), por ejemplo, publicó una guía de referencia sobre la protección de sistemas de gestión hotelera que describe procesos de reservas y controles de seguridad para datos sensibles [1]. Este tipo de solución sirve como contexto para entender que un PMS de producción requiere más que registrar reservas.
+Los sistemas de gestión hotelera (*Property Management Systems* o PMS) apoyan procesos como la administración de habitaciones, huéspedes, reservas, tarifas y pagos. En soluciones de mayor alcance, estos procesos pueden integrarse con servicios externos, mecanismos de acceso y controles de protección de información.
+
+NIST publicó una guía técnica sobre la seguridad de los sistemas de gestión hotelera que aborda la protección de la información y los controles aplicables a este tipo de plataformas [1]. Este antecedente permite reconocer que un sistema hotelero de producción requiere considerar aspectos adicionales a la gestión básica de reservas.
 
 ### 5.2 Antecedentes académicos y técnicos
 
-Vignaga y Perovich Gerosa (2003) documentan la arquitectura de un subsistema de reservas de un sistema de gestión hotelera. El trabajo presenta objetivos, restricciones, casos de uso y decisiones arquitectónicas, y es relevante como antecedente de análisis y diseño de sistemas de reservas [2].
+Vignaga y Perovich Gerosa (2003) presentan una descripción arquitectónica de un subsistema de reservas para un sistema de gestión hotelera. El trabajo aborda objetivos, restricciones, casos de uso y decisiones de diseño, por lo que sirve como referencia para estudiar la organización de este tipo de sistemas [2].
 
-También existen propuestas de sistemas de reserva hotelera basadas en arquitecturas multicapa. Abduljwad y Wang (2005), por ejemplo, describen una aplicación de reservas en la que la interfaz, la lógica de negocio y el almacenamiento se distribuyen en capas. Aunque sus tecnologías son distintas de las usadas en Hotel Reservas, el antecedente ilustra la importancia de separar responsabilidades [3].
-
-Estos antecedentes no se presentan como equivalentes directos al proyecto actual: corresponden a sistemas con enfoques y alcances diferentes. Se usan para contextualizar decisiones de modelado y arquitectura, no para afirmar que Hotel Reservas implemente sus funcionalidades.
+Abduljwad y Wang (2005) describen el diseño de un sistema de reservas hoteleras en línea mediante una arquitectura multinivel. El trabajo destaca la separación entre la interfaz, las reglas de negocio y el almacenamiento de datos [3]. Aunque Hotel Reservas utiliza una aplicación de escritorio y una conexión JDBC directa, la separación de responsabilidades también es un criterio presente en su diseño.
 
 ### 5.3 Comparación con Hotel Reservas
 
 | Aspecto | Sistemas hoteleros de mayor alcance | Hotel Reservas |
 |---|---|---|
-| Tipo de aplicación | Sistemas comerciales o soluciones web/de escritorio | Aplicación de consola local |
-| Gestión de reservas | Flujos de reserva integrados con otros procesos hoteleros | Operaciones básicas de creación, consulta y cancelación, según la implementación disponible |
-| Gestión de habitaciones | Inventario y disponibilidad con controles más amplios | Registro y consulta de habitaciones y validación de cruces de fechas |
-| Pagos | Pueden incluir integraciones financieras y controles de seguridad | Registro local de comprobantes/pagos; no procesa transacciones bancarias |
-| Acceso remoto | Puede estar disponible en soluciones web o en la nube | Fuera del alcance actual |
-| Persistencia | Habitualmente usa bases de datos u otros servicios de almacenamiento | Archivos de texto locales |
-| Finalidad | Apoyar la operación de un establecimiento | Aplicar y demostrar conceptos de programación y diseño de software |
+| Tipo de aplicación | Pueden ser soluciones web, móviles o de escritorio | Aplicación de escritorio desarrollada con JavaFX |
+| Gestión de reservas | Puede integrarse con canales y servicios externos | Creación, consulta, disponibilidad, cancelación y control de estados |
+| Gestión de habitaciones | Inventario y disponibilidad con módulos adicionales | Registro, consulta y mantenimiento de habitaciones |
+| Pagos | Pueden conectarse con pasarelas financieras | Registro de comprobantes y pagos; no procesa transacciones bancarias |
+| Persistencia | Bases de datos y servicios centralizados | Oracle Database mediante JDBC |
+| Acceso desde varios equipos | Depende de la arquitectura y el despliegue | Posible si los equipos acceden a la misma instancia Oracle por la red |
+| Finalidad | Apoyar la operación de establecimientos hoteleros | Aplicar y demostrar conceptos de programación y diseño de software |
 
 ### 5.4 Brecha y aporte del proyecto
 
-Hotel Reservas no pretende sustituir un PMS comercial. Su aporte académico consiste en una implementación reducida que permite estudiar el modelado de entidades, la validación de reglas de negocio, la separación entre capas y el desacoplamiento de la persistencia. La elección de archivos de texto reduce la complejidad del entorno, pero limita las capacidades de consulta, concurrencia, seguridad y recuperación frente a fallos. La interfaz gráfica, la conexión a una base de datos SQL y las integraciones externas se consideran posibles ampliaciones, no características implementadas en la versión descrita.
+Hotel Reservas no pretende sustituir un PMS comercial. Su aporte académico consiste en integrar una interfaz gráfica, un modelo orientado a objetos, una base de datos relacional y lógica de negocio implementada en PL/SQL.
+
+La solución permite estudiar la comunicación entre Java y Oracle, la distribución de responsabilidades y el uso de procedimientos almacenados para evitar que las mismas reglas estén implementadas de forma duplicada en distintas capas. Su alcance sigue siendo limitado frente a un producto comercial, especialmente en seguridad, integraciones externas, despliegue y administración avanzada.
 
 ## 6. Marco teórico
 
@@ -103,213 +110,264 @@ La programación orientada a objetos organiza el software mediante clases y obje
 
 ### 6.2 Encapsulamiento y herencia
 
-El encapsulamiento permite controlar el acceso al estado interno de los objetos y proteger sus invariantes. La herencia se usa para expresar una relación entre tipos cuando existe una relación conceptual de especialización. En el modelo, `Client` y `Employee` comparten características generales a través de `Person`.
+El encapsulamiento permite controlar el acceso al estado interno de los objetos. La herencia se utiliza para expresar características compartidas entre tipos relacionados. En el modelo, `Client` y `Employee` heredan de `Person`, que contiene los datos comunes de una persona.
 
 ### 6.3 Interfaces y polimorfismo
 
-Una interfaz define un contrato sin obligar a que todas sus implementaciones compartan la misma estrategia interna. El proyecto contempla contratos como `Identifiable`, `PricingPolicy` y `Repository<T>`. La interfaz de política de precios permite aplicar una estrategia intercambiable, mientras que el contrato de repositorio separa las operaciones de acceso a los registros de su forma concreta de almacenamiento.
+Las interfaces definen contratos que pueden ser implementados por distintas clases. En el proyecto, `Repository<T>` establece operaciones de consulta que utiliza la capa de persistencia. La clase `Person` también permite tratar de forma general a clientes y trabajadores cuando se necesita trabajar con sus atributos comunes.
 
 ### 6.4 Excepciones y validación
 
-Las excepciones permiten representar situaciones anómalas sin mezclar cada error con el flujo normal de ejecución. El proyecto distingue errores generales del sistema, datos inválidos, incumplimientos de reglas de negocio y recursos inexistentes. Las validaciones comprueban condiciones necesarias para registrar información coherente.
+Las excepciones permiten representar errores sin mezclar su tratamiento con el flujo normal de la aplicación. El proyecto utiliza excepciones para distinguir datos inválidos, incumplimientos de reglas de negocio y recursos inexistentes. Los errores definidos en Oracle se traducen en excepciones Java para que la interfaz pueda informar el resultado de una operación.
 
 ### 6.5 Arquitectura por capas
 
-La arquitectura por capas separa el programa en componentes con responsabilidades diferentes. En el sistema, la interfaz recibe las entradas y presenta resultados; el servicio coordina las operaciones; la persistencia guarda y recupera datos; y el modelo representa las entidades y contratos del dominio. Esta separación busca facilitar la lectura, el mantenimiento y la evolución del programa.
+La arquitectura separa el programa en componentes con responsabilidades distintas. JavaFX recibe las entradas y presenta resultados; `HotelService` coordina las solicitudes; la capa JDBC se comunica con Oracle; y la base de datos ejecuta las operaciones de negocio y conserva la información.
 
 ### 6.6 Principios GRASP y SOLID
 
-GRASP reúne criterios para asignar responsabilidades a los objetos. SOLID agrupa principios para promover diseños que sean más fáciles de mantener y extender. En Hotel Reservas se usan como guías de análisis: por ejemplo, separar la interacción por consola de las reglas del servicio, mantener el acceso a archivos en componentes de persistencia y definir interfaces para reducir el acoplamiento con implementaciones concretas. Esto no significa que el sistema cumpla automáticamente todos los principios en todos sus detalles; la aplicación de cada principio debe justificarse a partir del código real.
+GRASP reúne criterios para asignar responsabilidades a los objetos, mientras que SOLID agrupa principios que orientan el diseño de software mantenible. En Hotel Reservas, la separación entre interfaz, servicio, persistencia y base de datos busca mantener responsabilidades claras y reducir el acoplamiento.
 
-### 6.7 Persistencia
+La aplicación de estos principios debe entenderse como una guía de diseño y no como una certificación de cumplimiento total. Cada clase debe evaluarse según las responsabilidades que realmente implementa.
 
-La persistencia permite conservar información más allá de la ejecución actual del programa. Hotel Reservas utiliza archivos de texto delimitados para guardar y recuperar registros. Los mapeadores convierten entre las entidades del modelo y su representación textual, mientras que los repositorios centralizan las operaciones de almacenamiento.
+### 6.7 Persistencia y bases de datos relacionales
+
+La persistencia permite conservar la información más allá de la ejecución actual del programa. Hotel Reservas utiliza Oracle Database para almacenar los datos en tablas relacionadas. Las claves primarias y foráneas establecen las relaciones entre registros, mientras que las restricciones ayudan a mantener la integridad de la información.
+
+JDBC permite que Java ejecute consultas y llamadas a procedimientos almacenados. En este proyecto, los repositorios se enfocan en recuperar registros y los cambios de negocio se delegan a los paquetes PL/SQL.
 
 ### 6.8 Calidad del software
 
-La norma ISO/IEC 25010:2023 presenta un modelo de calidad del producto que puede orientar la definición de requisitos y la evaluación de software durante su ciclo de vida [5]. Para este proyecto, pueden considerarse aspectos como adecuación funcional, fiabilidad, seguridad, capacidad de mantenimiento y eficiencia. La documentación no afirma que el programa esté certificado ni que haya sido evaluado formalmente conforme a la norma; se la utiliza como referencia conceptual.
+La norma ISO/IEC 25010:2023 presenta un modelo de calidad de producto que puede utilizarse como referencia para analizar características como adecuación funcional, fiabilidad, seguridad y capacidad de mantenimiento [4]. En este proyecto se considera como marco conceptual; no se afirma que la aplicación haya sido certificada ni evaluada formalmente conforme a la norma.
 
 ## 7. Metodología de desarrollo
 
-El desarrollo se organizó de forma incremental. Se construyeron y ajustaron partes del sistema en etapas: modelo de dominio, excepciones, validaciones, servicios, menú de consola, contratos de repositorio y persistencia en archivos. La documentación y las decisiones de control de versiones se fueron adaptando a la estructura real del proyecto.
+El desarrollo se organizó de forma incremental. Primero se definieron las entidades y las operaciones principales; posteriormente se construyeron la interfaz, los servicios y la persistencia. En una etapa posterior, la solución se amplió para utilizar JavaFX y Oracle, y se trasladaron las reglas de negocio a paquetes PL/SQL.
 
-El control de versiones con Git permite registrar cambios mediante commits y trabajar con ramas. La rama `develop` se utiliza como espacio de integración y `main` como rama estable prevista para la entrega final. Los mensajes de commit deben describir cambios que realmente estén presentes en el repositorio.
+El trabajo se apoyó en Maven para administrar la configuración del proyecto y en Git/GitHub para registrar los cambios. La rama `develop` se utiliza como espacio de integración y `main` como rama estable prevista para la entrega.
 
-Como criterio de trabajo, una etapa se considera terminada cuando sus cambios han sido revisados y pueden explicarse. Las pruebas deben ejecutarse sobre la versión final del código; no se debe afirmar que una prueba fue superada si no se ejecutó o no se conservó evidencia de su resultado.
+Las pruebas se realizaron sobre los procedimientos y funciones de Oracle mediante un script de pruebas. Los resultados documentados corresponden a las ejecuciones realizadas durante el desarrollo; no deben interpretarse como una auditoría externa ni como una certificación de calidad.
 
 ## 8. Análisis del sistema
 
 ### 8.1 Actores y usuarios previstos
 
-El actor principal es una persona que administra la información del hotel a través del menú de consola. El sistema también contempla registros de clientes y trabajadores como entidades del dominio. Aunque `Employee` incluye una clasificación de rol, esta clasificación no debe interpretarse como un sistema completo de autenticación y autorización si el código no implementa controles de permisos diferenciados.
+El sistema contempla dos roles de trabajadores: `ADMIN` y `RECEPTIONIST`. Ambos pueden acceder a las funciones que les corresponden, mientras que algunas operaciones administrativas, como ciertas tareas de gestión y reportes, requieren un administrador activo.
+
+También se contempla el registro de huéspedes. Un huésped puede registrarse sin intervención de un trabajador y queda clasificado inicialmente como `NEW`. Las operaciones disponibles para huéspedes tienen restricciones diferentes a las de los trabajadores.
 
 ### 8.2 Requisitos funcionales
 
-Los siguientes requisitos representan el alcance previsto según la documentación del proyecto. Deben cotejarse con el menú y el código final antes de declarar que todos están implementados.
-
-- **RF-01.** Registrar y consultar clientes.
-- **RF-02.** Registrar y consultar trabajadores.
-- **RF-03.** Registrar y consultar habitaciones.
-- **RF-04.** Crear y consultar reservas.
-- **RF-05.** Cancelar reservas conforme a las operaciones disponibles en el sistema.
-- **RF-06.** Validar los datos de entrada antes de almacenar registros.
-- **RF-07.** Evitar reservas superpuestas para una misma habitación y periodo.
-- **RF-08.** Calcular el precio de una estancia mediante una política de precios.
-- **RF-09.** Emitir comprobantes asociados a las operaciones de reserva previstas.
-- **RF-10.** Registrar el estado de pago correspondiente.
-- **RF-11.** Guardar la información en archivos locales.
-- **RF-12.** Cargar los registros almacenados al iniciar la aplicación.
+- **RF-01.** Permitir el inicio de sesión de trabajadores registrados y activos.
+- **RF-02.** Registrar huéspedes y clientes, validando sus datos.
+- **RF-03.** Registrar trabajadores y aplicar las restricciones de rol correspondientes.
+- **RF-04.** Registrar y consultar habitaciones.
+- **RF-05.** Consultar habitaciones disponibles según fechas y cantidad de huéspedes.
+- **RF-06.** Crear reservas y comprobar que las fechas, la capacidad y la disponibilidad sean válidas.
+- **RF-07.** Calcular el importe de una reserva de acuerdo con la duración de la estancia y la categoría del cliente.
+- **RF-08.** Cancelar reservas respetando las condiciones del sistema y los permisos del usuario.
+- **RF-09.** Registrar el check-in y el check-out de las reservas.
+- **RF-10.** Generar comprobantes y registrar pagos parciales o completos.
+- **RF-11.** Gestionar el estado de mantenimiento de las habitaciones.
+- **RF-12.** Consultar reportes, estadísticas y el ranking de habitaciones populares.
+- **RF-13.** Conservar los registros en Oracle Database y registrar los cambios de estado de reservas en la tabla de auditoría.
 
 ### 8.3 Requisitos no funcionales
 
-- **RNF-01. Mantenibilidad:** separar el código en paquetes con responsabilidades identificables.
-- **RNF-02. Comprensibilidad:** mantener una estructura que pueda explicarse durante la sustentación.
-- **RNF-03. Persistencia:** conservar los datos mediante archivos locales entre ejecuciones normales.
-- **RNF-04. Portabilidad del entorno:** permitir compilar y ejecutar el proyecto en un entorno con el JDK y Maven requeridos.
-- **RNF-05. Integridad básica:** validar datos y aplicar reglas antes de aceptar operaciones relevantes.
-- **RNF-06. Seguridad limitada:** reconocer que los archivos de texto no proporcionan por sí solos cifrado, permisos por usuario ni auditoría de cambios.
+- **RNF-01. Mantenibilidad:** organizar el código en paquetes con responsabilidades identificables.
+- **RNF-02. Comprensibilidad:** mantener una estructura que pueda revisarse y explicarse durante la sustentación.
+- **RNF-03. Persistencia:** conservar la información mediante Oracle Database.
+- **RNF-04. Portabilidad del entorno:** permitir compilar y ejecutar el proyecto con el JDK y Maven requeridos y una instancia Oracle accesible.
+- **RNF-05. Integridad:** aplicar restricciones y validaciones para reducir inconsistencias en los datos.
+- **RNF-06. Conectividad:** permitir que los equipos autorizados se conecten a una misma instancia Oracle cuando la red y el servidor estén configurados para ello.
+- **RNF-07. Seguridad limitada:** reconocer que las contraseñas de trabajadores se almacenan en texto plano en esta versión académica y que el sistema requiere mejoras antes de un uso real.
 
 ### 8.4 Reglas de negocio
 
-1. Una reserva debe relacionarse con una habitación y un periodo de estancia válido.
-2. Una nueva reserva no debe solaparse con otra reserva incompatible de la misma habitación.
-3. Los datos necesarios para cada registro deben cumplir las validaciones definidas por el sistema.
-4. El precio debe calcularse mediante la política aplicable.
-5. Los cambios de estado y pago deben guardarse para que el estado persistido corresponda a la operación realizada.
+1. Una reserva debe asociarse a un cliente y una habitación existentes.
+2. El cliente debe estar activo y, cuando la reserva la registra un trabajador, este también debe estar activo.
+3. La fecha de entrada no puede ser anterior al día actual y la fecha de salida debe ser posterior a la entrada.
+4. La cantidad de huéspedes no puede superar la capacidad de la habitación.
+5. Una habitación no puede tener reservas incompatibles que se crucen en el mismo periodo.
+6. Una habitación en mantenimiento o marcada como no disponible no puede reservarse.
+7. Las estancias de siete noches o más reciben un descuento del 10 %. La categoría `FREQUENT` aplica un 5 % y la categoría `VIP` un 15 %; los descuentos correspondientes se acumulan según la función de cálculo de Oracle.
+8. El check-in solo puede realizarse durante el periodo válido de la reserva y el check-out requiere que la llegada se haya registrado.
+9. La cancelación de una reserva está sujeta a su estado. Si existen pagos, la cancelación realizada por un trabajador requiere un administrador; un huésped solo puede cancelar una reserva propia que no tenga pagos.
+10. Los abonos deben ser mayores que cero, admitir como máximo dos decimales y no superar el saldo pendiente.
+11. No se puede iniciar el mantenimiento de una habitación que tenga reservas activas o con llegada registrada.
 
 ## 9. Diseño y arquitectura
 
 ### 9.1 Organización por paquetes
 
-La estructura documentada del proyecto incluye los siguientes componentes:
+La estructura principal del proyecto se organiza en los siguientes componentes:
 
 | Componente | Responsabilidad principal |
 |---|---|
-| `Main` | Construir las dependencias concretas e iniciar la aplicación. |
-| `model` | Representar personas, habitaciones, reservas, comprobantes y contratos del dominio. |
-| `service` | Coordinar los casos de uso y las reglas que involucran varias entidades o repositorios. |
-| `persistence` | Definir repositorios, convertir registros a texto y leer o escribir los archivos. |
-| `ui` | Mostrar el menú de consola, recibir entradas y presentar resultados. |
-| `validation` | Reunir comprobaciones reutilizables de datos. |
-| `exceptions` | Representar errores de datos, reglas del negocio y recursos inexistentes. |
-| `data/` | Conservar archivos de texto usados por la aplicación. |
+| `Main` y `ui.AppFxmlLauncher` | Iniciar la aplicación JavaFX. |
+| `ui` | Cargar las ventanas, recibir entradas y presentar resultados. |
+| `service` | Coordinar las operaciones solicitadas por los controladores mediante `HotelService`. |
+| `persistence` | Gestionar la conexión JDBC, las consultas, los mappers y las llamadas a PL/SQL. |
+| `model` | Representar personas, habitaciones, reservas, comprobantes y resultados de reportes. |
+| `validation` | Reunir validaciones básicas de entrada. |
+| `exceptions` | Representar errores de datos, reglas de negocio y recursos inexistentes. |
+| `oracle/` | Contener los scripts SQL y PL/SQL de instalación y pruebas. |
 
-Las dependencias principales siguen el flujo `ui → service → persistence`, y los componentes de persistencia utilizan los tipos del modelo para almacenar y reconstruir registros. `Main` conecta las implementaciones concretas con los servicios.
+El flujo habitual de una operación es `ui → service → persistence → Oracle`. Los controladores no ejecutan directamente las reglas de negocio ni realizan las escrituras en las tablas.
 
-### 9.2 Entidades principales
+### 9.2 Entidades y componentes principales
 
-- **Person:** clase base para información compartida entre diferentes tipos de persona.
-- **Client:** representa un cliente del hotel.
-- **Employee:** representa a un trabajador y su clasificación de rol.
-- **Room:** representa una habitación y sus características relevantes.
-- **Reservation:** representa una reserva, sus fechas, estado y datos relacionados.
-- **Invoice:** representa un comprobante relacionado con la operación económica.
-- **PricingPolicy:** contrato para calcular precios mediante estrategias.
-- **StandardPricing / LongStayPricing:** implementaciones de estrategias de precio.
-- **Repository<T>:** contrato para las operaciones básicas de persistencia.
-- **HotelService:** coordina operaciones del dominio.
-- **HotelApp:** gestiona la interacción por consola.
+- **Person:** clase base con información común de personas.
+- **Client:** representa a un huésped y su categoría (`NEW`, `FREQUENT` o `VIP`).
+- **Employee:** representa a un trabajador, su rol y sus credenciales de acceso.
+- **Room:** representa una habitación, su tipo, capacidad, tarifa, disponibilidad y mantenimiento.
+- **Reservation:** relaciona al cliente, el trabajador que la registra (cuando aplica), la habitación, las fechas, la cantidad de huéspedes, el total y el estado.
+- **Invoice:** representa el comprobante asociado a una reserva, su método de pago, monto, abonos, reembolsos y estado.
+- **ReportRows:** contiene estructuras de solo lectura para representar los resultados de los reportes recibidos desde Oracle.
+- **HotelService:** actúa como fachada entre la interfaz y la persistencia.
+- **OracleHotelProcedures:** centraliza las llamadas JDBC a los paquetes PL/SQL.
+- **Repository<T>:** define operaciones de consulta para recuperar registros.
 
-La lista debe contrastarse con el repositorio final, especialmente si durante la última etapa cambiaron nombres, métodos o relaciones.
+### 9.3 Persistencia y base de datos
 
-### 9.3 Persistencia de datos
+La información se almacena en Oracle Database. Las tablas principales del sistema son:
 
-Los archivos locales identificados en la estructura documentada son:
+| Tabla | Información almacenada |
+|---|---|
+| `CLIENTES` | Datos de huéspedes y su categoría. |
+| `TRABAJADORES` | Datos de trabajadores, rol, usuario, contraseña y estado. |
+| `HABITACIONES` | Número, tipo, capacidad, precio, disponibilidad y mantenimiento. |
+| `RESERVAS` | Cliente, trabajador opcional, habitación, fechas, huéspedes, precio, total y estado. |
+| `COMPROBANTES` | Reserva asociada, fecha de emisión, monto, método de pago, abonos, reembolsos y estado. |
+| `AUDITORIA_RESERVAS` | Historial de cambios de estado de las reservas. |
 
-- `data/clientes.txt`
-- `data/trabajadores.txt`
-- `data/habitaciones.txt`
-- `data/reservas.txt`
-- `data/comprobantes.txt`
+Los paquetes PL/SQL principales son:
 
-Las clases de persistencia convierten los objetos a registros de texto y los reconstruyen al cargar los archivos. La carpeta `data/` se encuentra en la raíz del proyecto; por ello, ejecutar desde una ubicación distinta puede afectar la resolución de las rutas si estas son relativas.
+- **`PKG_RESERVAS`:** crea y cancela reservas, consulta disponibilidad, calcula totales, registra check-in/check-out, genera comprobantes y registra pagos.
+- **`PKG_PERSONAS`:** registra clientes, huéspedes y trabajadores, valida datos y permite iniciar sesión.
+- **`PKG_HABITACIONES`:** registra habitaciones y gestiona el mantenimiento.
+- **`PKG_REPORTES`:** genera estadísticas generales, reservas por estado, ingresos, uso de habitaciones, mejores clientes, saldos pendientes y ranking de habitaciones.
 
-El archivo `docs/gcode.sql`, si está presente, es un esquema de referencia y no una conexión activa con Oracle ni con otra base de datos SQL.
+También se utilizan las funciones `FN_NOCHES` y `FN_HAY_SOLAPE`, además de triggers que validan operaciones relacionadas con las reservas y registran cambios en la auditoría.
 
+Los repositorios Java se utilizan para consultar registros y convertir los resultados en modelos. Las operaciones de escritura y las reglas del negocio se ejecutan mediante los paquetes PL/SQL.
 
-### 9.4 Relación entre diseño, GRASP y SOLID
+### 9.4 Comunicación entre Java y Oracle
 
-La siguiente tabla explica las decisiones de diseño que pueden identificarse en la estructura descrita. La relación debe verificarse con el código que se entregue; no equivale a certificar cumplimiento total de cada principio.
+La comunicación se realiza mediante JDBC. `Database` lee el archivo local `db.properties` y abre la conexión. `AppFxml` crea el servicio que utilizará la aplicación. Los controladores llaman a `HotelService`, que prepara los parámetros y delega las operaciones en `OracleHotelProcedures`.
 
-| Principio o criterio | Aplicación en el proyecto | Alcance / precaución |
+La clase `OracleHotelProcedures` invoca procedimientos y funciones mediante `CallableStatement`. Cuando Oracle devuelve cursores, la capa JDBC lee sus filas y las convierte en modelos o estructuras de reporte. Los errores definidos en PL/SQL se traducen a las excepciones utilizadas por la aplicación.
+
+### 9.5 Conexión desde varias computadoras
+
+La aplicación utiliza una conexión JDBC directa con Oracle. Por esa razón, varios equipos pueden ejecutar su propia copia de Hotel Reservas y conectarse a una misma instancia de Oracle, siempre que exista conectividad de red y el servidor permita las conexiones.
+
+En este escenario, un equipo mantiene activa la instancia Oracle y los demás se conectan utilizando la dirección IP privada del servidor, el puerto del Listener y el nombre del servicio. Cada computadora cliente necesita su propio archivo `db.properties`, configurado para apuntar al mismo esquema de Oracle. No se crea una base de datos independiente en cada equipo ni se ejecutan los scripts de instalación en cada cliente.
+
+La computadora que aloja Oracle debe permanecer encendida y tener activo el Listener. El firewall debe permitir el acceso desde los equipos autorizados. Para conexiones fuera de la red local se recomienda utilizar una VPN y no exponer directamente el puerto de Oracle a Internet.
+
+### 9.6 Principios GRASP y SOLID
+
+| Principio o criterio | Aplicación en el proyecto | Alcance |
 |---|---|---|
-| GRASP: alta cohesión | La interfaz, el servicio y la persistencia se distribuyen en componentes con propósitos distintos. | Revisar que cada clase conserve responsabilidades relacionadas y no concentre operaciones ajenas. |
-| GRASP: bajo acoplamiento | Los contratos como `Repository<T>` separan las operaciones de almacenamiento de sus implementaciones concretas. | El desacoplamiento depende de que el servicio use los contratos y no dependa innecesariamente de clases concretas. |
-| GRASP: experto en información | Las entidades y servicios trabajan con los datos necesarios para sus operaciones. | Las reglas concretas deben comprobarse en los métodos reales del modelo y de `HotelService`. |
-| SOLID: responsabilidad única (SRP) | La separación de `HotelApp`, `HotelService`, validadores y clases de persistencia refleja una intención de separar motivos de cambio. | No afirmar que todas las clases cumplen SRP sin revisar cada una. |
-| SOLID: abierto/cerrado (OCP) | `PricingPolicy` y sus implementaciones (`StandardPricing` y `LongStayPricing`) permiten representar políticas de precio diferentes detrás de un contrato común. | La extensión sin modificación solo se cumple en la medida en que el servicio use la abstracción y no dependa de condicionales rígidos para cada política. |
-| SOLID: inversión de dependencias (DIP) | Los contratos de repositorio pueden servir como punto de dependencia entre servicio y almacenamiento. | Debe verificarse cómo se construyen e inyectan las dependencias en `Main` y `HotelService`. |
+| GRASP: alta cohesión | La interfaz, el servicio, la persistencia y los paquetes SQL tienen responsabilidades diferenciadas. | Cada componente se concentra en una parte del flujo. |
+| GRASP: bajo acoplamiento | Los controladores utilizan `HotelService` y no necesitan ejecutar SQL directamente. | La comunicación con Oracle se concentra en la capa de persistencia. |
+| GRASP: experto en información | Oracle aplica las reglas sobre los registros que almacena. | Las operaciones utilizan los datos de las tablas para validar y calcular resultados. |
+| SOLID: responsabilidad única (SRP) | Los controladores, servicios, mappers y componentes JDBC tienen responsabilidades distintas. | La separación facilita localizar cambios y errores. |
+| SOLID: inversión de dependencias (DIP) | `HotelService` recibe repositorios a través de sus interfaces y utiliza una clase dedicada para las llamadas a Oracle. | La construcción de dependencias se realiza al iniciar el servicio. |
 
-No se atribuye una implementación de permisos a `Employee.Role`: la clasificación del trabajador no equivale por sí sola a autenticación ni autorización. Tampoco se asume que `Client.Category` aplique descuentos automáticamente; cualquier comportamiento de ese tipo debe estar programado explícitamente.
+Estas decisiones reflejan criterios de diseño aplicados al proyecto; no constituyen una certificación de cumplimiento total de los principios.
 
 ## 10. Tecnologías y herramientas
 
-- **Java / JDK:** lenguaje y entorno de ejecución del proyecto; confirma la versión requerida en `pom.xml` antes de la entrega.
-- **Maven:** administración de la configuración y compilación del proyecto.
-- **Apache NetBeans:** entorno de desarrollo usado para editar y ejecutar la aplicación.
-- **Git:** control de versiones local.
-- **GitHub:** alojamiento remoto del repositorio.
-- **Archivos de texto:** mecanismo de persistencia local.
-- **Mermaid y Markdown:** formatos usados para apoyar diagramas y documentación, cuando estén incluidos en el repositorio.
-
+- **Java 17:** lenguaje utilizado para implementar la aplicación.
+- **JavaFX:** biblioteca utilizada para construir la interfaz gráfica.
+- **JDBC:** API utilizada para conectar Java con Oracle y ejecutar consultas y procedimientos.
+- **Oracle Database:** sistema gestor de base de datos utilizado para almacenar la información.
+- **PL/SQL:** lenguaje utilizado para implementar paquetes, procedimientos, funciones y triggers.
+- **Apache Maven:** herramienta para administrar dependencias y ejecutar la aplicación.
+- **Apache NetBeans:** entorno de desarrollo utilizado durante el proyecto.
+- **SQL Developer:** herramienta para conectarse a Oracle, ejecutar scripts y revisar los objetos de la base de datos.
+- **Git y GitHub:** herramientas utilizadas para el control de versiones y el alojamiento del repositorio.
+- **Markdown y Mermaid:** formatos utilizados para documentación y diagramas, cuando corresponde.
 
 ### 10.1 Correspondencia con la guía del proyecto de aula
 
-La guía de Programación III sirve como estructura de referencia para documentar el proyecto por etapas: análisis del problema y requisitos, diseño de arquitectura y clases, implementación y verificación, y documentación final. En esta versión se incluyen los apartados académicos principales —resumen, introducción, problema, justificación, estado del arte, objetivos, marco teórico, requisitos, arquitectura, limitaciones, pruebas y referencias—.
+La documentación presenta el análisis del problema, los objetivos, el diseño, la arquitectura, las tecnologías, las pruebas y las limitaciones del sistema. La versión actual incorpora una interfaz gráfica JavaFX y conexión con una base de datos Oracle, por lo que ya no corresponde describirla como un programa de consola con almacenamiento en archivos de texto.
 
-La guía también contempla componentes que pueden pertenecer a una versión más completa, como interfaz gráfica y conexión a una base de datos relacional. En esta documentación se identifican como trabajo futuro cuando no forman parte del alcance implementado. Del mismo modo, los diagramas, la evidencia de Git y los resultados de pruebas deben corresponder a los archivos y a la rama que efectivamente se entreguen.
+Los diagramas y las pruebas deben corresponder a la versión del código que se entrega. Los resultados de pruebas se describen según las ejecuciones realizadas y no deben presentarse como comprobaciones que no se hayan llevado a cabo.
 
 ## 11. Pruebas y verificación
 
-Se realizaron pruebas funcionales de las operaciones principales durante el desarrollo. La tabla presenta el comportamiento esperado para cada escenario; las comprobaciones realizadas indicaron que las funciones probadas operaron correctamente.
+Durante el desarrollo se ejecutó un script de pruebas PL/SQL para verificar los paquetes de personas, habitaciones, reservas y reportes. Entre los escenarios comprobados se encuentran:
 
 | ID | Escenario de prueba | Resultado esperado |
 |---|---|---|
-| P-01 | Iniciar el programa con archivos de datos válidos | La aplicación inicia, carga los datos disponibles y muestra el menú de consola. |
-| P-02 | Registrar un cliente con datos válidos | El sistema acepta el registro y permite consultarlo posteriormente. |
-| P-03 | Introducir datos inválidos | El sistema rechaza los datos que incumplen las validaciones e informa el problema. |
-| P-04 | Registrar una habitación | La habitación queda registrada y disponible para consulta. |
-| P-05 | Crear una reserva válida | La reserva queda registrada con los datos introducidos y las fechas correspondientes. |
-| P-06 | Crear una reserva que se solapa con otra para la misma habitación | El sistema impide el solapamiento incompatible y comunica que la reserva no puede realizarse. |
-| P-07 | Consultar un identificador inexistente | El sistema informa que no encuentra el registro solicitado, sin tratarlo como uno válido. |
-| P-08 | Aplicar una política de precio | El importe se calcula de acuerdo con la política de precios utilizada. |
-| P-09 | Registrar un pago o cambiar el estado de una reserva | La información correspondiente se actualiza y queda guardada. |
-| P-10 | Cerrar y volver a iniciar la aplicación | Los datos guardados previamente siguen disponibles después de reiniciar el programa. |
+| P-01 | Registrar un cliente con datos válidos | Se registra y los datos se normalizan. |
+| P-02 | Repetir documentos, correos o teléfonos | Oracle rechaza los datos duplicados. |
+| P-03 | Registrar trabajadores y validar roles | Se aplican las restricciones de autorización. |
+| P-04 | Iniciar sesión con credenciales válidas, incorrectas o de un trabajador inactivo | El resultado corresponde al estado de la cuenta y las credenciales. |
+| P-05 | Registrar habitaciones con datos válidos o inválidos | Se aceptan los datos correctos y se rechazan los inválidos. |
+| P-06 | Calcular importes según noches y categoría | Se aplican los descuentos establecidos. |
+| P-07 | Crear reservas válidas e inválidas | Se comprueban fechas, capacidad, cliente, trabajador y disponibilidad. |
+| P-08 | Intentar crear reservas superpuestas | Oracle impide los cruces incompatibles. |
+| P-09 | Realizar check-in, check-out y cancelaciones | Se respetan los estados y permisos permitidos. |
+| P-10 | Generar comprobantes y registrar abonos | Se actualizan los estados y saldos correspondientes. |
+| P-11 | Iniciar y finalizar mantenimiento | Se respetan las condiciones de mantenimiento. |
+| P-12 | Consultar estadísticas, reportes y rankings | Los cursores devuelven resultados coherentes con los registros. |
 
-Las pruebas realizadas durante el desarrollo indicaron que los escenarios comprobados funcionaron correctamente. Esta verificación corresponde al prototipo y no equivale a una auditoría externa ni a una evaluación formal de calidad.
+En la ejecución realizada durante el desarrollo, el autor informó que el script de pruebas terminó con cero fallos. Este resultado corresponde a las pruebas PL/SQL ejecutadas en el entorno local. No equivale a una auditoría independiente ni demuestra por sí solo que todas las combinaciones de la interfaz JavaFX hayan sido probadas.
 
-## 12. Resultados esperados y aportes
+La verificación de la aplicación también requiere comprobar la conexión JDBC, el inicio de sesión y las operaciones principales desde JavaFX en el entorno donde se vaya a ejecutar.
 
-Se espera que **Hotel Reservas** permita realizar desde una aplicación de consola las operaciones básicas de administración hotelera contempladas en su alcance: registrar y consultar información, gestionar reservas, validar datos, calcular tarifas y conservar los registros mediante archivos locales. También se espera que impida reservas incompatibles para una misma habitación y que los cambios guardados continúen disponibles al volver a iniciar el programa.
+## 12. Resultados y aportes
 
-En el aspecto académico, el proyecto reúne en un caso práctico conceptos de programación orientada a objetos, separación de responsabilidades, interfaces, políticas de precios, validaciones, manejo de excepciones y persistencia en archivos de texto. Las pruebas realizadas durante el desarrollo respaldan el funcionamiento de las operaciones verificadas, dentro de los límites del prototipo; no se presenta como un sistema hotelero comercial completo.
+Hotel Reservas integra una interfaz gráfica para gestionar las operaciones principales de un hotel con una base de datos Oracle. La solución permite registrar y consultar información, administrar habitaciones y reservas, registrar comprobantes y pagos, controlar el mantenimiento y consultar reportes.
+
+Uno de los cambios principales de la arquitectura fue trasladar las reglas de negocio a Oracle. Los procedimientos y funciones PL/SQL ejecutan las operaciones y devuelven los resultados que Java presenta en la interfaz. Esto reduce la duplicación de reglas entre la aplicación y la base de datos.
+
+En el aspecto académico, el proyecto reúne conceptos de programación orientada a objetos, herencia, interfaces, manejo de excepciones, JavaFX, JDBC, bases de datos relacionales y programación PL/SQL. También permite estudiar la conexión de varios clientes de escritorio a una misma instancia de Oracle, siempre que se configure la red correspondiente.
 
 ## 13. Limitaciones
 
-1. La interfaz es de consola; no existe una interfaz web o móvil.
-2. La persistencia se realiza en archivos locales y no mediante una base de datos transaccional.
-3. No se incluyen servicios de reserva por Internet ni sincronización con plataformas externas.
-4. El registro de pagos no equivale a una integración con una pasarela bancaria real.
-5. Los roles y categorías del modelo no implican permisos o descuentos automáticos si estos comportamientos no están implementados en el servicio.
-6. No debe utilizarse como sistema de producción sin ampliar las pruebas, seguridad, recuperación ante errores, concurrencia y administración de datos.
-7. Si se almacenan datos personales reales, deben evaluarse las obligaciones aplicables de protección de datos, así como los controles de acceso, conservación y eliminación.
+1. La aplicación es de escritorio y no incluye una interfaz web ni móvil.
+2. La comunicación con Oracle se realiza directamente desde cada cliente mediante JDBC; no existe una API o servidor de aplicación intermedio.
+3. El acceso desde varios equipos depende de que Oracle, el Listener, la red y el firewall estén configurados correctamente.
+4. El registro de pagos es interno al sistema y no representa una integración con una pasarela bancaria real.
+5. Las contraseñas de trabajadores se almacenan en texto plano en esta versión académica. Esta decisión limita el uso del sistema fuera de un entorno de pruebas.
+6. Las fechas se almacenan como texto en el formato `AAAA-MM-DD`, de acuerdo con el esquema utilizado.
+7. La aplicación requiere una instancia Oracle disponible y un archivo `db.properties` configurado en cada equipo cliente.
+8. No se incluyen servicios de reserva por Internet ni integración con plataformas externas.
+9. El sistema no debe utilizarse como producto comercial de producción sin ampliar las pruebas, la seguridad, los respaldos, la recuperación ante fallos y la administración de usuarios y conexiones.
 
-En Colombia, la Ley Estatutaria 1581 de 2012 establece disposiciones generales para la protección de datos personales registrados en bases de datos susceptibles de tratamiento [6]. Esta mención es contextual y no constituye una evaluación jurídica ni una afirmación de que el prototipo cumpla todas las obligaciones legales.
+Si se almacenan datos personales reales, deben revisarse las obligaciones aplicables de protección de datos. En Colombia, la Ley Estatutaria 1581 de 2012 establece disposiciones generales para el tratamiento de datos personales [5]. Esta mención es contextual y no constituye una evaluación jurídica ni una afirmación de cumplimiento legal del proyecto.
 
 ## 14. Trabajo futuro
 
-- Incorporar pruebas automatizadas para las reglas centrales y para la persistencia.
-- Evaluar una base de datos relacional si el alcance del proyecto lo requiere.
-- Añadir manejo más robusto de errores de lectura y escritura, respaldos y recuperación de archivos.
-- Diseñar autenticación y autorización reales si se requiere diferenciar permisos de trabajadores.
-- Mejorar la gestión de fechas, estados, historial de cambios y reportes.
-- Crear una interfaz gráfica o web solo si los requisitos académicos o de uso justifican esa ampliación.
-- Revisar documentación JavaDoc, diagramas y README para que reflejen exactamente el código de la entrega.
+- Mejorar el almacenamiento de contraseñas mediante mecanismos criptográficos adecuados.
+- Incorporar pruebas automatizadas para los flujos de JavaFX y la integración JDBC.
+- Evaluar una API o servidor de aplicación intermedio si el sistema requiere despliegues más amplios.
+- Mejorar el manejo de fechas y los tipos de datos de la base de datos.
+- Ampliar la gestión de respaldos y recuperación ante errores.
+- Incorporar mecanismos de configuración y despliegue más sencillos para distintos entornos.
+- Ampliar los reportes y las consultas de acuerdo con las necesidades del hotel.
 
 ## 15. Conclusiones
 
-Hotel Reservas plantea una solución académica de alcance limitado para organizar las operaciones principales de un sistema de reservas hoteleras. Su estructura permite aplicar programación orientada a objetos, separar la presentación de la lógica de negocio, utilizar contratos de interfaces y conservar registros en archivos locales.
+Hotel Reservas presenta una solución académica para organizar las operaciones principales de un sistema de gestión hotelera. La aplicación combina JavaFX para la interfaz, Java y JDBC para la comunicación y Oracle Database para el almacenamiento y la ejecución de las reglas de negocio.
 
-La comparación con sistemas comerciales y proyectos académicos muestra que la gestión de reservas comparte necesidades comunes —como representar habitaciones, clientes, periodos de estancia y pagos—, pero también que las soluciones de producción suelen incluir funciones de integración, seguridad y operación que están fuera del alcance de este prototipo.
+La integración de paquetes PL/SQL permitió centralizar validaciones, cálculos y operaciones de escritura, evitando mantener implementaciones duplicadas entre Java y Oracle. La separación entre controladores, servicio, persistencia y base de datos permite identificar las responsabilidades principales de cada componente.
 
-La calidad final del proyecto debe valorarse revisando el código entregado, ejecutando las pruebas y comprobando la consistencia entre implementación y documentación. La principal contribución del trabajo es demostrar la aplicación de los conceptos estudiados en un sistema concreto y explicable, sin presentarlo como un PMS comercial completo.
+El proyecto aplica los conceptos estudiados en Programación III en un caso práctico que puede explicarse desde su modelo de datos, su arquitectura y sus procesos principales. Aunque mantiene limitaciones propias de su alcance académico, constituye una base funcional para estudiar el desarrollo de aplicaciones Java conectadas a una base de datos relacional.
+
+## Referencias
+
+[1] Newhouse, B., Ekstrom, M., Finke, J. y Harriston, M. (2021). *Securing Property Management Systems*. NIST Special Publication 1800-27. National Institute of Standards and Technology. https://doi.org/10.6028/NIST.SP.1800-27
+
+[2] Vignaga, A. y Perovich Gerosa, D. (2003). *SAD del subsistema de reservas del sistema de gestión hotelera*. Reportes Técnicos 03-15, Universidad de la República, Facultad de Ingeniería, Instituto de Computación. https://hdl.handle.net/20.500.12008/3499
+
+[3] Abduljwad, F. y Wang, G.-J. (2005). *Design and Implementation of an Online Hotel Booking System Using Multi-Tier Architecture*. Journal of Jishou University (Natural Science Edition), 26(1).
+
+[4] International Organization for Standardization. (2023). *ISO/IEC 25010:2023 — Systems and software engineering — Systems and software Quality Requirements and Evaluation (SQuaRE) — Product quality model*. https://www.iso.org/standard/78176.html
+
+[5] Congreso de Colombia. (2012). *Ley Estatutaria 1581 de 2012, por la cual se dictan disposiciones generales para la protección de datos personales*. https://www.cancilleria.gov.co/sites/default/files/Normograma/docs/ley_1581_2012.htm

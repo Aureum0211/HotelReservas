@@ -1,4 +1,0 @@
-1;Administrador;1000000001;admin@hotel.com;3001234567;Valledupar;true;ADMIN;admin;admin123
-2;Laura Gomez;1000000002;laura@hotel.com;3002345678;Valledupar;true;RECEPTIONIST;recepcion1;recep123
-3;Carlos Perez;1000000003;carlos@hotel.com;3003456789;Valledupar;true;RECEPTIONIST;recepcion2;recep456
-4;Ana Torres;1000000004;ana@hotel.com;3004567890;Valledupar;false;RECEPTIONIST;inactivo;inactivo123

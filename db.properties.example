@@ -1,0 +1,15 @@
+# Plantilla de conexion Oracle para HotelReservas.
+# Copia este archivo como db.properties en la misma carpeta que pom.xml y completa los datos.
+#
+# Oracle en este mismo equipo:
+# db.url=jdbc:oracle:thin:@//localhost:1521/SERVICE_NAME
+#
+# Oracle en otro equipo de la red local:
+# db.url=jdbc:oracle:thin:@//IP_PRIVADA_DEL_SERVIDOR:1521/SERVICE_NAME
+#
+# Usa el SERVICE_NAME real de tu instancia (por ejemplo, xepdb1 en algunas instalaciones XE).
+# No uses SYS ni SYSTEM para la aplicacion.
+
+db.url=jdbc:oracle:thin:@//HOST:1521/SERVICE_NAME
+db.user=HOTEL
+db.password=CAMBIA_ESTA_CLAVE
