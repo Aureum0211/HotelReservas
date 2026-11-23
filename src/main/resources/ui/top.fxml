@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="ui.TopHabitacionesController" spacing="14">
+   <padding><Insets topRightBottomLeft="22"/></padding>
+   <children>
+      <Label text="Habitaciones más solicitadas" styleClass="titulo-seccion"/>
+      <HBox spacing="10" alignment="CENTER_LEFT" styleClass="panel-claro">
+         <children>
+            <Label text="Mostrar" styleClass="seccion"/>
+            <ComboBox fx:id="cmbCantidad" prefWidth="110"/>
+            <Label text="Periodo" styleClass="seccion"/>
+            <ComboBox fx:id="cmbPeriodo" prefWidth="170"/>
+            <Button text="Actualizar" onAction="#actualizar"/>
+         </children>
+      </HBox>
+      <Label fx:id="lblNota" styleClass="nota" wrapText="true"/>
+      <ScrollPane fitToWidth="true" styleClass="scroll-transparente" VBox.vgrow="ALWAYS">
+         <content>
+            <VBox fx:id="vbTop" spacing="12">
+               <padding><Insets topRightBottomLeft="6"/></padding>
+            </VBox>
+         </content>
+      </ScrollPane>
+   </children>
+</VBox>

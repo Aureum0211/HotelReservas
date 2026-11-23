@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ui.PrincipalController" styleClass="fondo" prefWidth="1240" prefHeight="740">
+   <top>
+      <HBox alignment="CENTER_LEFT" spacing="12" styleClass="barra">
+         <padding><Insets top="10" right="16" bottom="10" left="16"/></padding>
+         <children>
+            <ImageView fitHeight="44" preserveRatio="true" smooth="true"><image><Image url="@images/logo_hr.png"/></image></ImageView>
+            <Label text="Hotel Reserva" styleClass="barra-titulo" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblUsuario" styleClass="barra-texto"/>
+            <Button text="Cerrar sesión" styleClass="boton-barra" onAction="#cerrarSesion"/>
+         </children>
+      </HBox>
+   </top>
+   <center>
+      <TabPane fx:id="tabs" tabClosingPolicy="UNAVAILABLE">
+         <tabs>
+
+            <!-- ============================ PANEL (solo administrador) ============================ -->
+            <Tab fx:id="tabPanel" text="Panel">
+               <content>
+                  <VBox spacing="16">
+                     <padding><Insets topRightBottomLeft="20"/></padding>
+                     <children>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                           <children>
+                              <Label text="Resumen de hoy" styleClass="titulo-seccion"/>
+                              <Button text="Actualizar" onAction="#actualizarPanel"/>
+                           </children>
+                        </HBox>
+                        <VBox spacing="8" styleClass="tarjeta" maxWidth="Infinity">
+                           <children>
+                              <Label text="Ocupación de hoy" styleClass="tarjeta-titulo"/>
+                              <ProgressBar fx:id="pbOcupacion" progress="0" maxWidth="Infinity" prefHeight="18"/>
+                              <Label fx:id="lblPorcentaje" styleClass="resumen"/>
+                           </children>
+                        </VBox>
+                        <GridPane hgap="14" vgap="14">
+                           <columnConstraints>
+                              <ColumnConstraints percentWidth="25" hgrow="ALWAYS"/>
+                              <ColumnConstraints percentWidth="25" hgrow="ALWAYS"/>
+                              <ColumnConstraints percentWidth="25" hgrow="ALWAYS"/>
+                              <ColumnConstraints percentWidth="25" hgrow="ALWAYS"/>
+                           </columnConstraints>
+                           <children>
+                              <VBox spacing="6" styleClass="tarjeta" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="0"><children>
+                                 <Label text="Habitaciones" styleClass="tarjeta-titulo"/><Label fx:id="lblTotal" styleClass="tarjeta-valor"/></children></VBox>
+                              <VBox spacing="6" styleClass="tarjeta" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="0"><children>
+                                 <Label text="Ocupadas hoy" styleClass="tarjeta-titulo"/><Label fx:id="lblOcupadas" styleClass="tarjeta-valor"/></children></VBox>
+                              <VBox spacing="6" styleClass="tarjeta" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="0"><children>
+                                 <Label text="Reservadas" styleClass="tarjeta-titulo"/><Label fx:id="lblReservadas" styleClass="tarjeta-valor"/></children></VBox>
+                              <VBox spacing="6" styleClass="tarjeta" maxWidth="Infinity" GridPane.columnIndex="3" GridPane.rowIndex="0"><children>
+                                 <Label text="Libres" styleClass="tarjeta-titulo"/><Label fx:id="lblLibres" styleClass="tarjeta-valor"/></children></VBox>
+                              <VBox spacing="6" styleClass="tarjeta" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="1"><children>
+                                 <Label text="En mantenimiento" styleClass="tarjeta-titulo"/><Label fx:id="lblMantenimiento" styleClass="tarjeta-valor"/></children></VBox>
+                              <VBox spacing="6" styleClass="tarjeta" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1"><children>
+                                 <Label text="No disponibles" styleClass="tarjeta-titulo"/><Label fx:id="lblNoDisponibles" styleClass="tarjeta-valor"/></children></VBox>
+                              <VBox spacing="6" styleClass="tarjeta" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="1"><children>
+                                 <Label text="Ingresos recibidos" styleClass="tarjeta-titulo"/><Label fx:id="lblIngresos" styleClass="tarjeta-valor"/></children></VBox>
+                              <VBox spacing="6" styleClass="tarjeta" maxWidth="Infinity" GridPane.columnIndex="3" GridPane.rowIndex="1"><children>
+                                 <Label text="Saldo pendiente" styleClass="tarjeta-titulo"/><Label fx:id="lblPendiente" styleClass="tarjeta-valor"/></children></VBox>
+                           </children>
+                        </GridPane>
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+
+            <!-- ============================ TOP HABITACIONES ============================ -->
+            <Tab text="Top habitaciones">
+               <content>
+                  <fx:include fx:id="top" source="top.fxml"/>
+               </content>
+            </Tab>
+
+            <!-- ============================ RESERVAS ============================ -->
+            <Tab text="Reservas">
+               <content>
+                  <VBox spacing="10">
+                     <padding><Insets topRightBottomLeft="16"/></padding>
+                     <children>
+                        <VBox spacing="8" styleClass="panel-claro">
+                           <children>
+                              <Label text="Nueva reserva" styleClass="seccion"/>
+                              <HBox spacing="8" alignment="CENTER_LEFT">
+                                 <children>
+                                    <ComboBox fx:id="cmbCliente" promptText="Cliente" prefWidth="230" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                                    <DatePicker fx:id="dpEntrada" prefWidth="130"/>
+                                    <DatePicker fx:id="dpSalida" prefWidth="130"/>
+                                    <Label text="Personas"/>
+                                    <Spinner fx:id="spPersonas" min="1" max="10" initialValue="1" prefWidth="70"/>
+                                    <ComboBox fx:id="cmbHabitacion" promptText="Habitación libre" prefWidth="320" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                                    <Button text="Crear reserva" styleClass="boton-principal" onAction="#crearReserva"/>
+                                 </children>
+                              </HBox>
+                              <Label fx:id="lblResumenReserva" styleClass="nota"/>
+                              <Label fx:id="lblAviso" styleClass="error"/>
+                           </children>
+                        </VBox>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                           <children>
+                              <TextField fx:id="txtBuscarReserva" promptText="Buscar por cliente o habitación" prefWidth="240" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                              <ComboBox fx:id="cmbFiltroEstado" prefWidth="170"/>
+                              <Button text="Registrar llegada" onAction="#registrarLlegada">
+                                 <tooltip><Tooltip text="El huésped llega al hotel y se instala. La reserva pasa a 'En el hotel'."/></tooltip>
+                              </Button>
+                              <Button text="Registrar salida" onAction="#registrarSalida">
+                                 <tooltip><Tooltip text="El huésped se va del hotel. La reserva pasa a 'Finalizada'."/></tooltip>
+                              </Button>
+                              <Button text="Cancelar reserva" styleClass="boton-peligro" onAction="#cancelarReserva"/>
+                              <ComboBox fx:id="cmbMetodo" prefWidth="140"/>
+                              <Button text="Generar comprobante" onAction="#generarComprobante"/>
+                           </children>
+                        </HBox>
+                        <TableView fx:id="tblReservas" VBox.vgrow="ALWAYS">
+                           <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+                           <columns>
+                              <TableColumn text="#"/>
+                              <TableColumn text="Cliente"/>
+                              <TableColumn text="Habitación"/>
+                              <TableColumn text="Entrada"/>
+                              <TableColumn text="Salida"/>
+                              <TableColumn text="Personas"/>
+                              <TableColumn text="Total"/>
+                              <TableColumn text="Atendió"/>
+                              <TableColumn text="Estado"/>
+                           </columns>
+                        </TableView>
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+
+            <!-- ============================ CLIENTES ============================ -->
+            <Tab text="Clientes">
+               <content>
+                  <HBox spacing="16">
+                     <padding><Insets topRightBottomLeft="16"/></padding>
+                     <children>
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                           <children>
+                              <TextField fx:id="txtBuscarCliente" promptText="Buscar por nombre, documento o correo"/>
+                              <TableView fx:id="tblClientes" VBox.vgrow="ALWAYS">
+                                 <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+                                 <columns>
+                                    <TableColumn text="#"/>
+                                    <TableColumn text="Nombre"/>
+                                    <TableColumn text="Documento"/>
+                                    <TableColumn text="Correo"/>
+                                    <TableColumn text="Teléfono"/>
+                                    <TableColumn text="Ciudad"/>
+                                    <TableColumn text="Categoría"/>
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </VBox>
+                        <VBox spacing="8" prefWidth="250" styleClass="panel-claro">
+                           <children>
+                              <Label text="Nuevo cliente" styleClass="seccion"/>
+                              <Label text="Nombre"/>
+                              <TextField fx:id="txtNombre"/>
+                              <Label text="Documento"/>
+                              <TextField fx:id="txtDocumento"/>
+                              <Label text="Correo"/>
+                              <TextField fx:id="txtCorreo"/>
+                              <Label text="Teléfono"/>
+                              <TextField fx:id="txtTelefono"/>
+                              <Label text="Ciudad"/>
+                              <TextField fx:id="txtCiudad"/>
+                              <Label text="Categoría"/>
+                              <ComboBox fx:id="cmbCategoria" maxWidth="Infinity"/>
+                              <Button text="Registrar cliente" styleClass="boton-principal" maxWidth="Infinity" onAction="#registrarCliente"/>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </content>
+            </Tab>
+
+            <!-- ============================ HABITACIONES ============================ -->
+            <Tab text="Habitaciones">
+               <content>
+                  <VBox spacing="10">
+                     <padding><Insets topRightBottomLeft="16"/></padding>
+                     <children>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                           <children>
+                              <Label text="Libres del"/>
+                              <DatePicker fx:id="dpDesde" prefWidth="130"/>
+                              <Label text="al"/>
+                              <DatePicker fx:id="dpHasta" prefWidth="130"/>
+                              <Label text="Personas"/>
+                              <Spinner fx:id="spPersonasBuscar" min="1" max="10" initialValue="1" prefWidth="70"/>
+                              <Button text="Buscar libres" onAction="#buscarLibres"/>
+                              <Button text="Ver todas" onAction="#verTodas"/>
+                           </children>
+                        </HBox>
+                        <HBox spacing="8" alignment="CENTER_LEFT" styleClass="panel-claro">
+                           <children>
+                              <Label text="Administrador:" styleClass="seccion"/>
+                              <TextField fx:id="txtNumero" promptText="Número" prefWidth="80"/>
+                              <ComboBox fx:id="cmbTipo" prefWidth="110"/>
+                              <Spinner fx:id="spCapacidad" min="1" max="10" initialValue="1" prefWidth="70"/>
+                              <TextField fx:id="txtPrecio" promptText="Precio por noche" prefWidth="130"/>
+                              <Button fx:id="btnAgregarHab" text="Agregar habitación" onAction="#agregarHabitacion"/>
+                              <Button fx:id="btnMantenimiento" text="Poner / quitar mantenimiento" onAction="#mantenimiento"/>
+                           </children>
+                        </HBox>
+                        <TableView fx:id="tblHabitaciones" VBox.vgrow="ALWAYS">
+                           <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+                           <columns>
+                              <TableColumn text="#"/>
+                              <TableColumn text="Número"/>
+                              <TableColumn text="Tipo"/>
+                              <TableColumn text="Capacidad"/>
+                              <TableColumn text="Precio por noche"/>
+                              <TableColumn text="Disponible"/>
+                              <TableColumn text="Mantenimiento"/>
+                           </columns>
+                        </TableView>
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+
+            <!-- ============================ COMPROBANTES ============================ -->
+            <Tab text="Comprobantes">
+               <content>
+                  <VBox spacing="10">
+                     <padding><Insets topRightBottomLeft="16"/></padding>
+                     <children>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                           <children>
+                              <TextField fx:id="txtAbono" promptText="Valor a abonar" prefWidth="150"/>
+                              <Button text="Registrar abono" styleClass="boton-principal" onAction="#registrarAbono"/>
+                              <Label text="Selecciona un comprobante de la tabla y escribe el valor." styleClass="nota"/>
+                           </children>
+                        </HBox>
+                        <TableView fx:id="tblComprobantes" VBox.vgrow="ALWAYS">
+                           <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+                           <columns>
+                              <TableColumn text="#"/>
+                              <TableColumn text="Reserva"/>
+                              <TableColumn text="Cliente"/>
+                              <TableColumn text="Fecha"/>
+                              <TableColumn text="Monto"/>
+                              <TableColumn text="Pagado"/>
+                              <TableColumn text="Saldo"/>
+                              <TableColumn text="Método"/>
+                              <TableColumn text="Estado"/>
+                           </columns>
+                        </TableView>
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+
+            <!-- ============================ REPORTES (solo administrador) ============================ -->
+            <Tab fx:id="tabReportes" text="Reportes">
+               <content>
+                  <fx:include source="reportes.fxml"/>
+               </content>
+            </Tab>
+
+            <!-- ============================ TRABAJADORES (solo administrador) ============================ -->
+            <Tab fx:id="tabTrabajadores" text="Trabajadores">
+               <content>
+                  <HBox spacing="16">
+                     <padding><Insets topRightBottomLeft="16"/></padding>
+                     <children>
+                        <TableView fx:id="tblTrabajadores" HBox.hgrow="ALWAYS">
+                           <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+                           <columns>
+                              <TableColumn text="#"/>
+                              <TableColumn text="Nombre"/>
+                              <TableColumn text="Documento"/>
+                              <TableColumn text="Correo"/>
+                              <TableColumn text="Teléfono"/>
+                              <TableColumn text="Ciudad"/>
+                              <TableColumn text="Rol"/>
+                              <TableColumn text="Usuario"/>
+                           </columns>
+                        </TableView>
+                        <VBox spacing="8" prefWidth="250" styleClass="panel-claro">
+                           <children>
+                              <Label text="Nuevo trabajador" styleClass="seccion"/>
+                              <Label text="Nombre"/>
+                              <TextField fx:id="txtEmpNombre"/>
+                              <Label text="Documento"/>
+                              <TextField fx:id="txtEmpDocumento"/>
+                              <Label text="Correo"/>
+                              <TextField fx:id="txtEmpCorreo"/>
+                              <Label text="Teléfono"/>
+                              <TextField fx:id="txtEmpTelefono"/>
+                              <Label text="Ciudad"/>
+                              <TextField fx:id="txtEmpCiudad"/>
+                              <Label text="Rol"/>
+                              <ComboBox fx:id="cmbEmpRol" maxWidth="Infinity"/>
+                              <Label text="Usuario"/>
+                              <TextField fx:id="txtEmpUsuario"/>
+                              <Label text="Contraseña"/>
+                              <PasswordField fx:id="txtEmpClave"/>
+                              <Button text="Registrar trabajador" styleClass="boton-principal" maxWidth="Infinity" onAction="#registrarTrabajador"/>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </content>
+            </Tab>
+
+
+         </tabs>
+      </TabPane>
+   </center>
+</BorderPane>
