@@ -6,71 +6,118 @@
 <?import javafx.scene.layout.*?>
 
 <!--
-  Pantalla de inicio = marca + mascota + inicio de sesion.
-  Los anchos de las tres columnas (33% / 30% / resto) se ajustan en BienvenidaController
-  para que la pantalla se vea bien en cualquier tamano de ventana.
+  Pantalla de inicio: heroe con la mascota (mitad izquierda) + dos accesos claramente separados
+  (mitad derecha): acceso administrativo para trabajadores y acceso para huespedes.
+  El ancho del heroe (50%) y el recorte de la imagen los ajusta BienvenidaController.
 -->
 <HBox fx:id="raiz" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="ui.BienvenidaController">
    <children>
 
-      <!-- Columna 1: marca -->
-      <VBox fx:id="panelMarca" styleClass="panel-verde" spacing="16" minWidth="300">
-         <padding><Insets top="34" right="34" bottom="22" left="40"/></padding>
-         <children>
-            <ImageView fitWidth="250" preserveRatio="true" smooth="true">
-               <image><Image url="@images/logo_completo.png"/></image>
-            </ImageView>
-            <Label text="Gestión inteligente de reservas y huéspedes para hoteles, hostales y alojamientos."
-                   styleClass="lema" wrapText="true"/>
-            <VBox spacing="8">
-               <padding><Insets top="10" right="0" bottom="0" left="0"/></padding>
-               <children>
-                  <Label text="•  Control de disponibilidad en tiempo real" styleClass="texto-claro"/>
-                  <Label text="•  Registro de huéspedes" styleClass="texto-claro"/>
-                  <Label text="•  Gestión de tarifas y reservas" styleClass="texto-claro"/>
-                  <Label text="•  Reportes y estadísticas" styleClass="texto-claro"/>
-               </children>
-            </VBox>
-            <Region VBox.vgrow="ALWAYS"/>
-            <Label text="Tu hotel," styleClass="lema"/>
-            <Label text="mejor gestionado." styleClass="lema-dorado"/>
-            <Label text="Edward Carrillo Martinez  ·  Prof. Alfredo Bautista  ·  Programación 3" styleClass="texto-claro-pequeno" wrapText="true"/>
-         </children>
-      </VBox>
-
-      <!-- Columna 2: mascota (la imagen se recorta para llenar todo el panel) -->
-      <StackPane fx:id="panelFoto" styleClass="panel-imagen" minWidth="220">
+      <!-- Heroe: mascota a pantalla completa con velos para que el texto se lea -->
+      <StackPane fx:id="panelFoto" styleClass="heroe" minWidth="340">
          <children>
             <ImageView fx:id="imgMascota" smooth="true" preserveRatio="false">
                <image><Image url="@images/mascota.jpg"/></image>
             </ImageView>
+            <Region styleClass="heroe-velo-sup" maxHeight="150" mouseTransparent="true" StackPane.alignment="TOP_CENTER"/>
+            <Region styleClass="heroe-velo-inf" maxHeight="330" mouseTransparent="true" StackPane.alignment="BOTTOM_CENTER"/>
+            <HBox styleClass="placa-logo" maxWidth="-Infinity" maxHeight="-Infinity" StackPane.alignment="TOP_LEFT">
+               <StackPane.margin><Insets top="26" left="28"/></StackPane.margin>
+               <children>
+                  <ImageView fitHeight="46" preserveRatio="true" smooth="true"><image><Image url="@images/logo_hr.png"/></image></ImageView>
+               </children>
+            </HBox>
+            <VBox fx:id="panelMarca" spacing="8" alignment="BOTTOM_LEFT" maxHeight="-Infinity" StackPane.alignment="BOTTOM_LEFT">
+               <padding><Insets top="0" right="34" bottom="22" left="34"/></padding>
+               <children>
+                  <Label text="Hotel Reserva" styleClass="marca-nombre"/>
+                  <Label text="Gestión inteligente de reservas y huéspedes para hoteles, hostales y alojamientos."
+                         styleClass="lema" wrapText="true"/>
+                  <GridPane hgap="22" vgap="6">
+                     <padding><Insets top="8" right="0" bottom="6" left="0"/></padding>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES"/>
+                        <ColumnConstraints hgrow="SOMETIMES"/>
+                     </columnConstraints>
+                     <children>
+                        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="0"><children>
+                           <Region styleClass="ico, ico-pequeno, ico-check, ico-dorado" style="-fx-background-color: #eab252;"/>
+                           <Label text="Disponibilidad en tiempo real" styleClass="heroe-ventaja"/></children></HBox>
+                        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="0"><children>
+                           <Region styleClass="ico, ico-pequeno, ico-check" style="-fx-background-color: #eab252;"/>
+                           <Label text="Registro de huéspedes" styleClass="heroe-ventaja"/></children></HBox>
+                        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="1"><children>
+                           <Region styleClass="ico, ico-pequeno, ico-check" style="-fx-background-color: #eab252;"/>
+                           <Label text="Gestión de tarifas y reservas" styleClass="heroe-ventaja"/></children></HBox>
+                        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="1"><children>
+                           <Region styleClass="ico, ico-pequeno, ico-check" style="-fx-background-color: #eab252;"/>
+                           <Label text="Reportes y estadísticas" styleClass="heroe-ventaja"/></children></HBox>
+                     </children>
+                  </GridPane>
+                  <Label text="Edward Carrillo Martinez  ·  Prof. Alfredo Bautista  ·  Programación 3"
+                         styleClass="texto-claro-pequeno" wrapText="true"/>
+               </children>
+            </VBox>
          </children>
       </StackPane>
 
-      <!-- Columna 3: inicio de sesion -->
-      <StackPane styleClass="fondo" minWidth="360" HBox.hgrow="ALWAYS">
+      <!-- Accesos -->
+      <StackPane styleClass="panel-acceso" minWidth="420" HBox.hgrow="ALWAYS">
          <children>
-            <VBox alignment="CENTER" spacing="14" maxWidth="400" StackPane.alignment="CENTER">
-               <padding><Insets topRightBottomLeft="30"/></padding>
+            <VBox spacing="16" maxWidth="440" alignment="CENTER_LEFT" StackPane.alignment="CENTER">
+               <padding><Insets top="28" right="32" bottom="28" left="32"/></padding>
                <children>
-                  <Label text="Iniciar sesión" styleClass="titulo-login"/>
-                  <Label text="Acceso para trabajadores del hotel" styleClass="nota"/>
-                  <Region prefHeight="6"/>
-                  <TextField fx:id="txtUsuario" promptText="Usuario" styleClass="campo-grande" maxWidth="Infinity"/>
-                  <PasswordField fx:id="txtClave" promptText="Contraseña" styleClass="campo-grande" maxWidth="Infinity"/>
-                  <Button text="Entrar" defaultButton="true" styleClass="boton-principal, boton-ancho"
-                          prefHeight="46" maxWidth="Infinity" onAction="#entrar"/>
-                  <Label fx:id="lblMensaje" styleClass="error" wrapText="true"/>
-                  <HBox alignment="CENTER" spacing="12" styleClass="separador-o">
+                  <VBox spacing="2">
                      <children>
-                        <Separator HBox.hgrow="ALWAYS"/>
-                        <Label text="o" styleClass="nota"/>
-                        <Separator HBox.hgrow="ALWAYS"/>
+                        <Label text="Bienvenido" styleClass="titulo-login"/>
+                        <Label text="Elige cómo quieres ingresar." styleClass="nota"/>
                      </children>
-                  </HBox>
-                  <Button text="Soy huésped" styleClass="boton-contorno" prefHeight="46" maxWidth="Infinity" onAction="#irHuesped"/>
-                  <Label text="Sin contraseña: solo necesitas tu documento." styleClass="nota"/>
+                  </VBox>
+
+                  <!-- Acceso administrativo -->
+                  <VBox spacing="10" styleClass="acceso-admin">
+                     <children>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                           <children>
+                              <StackPane styleClass="icono-acceso"><children><Region styleClass="ico, ico-grande, ico-candado, ico-dorado"/></children></StackPane>
+                              <VBox spacing="2">
+                                 <children>
+                                    <Label text="PERSONAL DEL HOTEL" styleClass="acceso-etiqueta"/>
+                                    <Label text="Acceso administrativo" styleClass="acceso-titulo"/>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        <Label text="Usuario" styleClass="campo-etiqueta"/>
+                        <TextField fx:id="txtUsuario" promptText="Tu usuario" styleClass="campo-grande" maxWidth="Infinity"/>
+                        <Label text="Contraseña" styleClass="campo-etiqueta"/>
+                        <PasswordField fx:id="txtClave" promptText="Tu contraseña" styleClass="campo-grande" maxWidth="Infinity"/>
+                        <Button text="Entrar" defaultButton="true" styleClass="boton-principal, boton-ancho"
+                                prefHeight="44" maxWidth="Infinity" onAction="#entrar"/>
+                        <Label fx:id="lblMensaje" styleClass="error" wrapText="true"/>
+                     </children>
+                  </VBox>
+
+                  <!-- Acceso de huespedes -->
+                  <VBox spacing="10" styleClass="acceso-huesped">
+                     <children>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                           <children>
+                              <StackPane styleClass="icono-acceso, icono-acceso-oscuro"><children><Region styleClass="ico, ico-grande, ico-llave"/></children></StackPane>
+                              <VBox spacing="2">
+                                 <children>
+                                    <Label text="HUÉSPEDES" styleClass="acceso-etiqueta-oscura"/>
+                                    <Label text="¿Quieres reservar?" styleClass="acceso-titulo-claro"/>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        <Label text="Consulta disponibilidad, reserva tu habitación y revisa tus reservas. Sin contraseña: solo necesitas tu documento."
+                               styleClass="acceso-texto-claro" wrapText="true"/>
+                        <Button text="Soy huésped" styleClass="boton-sobre-oscuro" prefHeight="42" maxWidth="Infinity" onAction="#irHuesped"/>
+                     </children>
+                  </VBox>
                </children>
             </VBox>
          </children>

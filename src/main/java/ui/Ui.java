@@ -13,6 +13,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.util.StringConverter;
 import model.Room;
 
@@ -116,12 +118,14 @@ final class Ui {
     static void info(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION, mensaje, ButtonType.OK);
         alerta.setHeaderText(null);
+        estilizar(alerta, "dialog-icono-info", "ico-check");
         alerta.showAndWait();
     }
 
     static boolean confirmar(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.CONFIRMATION, mensaje, ButtonType.YES, ButtonType.NO);
         alerta.setHeaderText(null);
+        estilizar(alerta, "dialog-icono-pregunta", "ico-pregunta");
         return alerta.showAndWait().filter(b -> b == ButtonType.YES).isPresent();
     }
 
@@ -130,8 +134,22 @@ final class Ui {
             accion.run();
         } catch (RuntimeException error) {
             Alert alerta = new Alert(Alert.AlertType.WARNING, mensaje(error), ButtonType.OK);
-            alerta.setHeaderText("No se pudo completar la accion");
+            alerta.setHeaderText("No se pudo completar la acción");
+            estilizar(alerta, "dialog-icono-aviso", "ico-alerta");
             alerta.showAndWait();
+        }
+    }
+
+    /** Aplica a una ventana emergente la hoja de estilos de la aplicacion y un icono propio. */
+    private static void estilizar(Alert alerta, String claseFondo, String claseIcono) {
+        alerta.getDialogPane().getStylesheets().add(Ui.class.getResource("/ui/estilos.css").toExternalForm());
+        Region icono = new Region();
+        icono.getStyleClass().addAll("ico", "ico-grande", claseIcono);
+        StackPane marco = new StackPane(icono);
+        marco.getStyleClass().addAll("dialog-icono", claseFondo);
+        alerta.setGraphic(marco);
+        if (Sesion.ventana != null) {
+            alerta.initOwner(Sesion.ventana);
         }
     }
 
@@ -164,12 +182,13 @@ final class Ui {
         });
     }
 
-    private static String claseEstado(String estado) {
+    static String claseEstado(String estado) {
         return switch (estado) {
-            case "En el hotel", "Pagado" -> "badge-ok";
+            case "En el hotel", "Pagado", "Disponible", "Operativa" -> "badge-ok";
             case "Confirmada", "Pendiente" -> "badge-aviso";
             case "Pago parcial" -> "badge-medio";
-            case "Cancelada", "Anulado" -> "badge-malo";
+            case "Cancelada", "Anulado", "No disponible" -> "badge-malo";
+            case "En mantenimiento" -> "badge-medio";
             default -> "badge-neutro";
         };
     }

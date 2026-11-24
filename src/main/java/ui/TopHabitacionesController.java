@@ -69,29 +69,41 @@ public class TopHabitacionesController {
     private HBox fila(int puesto, ReportRows.RoomRanking room, int maximo) {
         Label rank = new Label(String.valueOf(puesto));
         rank.getStyleClass().add("rank");
-        if (puesto == 1) rank.getStyleClass().add("rank-1");
+        if (puesto <= 3) rank.getStyleClass().add("rank-" + puesto);
 
-        Label nombre = new Label("Habitación " + room.roomNumber() + " · " + Ui.es(room.type()));
+        Label nombre = new Label("Habitación " + room.roomNumber());
         nombre.getStyleClass().add("top-nombre");
-        nombre.setMinWidth(210);
+        Label tipo = new Label(Ui.es(room.type()));
+        tipo.getStyleClass().add("top-tipo");
+        VBox titulos = new VBox(1, nombre, tipo);
+        titulos.setMinWidth(150);
 
         Region barra = new Region();
         barra.getStyleClass().add("barra-top");
         if (puesto == 1) barra.getStyleClass().add("barra-top-1");
-        barra.setPrefHeight(22);
-        barra.setMaxHeight(22);
+        barra.setPrefHeight(14);
+        barra.setMaxHeight(14);
         StackPane pista = new StackPane(barra);
         pista.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(pista, Priority.ALWAYS);
         double fraccion = Math.max(0.012, (double) room.reservations() / maximo);
         barra.maxWidthProperty().bind(pista.widthProperty().multiply(fraccion));
 
-        Label cifras = new Label(room.reservations() + (room.reservations() == 1 ? " reserva" : " reservas")
-                + "  ·  " + room.nights() + (room.nights() == 1 ? " noche" : " noches"));
-        cifras.getStyleClass().add("top-valor");
-        cifras.setMinWidth(170);
-        HBox fila = new HBox(12, rank, nombre, pista, cifras);
+        Label reservasCifra = new Label(String.valueOf(room.reservations()));
+        reservasCifra.getStyleClass().add("top-cifra");
+        Label reservasTexto = new Label(room.reservations() == 1 ? "reserva" : "reservas");
+        reservasTexto.getStyleClass().add("top-valor");
+        Label nochesCifra = new Label(room.nights() + (room.nights() == 1 ? " noche" : " noches"));
+        nochesCifra.getStyleClass().add("top-valor");
+        VBox cifras = new VBox(0, new HBox(5, reservasCifra, reservasTexto), nochesCifra);
+        ((HBox) cifras.getChildren().get(0)).setAlignment(Pos.BASELINE_RIGHT);
+        cifras.setMinWidth(130);
+        cifras.setAlignment(Pos.CENTER_RIGHT);
+
+        HBox fila = new HBox(14, rank, titulos, pista, cifras);
         fila.setAlignment(Pos.CENTER_LEFT);
+        fila.getStyleClass().add("top-fila");
+        if (puesto == 1) fila.getStyleClass().add("top-fila-1");
         return fila;
     }
 }

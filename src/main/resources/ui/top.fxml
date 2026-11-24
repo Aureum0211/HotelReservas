@@ -5,24 +5,30 @@
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="ui.TopHabitacionesController" spacing="14">
-   <padding><Insets topRightBottomLeft="22"/></padding>
+      fx:controller="ui.TopHabitacionesController" spacing="14" styleClass="pagina">
+   <padding><Insets top="24" right="28" bottom="20" left="28"/></padding>
    <children>
-      <Label text="Habitaciones más solicitadas" styleClass="titulo-seccion"/>
-      <HBox spacing="10" alignment="CENTER_LEFT" styleClass="panel-claro">
+      <VBox spacing="2">
          <children>
-            <Label text="Mostrar" styleClass="seccion"/>
-            <ComboBox fx:id="cmbCantidad" prefWidth="110"/>
-            <Label text="Periodo" styleClass="seccion"/>
-            <ComboBox fx:id="cmbPeriodo" prefWidth="170"/>
-            <Button text="Actualizar" onAction="#actualizar"/>
+            <Label text="Habitaciones más solicitadas" styleClass="titulo-seccion"/>
+            <Label text="Ranking según las reservas no canceladas de cada habitación." styleClass="pagina-subtitulo"/>
+         </children>
+      </VBox>
+      <HBox spacing="12" alignment="BOTTOM_LEFT" styleClass="tarjeta">
+         <padding><Insets top="12" right="18" bottom="12" left="18"/></padding>
+         <children>
+            <VBox spacing="4"><children><Label text="Mostrar" styleClass="campo-etiqueta"/><ComboBox fx:id="cmbCantidad" prefWidth="120"/></children></VBox>
+            <VBox spacing="4"><children><Label text="Periodo" styleClass="campo-etiqueta"/><ComboBox fx:id="cmbPeriodo" prefWidth="180"/></children></VBox>
+            <Button text="Actualizar" onAction="#actualizar">
+               <graphic><Region styleClass="ico, ico-pequeno, ico-actualizar"/></graphic>
+            </Button>
          </children>
       </HBox>
       <Label fx:id="lblNota" styleClass="nota" wrapText="true"/>
       <ScrollPane fitToWidth="true" styleClass="scroll-transparente" VBox.vgrow="ALWAYS">
          <content>
-            <VBox fx:id="vbTop" spacing="12">
-               <padding><Insets topRightBottomLeft="6"/></padding>
+            <VBox fx:id="vbTop" spacing="10">
+               <padding><Insets top="4" right="6" bottom="6" left="2"/></padding>
             </VBox>
          </content>
       </ScrollPane>
