@@ -25,9 +25,13 @@ public class BienvenidaController {
 
     @FXML
     private void initialize() {
-        // Columna de marca = 33% del ancho, mascota = 30%; el inicio de sesion ocupa el resto.
-        panelMarca.prefWidthProperty().bind(raiz.widthProperty().multiply(0.33));
-        panelFoto.prefWidthProperty().bind(raiz.widthProperty().multiply(0.30));
+        // El heroe con la mascota ocupa la mitad izquierda; los accesos ocupan el resto.
+        // El texto de marca (panelMarca) se superpone al heroe y toma su ancho.
+        panelFoto.prefWidthProperty().bind(raiz.widthProperty().multiply(0.50));
+        panelMarca.maxWidthProperty().bind(panelFoto.widthProperty());
+        // La imagen no participa en el calculo de tamanos: solo se recorta para llenar el heroe.
+        imgMascota.setManaged(false);
+        lblMensaje.managedProperty().bind(lblMensaje.textProperty().isNotEmpty());
         cubrir(imgMascota, panelFoto);
     }
 

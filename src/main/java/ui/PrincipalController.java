@@ -2,7 +2,9 @@ package ui;
 
 import java.time.LocalDate;
 import java.util.List;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -14,6 +16,12 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import model.Client;
 import model.Employee;
 import model.Invoice;
@@ -31,6 +39,19 @@ public class PrincipalController {
     @FXML private Tab tabPanel;
     @FXML private Tab tabTrabajadores;
     @FXML private Tab tabReportes;
+    @FXML private Tab tabTop;
+    @FXML private Tab tabReservas;
+    @FXML private Tab tabClientes;
+    @FXML private Tab tabHabitaciones;
+    @FXML private Tab tabComprobantes;
+
+    // ---- Menu lateral (solo presentacion: elige que seccion se muestra)
+    @FXML private ToggleGroup grupoNav;
+    @FXML private ToggleButton navPanel;
+    @FXML private ToggleButton navReportes;
+    @FXML private ToggleButton navTrabajadores;
+    @FXML private Label lblNavAdmin;
+    @FXML private VBox vbRecientes;
 
     // ---- Top de habitaciones (controlador de top.fxml, incluido con fx:id="top")
     @FXML private TopHabitacionesController topController;
@@ -116,7 +137,16 @@ public class PrincipalController {
             tabs.getTabs().remove(tabPanel);
             tabs.getTabs().remove(tabTrabajadores);
             tabs.getTabs().remove(tabReportes);
+            for (javafx.scene.Node nodo : List.of(navPanel, navReportes, navTrabajadores, lblNavAdmin)) {
+                nodo.setVisible(false);
+                nodo.setManaged(false);
+            }
         }
+        // Los avisos vacios no ocupan espacio.
+        lblResumenReserva.managedProperty().bind(lblResumenReserva.textProperty().isNotEmpty());
+        lblAviso.managedProperty().bind(lblAviso.textProperty().isNotEmpty());
+        // Seccion inicial: el administrador entra al Panel; el recepcionista, a Reservas.
+        mostrarSeccion(esAdmin ? "panel" : "reservas");
         btnAgregarHab.setDisable(!esAdmin);
         btnMantenimiento.setDisable(!esAdmin);
 
@@ -176,8 +206,8 @@ public class PrincipalController {
         Ui.columna(tblHabitaciones, 2, h -> Ui.es(h.getType()));
         Ui.columna(tblHabitaciones, 3, h -> h.getCapacity());
         Ui.columna(tblHabitaciones, 4, h -> Ui.dinero(h.getPricePerNight()));
-        Ui.columna(tblHabitaciones, 5, h -> h.isAvailable() ? "Si" : "No");
-        Ui.columna(tblHabitaciones, 6, h -> h.isUnderMaintenance() ? "Si" : "No");
+        Ui.columnaEstado(tblHabitaciones, 5, h -> h.isAvailable() ? "Disponible" : "No disponible");
+        Ui.columnaEstado(tblHabitaciones, 6, h -> h.isUnderMaintenance() ? "En mantenimiento" : "Operativa");
 
         Ui.columna(tblComprobantes, 0, i -> i.getId());
         Ui.columna(tblComprobantes, 1, i -> i.getReservation().getId());
@@ -201,7 +231,67 @@ public class PrincipalController {
         refrescar();
     }
 
+    // ------------------------------------------------------------------ menu lateral
+
+    /** Se ejecuta al pulsar un boton del menu lateral. */
+    @FXML
+    private void irSeccion(ActionEvent evento) {
+        ToggleButton boton = (ToggleButton) evento.getSource();
+        mostrarSeccion(String.valueOf(boton.getUserData()));
+    }
+
+    /** Muestra la seccion indicada y marca su boton en el menu. */
+    private void mostrarSeccion(String clave) {
+        Tab tab = switch (clave) {
+            case "panel" -> tabPanel;
+            case "top" -> tabTop;
+            case "reservas" -> tabReservas;
+            case "clientes" -> tabClientes;
+            case "habitaciones" -> tabHabitaciones;
+            case "comprobantes" -> tabComprobantes;
+            case "reportes" -> tabReportes;
+            case "trabajadores" -> tabTrabajadores;
+            default -> null;
+        };
+        if (tab == null || !tabs.getTabs().contains(tab)) {
+            return;
+        }
+        tabs.getSelectionModel().select(tab);
+        for (javafx.scene.control.Toggle toggle : grupoNav.getToggles()) {
+            toggle.setSelected(clave.equals(String.valueOf(((ToggleButton) toggle).getUserData())));
+        }
+    }
+
     // ------------------------------------------------------------------ panel
+
+    /** Muestra las 6 reservas mas recientes (las de id mas alto), con los datos que ya existen. */
+    private void actualizarRecientes() {
+        vbRecientes.getChildren().clear();
+        if (reservas.isEmpty()) {
+            Label vacio = new Label("Todavía no hay reservas registradas.");
+            vacio.getStyleClass().add("nota");
+            vbRecientes.getChildren().add(vacio);
+            return;
+        }
+        reservas.stream()
+                .sorted((a, b) -> Integer.compare(b.getId(), a.getId()))
+                .limit(6)
+                .forEach(r -> {
+                    Label titulo = new Label(r.getClient().getName() + "  ·  Hab. " + r.getRoom().getNumber());
+                    titulo.getStyleClass().add("reciente-titulo");
+                    Label fechas = new Label(Ui.fecha(r.getCheckIn()) + " → " + Ui.fecha(r.getCheckOut()));
+                    fechas.getStyleClass().add("nota");
+                    VBox texto = new VBox(2, titulo, fechas);
+                    HBox.setHgrow(texto, Priority.ALWAYS);
+                    String estado = Ui.es(r.getStatus());
+                    Label etiqueta = new Label(estado);
+                    etiqueta.getStyleClass().addAll("badge", Ui.claseEstado(estado));
+                    HBox fila = new HBox(8, texto, etiqueta);
+                    fila.setAlignment(Pos.CENTER_LEFT);
+                    fila.getStyleClass().add("reciente-fila");
+                    vbRecientes.getChildren().add(fila);
+                });
+    }
 
     @FXML
     private void actualizarPanel() {
@@ -435,6 +525,7 @@ public class PrincipalController {
             topController.actualizar();
             if (esAdmin) {
                 tblTrabajadores.getItems().setAll(servicio.getEmployees(usuario));
+                actualizarRecientes();
                 actualizarPanel();
             }
         });

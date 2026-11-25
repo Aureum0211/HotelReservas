@@ -8,6 +8,11 @@ import java.nio.file.Files;
 import java.time.LocalDate;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.util.StringConverter;
+import javafx.scene.chart.XYChart;
+import javafx.scene.layout.VBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -23,6 +28,8 @@ public class ReportesController {
     @FXML private DatePicker dpHasta;
     @FXML private Label lblResumen;
     @FXML private TableView<String[]> tblReporte;
+    @FXML private BarChart<String, Number> grafico;
+    @FXML private VBox cajaGrafico;
 
     private Reportes.Reporte actual;
 
@@ -46,7 +53,35 @@ public class ReportesController {
             }
             tblReporte.getItems().setAll(actual.filas());
             lblResumen.setText(actual.resumen());
+            mostrarGrafico();
         });
+    }
+
+    /** Dibuja la serie principal del reporte (si tiene datos) al lado de la tabla. */
+    private void mostrarGrafico() {
+        boolean hayDatos = !actual.valores().isEmpty();
+        cajaGrafico.setVisible(hayDatos);
+        cajaGrafico.setManaged(hayDatos);
+        grafico.getData().clear();
+        if (!hayDatos) {
+            return;
+        }
+        grafico.setTitle(actual.tituloGrafico());
+        // Conteos: solo marcas enteras. Dinero: valores con formato de moneda.
+        NumberAxis ejeY = (NumberAxis) grafico.getYAxis();
+        boolean dinero = actual.enDinero();
+        ejeY.setTickLabelFormatter(new StringConverter<>() {
+            @Override public String toString(Number n) {
+                if (dinero) return Ui.dinero(n.doubleValue());
+                return n.doubleValue() == Math.rint(n.doubleValue()) ? String.valueOf(n.intValue()) : "";
+            }
+            @Override public Number fromString(String texto) { return 0; }
+        });
+        XYChart.Series<String, Number> serie = new XYChart.Series<>();
+        for (int i = 0; i < actual.valores().size(); i++) {
+            serie.getData().add(new XYChart.Data<>(actual.etiquetas().get(i), actual.valores().get(i)));
+        }
+        grafico.getData().add(serie);
     }
 
     @FXML

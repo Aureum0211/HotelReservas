@@ -1,135 +1,369 @@
-/* ===== Hotel Reserva - estilos (paleta tomada del afiche) =====
-   verde #1b2c20 | dorado #eab252 | crema #fdebd0 | fondo #fff7e8
-   Para cambiar los colores de toda la aplicacion, edita estos valores. */
+/* =====================================================================================
+   Hotel Reserva - sistema de diseno
+   Paleta: verde #1b2c20 | dorado #eab252 | crema #fdebd0 | fondo #fff7e8
+   Todo el color de la aplicacion sale de las variables de .root: cambiando ahi cambia todo.
+   Orden del archivo: variables > textos > botones > campos > tablas > tarjetas >
+   menu lateral > pantallas (login, panel, huespedes) > dialogos > iconos.
+   ===================================================================================== */
 
 .root {
-    -fx-font-family: "Segoe UI", "System";
+    -hr-verde: #1b2c20;
+    -hr-verde-medio: #2a4433;
+    -hr-verde-claro: #3a5a45;
+    -hr-dorado: #eab252;
+    -hr-dorado-osc: #b98524;
+    -hr-dorado-claro: #f6dca3;
+    -hr-crema: #fdebd0;
+    -hr-fondo: #fff7e8;
+    -hr-superficie: #ffffff;
+    -hr-borde: #eadcb8;
+    -hr-borde-fuerte: #dcc592;
+    -hr-texto: #1b2c20;
+    -hr-suave: #7a6a4a;
+    -hr-ok: #2d6a45;
+    -hr-peligro: #8c2f2f;
+
+    -fx-font-family: "Segoe UI", "Helvetica Neue", "System";
     -fx-font-size: 13px;
     -fx-base: #fff7e8;
     -fx-accent: #eab252;
     -fx-focus-color: #eab252;
-    -fx-faint-focus-color: rgba(234, 178, 82, 0.25);
+    -fx-faint-focus-color: rgba(234, 178, 82, 0.22);
     -fx-control-inner-background: white;
-    -fx-text-fill: #1b2c20;
+    -fx-text-fill: -hr-texto;
 }
 
-.fondo { -fx-background-color: #fff7e8; }
-.label { -fx-text-fill: #1b2c20; }
-
-/* ---------- barra superior ---------- */
-.barra { -fx-background-color: #1b2c20; -fx-border-color: #eab252; -fx-border-width: 0 0 3 0; }
-.barra-titulo { -fx-font-family: "Georgia"; -fx-text-fill: #fdebd0; -fx-font-size: 20px; -fx-font-weight: bold; }
-.barra-texto { -fx-text-fill: #fdebd0; -fx-font-weight: bold; }
+.fondo { -fx-background-color: -hr-fondo; }
+.label { -fx-text-fill: -hr-texto; }
 
 /* ---------- textos ---------- */
-.titulo { -fx-font-family: "Georgia"; -fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #1b2c20; }
-.titulo-seccion { -fx-font-family: "Georgia"; -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1b2c20; }
-.lema { -fx-font-family: "Georgia"; -fx-font-style: italic; -fx-font-size: 17px; -fx-text-fill: #fdebd0; }
-.lema-dorado { -fx-font-family: "Georgia"; -fx-font-style: italic; -fx-font-weight: bold; -fx-font-size: 22px; -fx-text-fill: #eab252; }
-.texto-claro { -fx-text-fill: #fdebd0; }
+.titulo-seccion { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: -hr-verde; }
+.pagina-subtitulo { -fx-text-fill: -hr-suave; -fx-font-size: 13px; }
+.seccion { -fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -hr-verde; }
+.tarjeta-encabezado { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: -hr-verde; }
+.campo-etiqueta { -fx-font-size: 11.5px; -fx-font-weight: bold; -fx-text-fill: -hr-suave; }
+.nota { -fx-text-fill: -hr-suave; }
+.resumen { -fx-text-fill: -hr-verde; -fx-font-weight: bold; }
+.error { -fx-text-fill: -hr-peligro; }
+.saludo { -fx-font-weight: bold; -fx-text-fill: -hr-ok; }
+.lema { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-style: italic; -fx-font-size: 17px; -fx-text-fill: -hr-crema; }
+.lema-dorado { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-style: italic; -fx-font-weight: bold; -fx-font-size: 22px; -fx-text-fill: -hr-dorado; }
+.texto-claro { -fx-text-fill: -hr-crema; }
 .texto-claro-pequeno { -fx-text-fill: #cdbf9f; -fx-font-size: 11px; }
-.subtitulo { -fx-font-size: 15px; -fx-text-fill: #555555; }
-.seccion { -fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1b2c20; }
-.nota { -fx-text-fill: #7a6a4a; }
-.resumen { -fx-text-fill: #1b2c20; -fx-font-weight: bold; }
-.error { -fx-text-fill: #a63a3a; }
-.saludo { -fx-font-weight: bold; -fx-text-fill: #2d6a45; }
 
-/* ---------- pantalla de bienvenida y login ---------- */
-.panel-verde { -fx-background-color: #1b2c20; }
-.panel-imagen { -fx-background-color: #fdebd0; }
+/* ---------- barra superior ---------- */
+.barra { -fx-background-color: -hr-verde; -fx-border-color: -hr-dorado; -fx-border-width: 0 0 2 0; }
+.barra-titulo { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-text-fill: -hr-crema; -fx-font-size: 20px; -fx-font-weight: bold; }
+.barra-texto { -fx-text-fill: -hr-crema; -fx-font-weight: bold; }
+.chip-usuario { -fx-background-color: rgba(253, 235, 208, 0.10); -fx-background-radius: 20; -fx-padding: 6 14 6 10; }
 
 /* ---------- botones ---------- */
 .button {
-    -fx-background-color: #f3e3c3; -fx-text-fill: #1b2c20; -fx-font-weight: bold;
-    -fx-background-radius: 8; -fx-padding: 7 14 7 14; -fx-cursor: hand;
+    -fx-background-color: white; -fx-background-radius: 8;
+    -fx-border-color: -hr-borde-fuerte; -fx-border-radius: 8; -fx-border-width: 1;
+    -fx-text-fill: -hr-verde; -fx-font-weight: bold;
+    -fx-padding: 8 16 8 16; -fx-cursor: hand;
 }
-.button:hover { -fx-background-color: #ecd6a8; }
-.boton-principal { -fx-background-color: #eab252; -fx-text-fill: #1b2c20; }
+.button:hover { -fx-background-color: -hr-crema; }
+.button:pressed { -fx-background-color: #f6dca3; }
+.button:disabled { -fx-opacity: 0.45; }
+.button:focused { -fx-background-insets: 0; }
+
+.boton-principal { -fx-background-color: -hr-dorado; -fx-border-color: transparent; -fx-text-fill: -hr-verde; }
 .boton-principal:hover { -fx-background-color: #f2c372; }
-.boton-oscuro { -fx-background-color: #1b2c20; -fx-text-fill: #fdebd0; }
-.boton-oscuro:hover { -fx-background-color: #2f4b39; }
-.boton-peligro { -fx-background-color: #8c2f2f; -fx-text-fill: white; }
-.boton-peligro:hover { -fx-background-color: #a83a3a; }
-.boton-barra { -fx-background-color: transparent; -fx-text-fill: #eab252; -fx-border-color: #eab252; -fx-border-radius: 8; }
-.boton-barra:hover { -fx-background-color: rgba(234, 178, 82, 0.2); }
-.boton-grande { -fx-font-size: 16px; -fx-padding: 14 28 14 28; }
+.boton-principal:pressed { -fx-background-color: #d99f3c; }
+.boton-oscuro { -fx-background-color: -hr-verde; -fx-border-color: transparent; -fx-text-fill: -hr-crema; }
+.boton-oscuro:hover { -fx-background-color: -hr-verde-medio; }
+.boton-peligro { -fx-background-color: #fbeaea; -fx-border-color: #e6c3c3; -fx-text-fill: -hr-peligro; }
+.boton-peligro:hover { -fx-background-color: -hr-peligro; -fx-border-color: transparent; -fx-text-fill: white; }
+.boton-barra { -fx-background-color: transparent; -fx-text-fill: -hr-dorado; -fx-border-color: -hr-dorado; }
+.boton-barra:hover { -fx-background-color: rgba(234, 178, 82, 0.18); }
+.boton-contorno { -fx-background-color: white; -fx-border-color: -hr-verde; -fx-text-fill: -hr-verde; -fx-font-size: 14px; }
+.boton-contorno:hover { -fx-background-color: -hr-crema; }
+.boton-sobre-oscuro { -fx-background-color: transparent; -fx-border-color: -hr-dorado; -fx-text-fill: -hr-dorado; -fx-font-size: 14px; }
+.boton-sobre-oscuro:hover { -fx-background-color: -hr-dorado; -fx-text-fill: -hr-verde; }
+.boton-ancho { -fx-font-size: 14px; }
+.boton-grande { -fx-font-size: 15px; -fx-padding: 12 26 12 26; }
 
 /* ---------- campos ---------- */
 .text-field, .password-field {
-    -fx-background-color: white; -fx-background-radius: 6;
-    -fx-border-color: #dcc592; -fx-border-radius: 6; -fx-padding: 6 8 6 8;
+    -fx-background-color: white; -fx-background-radius: 8;
+    -fx-border-color: -hr-borde-fuerte; -fx-border-radius: 8; -fx-border-width: 1;
+    -fx-padding: 8 11 8 11; -fx-prompt-text-fill: #a89a78;
 }
-.text-field:focused, .password-field:focused { -fx-border-color: #eab252; }
-.combo-box-base, .date-picker { -fx-background-color: white; -fx-background-radius: 6; -fx-border-color: #dcc592; -fx-border-radius: 6; }
-.date-picker > .text-field, .combo-box-base > .text-field { -fx-background-color: transparent; -fx-border-color: transparent; }
-.spinner { -fx-background-radius: 6; }
+.text-field:focused, .password-field:focused { -fx-border-color: -hr-dorado; -fx-effect: dropshadow(gaussian, rgba(234, 178, 82, 0.35), 6, 0, 0, 0); }
+.campo-grande { -fx-font-size: 14px; -fx-pref-height: 44; }
 
-/* ---------- pestanas ---------- */
-.tab-pane > .tab-header-area > .tab-header-background { -fx-background-color: #f3e3c3; }
-.tab-pane > .tab-header-area > .headers-region > .tab {
-    -fx-background-color: #f3e3c3; -fx-background-radius: 0; -fx-padding: 7 18 7 18;
+.combo-box-base, .date-picker, .spinner {
+    -fx-background-color: white; -fx-background-radius: 8;
+    -fx-border-color: -hr-borde-fuerte; -fx-border-radius: 8; -fx-border-width: 1;
+    -fx-min-height: 36; -fx-pref-height: 36;
 }
-.tab-pane > .tab-header-area > .headers-region > .tab .tab-label { -fx-text-fill: #1b2c20; -fx-font-weight: bold; }
-.tab-pane > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: #ecd6a8; }
-.tab-pane > .tab-header-area > .headers-region > .tab:selected { -fx-background-color: #1b2c20; }
-.tab-pane > .tab-header-area > .headers-region > .tab:selected .tab-label { -fx-text-fill: #eab252; }
-.tab-pane > .tab-header-area > .headers-region > .tab .focus-indicator { -fx-border-width: 0; }
-.tab-pane > .tab-content-area { -fx-background-color: #fff7e8; }
+.combo-box-base:focused, .date-picker:focused, .spinner:focused { -fx-border-color: -hr-dorado; }
+.combo-box-base .arrow-button, .date-picker .arrow-button { -fx-background-color: transparent; -fx-background-radius: 0 8 8 0; }
+.combo-box-base .arrow, .date-picker .arrow-button .arrow { -fx-background-color: -hr-suave; }
+.date-picker > .text-field, .combo-box-base > .text-field, .spinner > .text-field {
+    -fx-background-color: transparent; -fx-border-color: transparent; -fx-effect: none; -fx-padding: 6 8 6 10;
+}
+.spinner .increment-arrow-button, .spinner .decrement-arrow-button { -fx-background-color: transparent; }
+.combo-box-popup > .list-view, .date-picker-popup {
+    -fx-background-color: white; -fx-border-color: -hr-borde-fuerte; -fx-border-radius: 8; -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(27, 44, 32, 0.20), 14, 0, 0, 4);
+}
+.combo-box-popup .list-cell { -fx-padding: 8 12 8 12; -fx-text-fill: -hr-verde; }
+.combo-box-popup .list-cell:filled:hover { -fx-background-color: -hr-crema; }
+.combo-box-popup .list-cell:filled:selected { -fx-background-color: #f6dca3; -fx-text-fill: -hr-verde; }
+.date-picker-popup .month-year-pane { -fx-background-color: -hr-verde; }
+.date-picker-popup .month-year-pane .label { -fx-text-fill: -hr-crema; }
+.date-picker-popup .day-cell:hover { -fx-background-color: -hr-crema; }
+.date-picker-popup .day-cell:selected { -fx-background-color: -hr-dorado; -fx-text-fill: -hr-verde; }
+.date-picker-popup .today { -fx-border-color: -hr-dorado; }
+.tooltip { -fx-background-color: -hr-verde; -fx-text-fill: -hr-crema; -fx-background-radius: 6; -fx-font-size: 12px; }
 
 /* ---------- tablas ---------- */
-.table-view { -fx-background-color: white; -fx-border-color: #e3d0a3; -fx-border-radius: 8; -fx-background-radius: 8; }
-.table-view .column-header-background { -fx-background-color: #1b2c20; }
-.table-view .column-header, .table-view .filler { -fx-background-color: #1b2c20; -fx-border-color: transparent; }
-.table-view .column-header .label { -fx-text-fill: #fdebd0; -fx-font-weight: bold; }
-.table-view .placeholder .label { -fx-text-fill: #7a6a4a; }
-.table-row-cell { -fx-background-color: white; -fx-table-cell-border-color: transparent; }
-.table-row-cell:odd { -fx-background-color: #fff7e8; }
-.table-row-cell:hover { -fx-background-color: #fbeccb; }
-.table-row-cell:filled:selected { -fx-background-color: #f6dca3; }
-.table-row-cell:filled:selected .table-cell { -fx-text-fill: #1b2c20; }
-
-/* ---------- tarjetas y paneles ---------- */
-.tarjeta {
-    -fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
-    -fx-border-color: #eab252; -fx-border-width: 0 0 4 0; -fx-border-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(27, 44, 32, 0.15), 10, 0, 0, 2);
+.table-view {
+    -fx-background-color: white; -fx-background-radius: 12;
+    -fx-border-color: -hr-borde; -fx-border-radius: 12; -fx-padding: 0;
+    -fx-cell-size: 38px;
 }
-.tarjeta-titulo { -fx-text-fill: #7a6a4a; }
-.tarjeta-valor { -fx-font-family: "Georgia"; -fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1b2c20; }
-.panel-claro { -fx-background-color: #f8ebcf; -fx-background-radius: 10; -fx-padding: 12; }
-
-/* ---------- top de habitaciones ---------- */
-.rank {
-    -fx-background-color: #1b2c20; -fx-text-fill: #eab252; -fx-background-radius: 20;
-    -fx-min-width: 32; -fx-min-height: 32; -fx-alignment: center; -fx-font-weight: bold; -fx-font-size: 14px;
+.table-view .column-header-background { -fx-background-color: #f7edd5; -fx-background-radius: 12 12 0 0; }
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent; -fx-size: 40; -fx-border-color: transparent transparent #eadcb8 transparent; -fx-border-width: 0 0 1 0;
 }
-.rank-1 { -fx-background-color: #eab252; -fx-text-fill: #1b2c20; }
-.top-nombre { -fx-font-weight: bold; -fx-text-fill: #1b2c20; }
-.barra-top { -fx-background-color: #cfb27a; -fx-background-radius: 6; }
-.barra-top-1 { -fx-background-color: linear-gradient(to right, #c8912c, #f2c372); }
-.top-valor { -fx-text-fill: #7a6a4a; }
+.table-view .column-header .label { -fx-text-fill: -hr-suave; -fx-font-weight: bold; -fx-font-size: 12px; -fx-alignment: CENTER_LEFT; -fx-padding: 0 4 0 6; }
+.table-view .column-header.col-centro .label { -fx-alignment: CENTER; }
+.table-view .column-header.col-derecha .label { -fx-alignment: CENTER_RIGHT; }
+.table-view .column-resize-line { -fx-background-color: transparent; }
+.table-view .placeholder .label { -fx-text-fill: -hr-suave; -fx-font-size: 14px; }
+.table-row-cell { -fx-cell-size: 38px; -fx-background-color: white; -fx-border-color: transparent transparent #f3ead2 transparent; -fx-border-width: 0 0 1 0; -fx-table-cell-border-color: transparent; }
+.table-row-cell:empty { -fx-background-color: transparent; -fx-border-color: transparent; }
+.table-row-cell:filled:hover { -fx-background-color: #fff3da; }
+.table-row-cell:filled:selected { -fx-background-color: #fbe6b8; }
+.table-row-cell:filled:selected .table-cell { -fx-text-fill: -hr-verde; }
+.table-cell { -fx-alignment: CENTER_LEFT; -fx-padding: 0 4 0 10; -fx-text-fill: -hr-verde; }
+.table-cell.col-centro { -fx-alignment: CENTER; }
+.table-cell.col-derecha { -fx-alignment: CENTER_RIGHT; -fx-padding: 0 14 0 4; }
+.scroll-bar .thumb { -fx-background-color: #d9c79b; -fx-background-radius: 6; }
+.scroll-bar .track { -fx-background-color: transparent; }
+.scroll-bar { -fx-background-color: transparent; }
+.scroll-bar .increment-button, .scroll-bar .decrement-button { -fx-padding: 0; -fx-background-color: transparent; }
+.scroll-bar .increment-arrow, .scroll-bar .decrement-arrow { -fx-padding: 0; -fx-shape: " "; }
 
-/* ---------- inicio de sesion ---------- */
-.titulo-login { -fx-font-family: "Georgia"; -fx-font-size: 36px; -fx-text-fill: #1b2c20; }
-.boton-ancho { -fx-font-size: 15px; -fx-background-radius: 8; }
-.boton-contorno { -fx-background-color: white; -fx-border-color: #1b2c20; -fx-border-radius: 8; -fx-text-fill: #1b2c20; -fx-font-size: 15px; }
-.boton-contorno:hover { -fx-background-color: #f3e3c3; }
-.campo-grande { -fx-font-size: 14px; -fx-pref-height: 46; }
-.separador-o .separator .line { -fx-border-color: #d8c493; -fx-border-width: 1 0 0 0; }
-
-/* ---------- etiquetas de estado en las tablas ---------- */
-.badge { -fx-padding: 2 10 2 10; -fx-background-radius: 10; -fx-font-size: 12px; -fx-font-weight: bold; }
+/* ---------- etiquetas de estado ---------- */
+.badge { -fx-padding: 3 11 3 11; -fx-background-radius: 12; -fx-font-size: 11.5px; -fx-font-weight: bold; }
 .badge-ok { -fx-background-color: #d6ecd9; -fx-text-fill: #1f6a3a; }
 .badge-aviso { -fx-background-color: #fbe6b8; -fx-text-fill: #7a5410; }
 .badge-medio { -fx-background-color: #fcd9b8; -fx-text-fill: #8a4a10; }
 .badge-malo { -fx-background-color: #f3cfcf; -fx-text-fill: #8c2f2f; }
-.badge-neutro { -fx-background-color: #e5e1d6; -fx-text-fill: #555555; }
+.badge-neutro { -fx-background-color: #e8e3d4; -fx-text-fill: #5a5547; }
 
-/* ---------- barra de progreso (ocupacion) ---------- */
-.progress-bar > .track { -fx-background-color: #eadfc4; -fx-background-radius: 8; -fx-background-insets: 0; }
+/* ---------- tarjetas y paneles ---------- */
+.tarjeta {
+    -fx-background-color: white; -fx-background-radius: 14; -fx-padding: 18;
+    -fx-border-color: -hr-borde; -fx-border-radius: 14; -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(27, 44, 32, 0.07), 12, 0, 0, 3);
+}
+.tarjeta-titulo { -fx-text-fill: -hr-suave; -fx-font-size: 12.5px; }
+.tarjeta-valor { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: -hr-verde; }
+.panel-claro { -fx-background-color: white; -fx-background-radius: 14; -fx-padding: 16; -fx-border-color: -hr-borde; -fx-border-radius: 14; -fx-border-width: 1; }
+.franja-resumen { -fx-background-color: #fff0d0; -fx-background-radius: 10; -fx-padding: 10 14 10 14; -fx-border-color: #f1d9a0; -fx-border-radius: 10; }
+.separador-suave { -fx-background-color: -hr-borde; -fx-min-height: 1; -fx-pref-height: 1; -fx-max-height: 1; }
+
+.kpi-icono { -fx-background-color: -hr-crema; -fx-background-radius: 12; -fx-min-width: 44; -fx-min-height: 44; -fx-pref-width: 44; -fx-pref-height: 44; -fx-alignment: CENTER; }
+.kpi-icono-oscuro { -fx-background-color: -hr-verde; }
+.kpi-icono-oscuro .ico { -fx-background-color: -hr-dorado; }
+.kpi-valor { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: -hr-verde; }
+.kpi-titulo { -fx-text-fill: -hr-suave; -fx-font-size: 12.5px; }
+.punto { -fx-background-radius: 6; -fx-min-width: 10; -fx-min-height: 10; -fx-pref-width: 10; -fx-pref-height: 10; -fx-max-width: 10; -fx-max-height: 10; }
+.punto-ocupada { -fx-background-color: -hr-verde; }
+.punto-reservada { -fx-background-color: -hr-dorado; }
+.punto-libre { -fx-background-color: #8fb69c; }
+.punto-mant { -fx-background-color: #d9893a; }
+.punto-nodisp { -fx-background-color: #b9b19c; }
+.dato-mini { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -hr-verde; }
+.reciente-fila { -fx-padding: 10 0 10 0; -fx-border-color: transparent transparent #f3ead2 transparent; -fx-border-width: 0 0 1 0; }
+.reciente-titulo { -fx-font-weight: bold; -fx-text-fill: -hr-verde; }
+
+/* barra de progreso (ocupacion) */
+.progress-bar > .track { -fx-background-color: #f0e5c8; -fx-background-radius: 8; -fx-background-insets: 0; }
 .progress-bar > .bar { -fx-background-color: linear-gradient(to right, #c8912c, #f2c372); -fx-background-radius: 8; -fx-background-insets: 0; -fx-padding: 0.4em; }
+.barra-segmentada { -fx-background-color: #f0e5c8; -fx-background-radius: 8; }
+.seg-ocupada { -fx-background-color: -hr-verde; }
+.seg-reservada { -fx-background-color: -hr-dorado; }
+.seg-libre { -fx-background-color: #8fb69c; }
+.seg-mant { -fx-background-color: #d9893a; }
+.seg-nodisp { -fx-background-color: #b9b19c; }
 
-/* ---------- zona con scroll transparente (sin tocar -fx-background, que fija el color del texto) ---------- */
+/* zona con scroll transparente */
 .scroll-transparente { -fx-background-color: transparent; -fx-padding: 0; }
 .scroll-transparente > .viewport { -fx-background-color: transparent; }
+
+/* ---------- menu lateral (zona de trabajadores) ---------- */
+.menu-lateral { -fx-background-color: -hr-verde; -fx-min-width: 224; -fx-pref-width: 224; -fx-max-width: 224; }
+.nav-grupo { -fx-text-fill: rgba(253, 235, 208, 0.45); -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-padding: 14 0 4 22; }
+.nav-item, .nav-item:focused {
+    -fx-background-color: transparent; -fx-background-insets: 0; -fx-background-radius: 0;
+    -fx-text-fill: rgba(253, 235, 208, 0.85); -fx-font-size: 13.5px; -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT; -fx-graphic-text-gap: 14; -fx-padding: 11 16 11 19; -fx-cursor: hand;
+    -fx-border-color: transparent; -fx-border-width: 0 0 0 3; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;
+}
+.nav-item .ico { -fx-background-color: rgba(253, 235, 208, 0.60); }
+.nav-item:hover { -fx-background-color: rgba(255, 255, 255, 0.07); }
+.nav-item:selected, .nav-item:selected:focused {
+    -fx-background-color: rgba(234, 178, 82, 0.16); -fx-text-fill: -hr-dorado; -fx-border-color: transparent transparent transparent -hr-dorado;
+}
+.nav-item:selected .ico { -fx-background-color: -hr-dorado; }
+.menu-pie { -fx-padding: 14 20 16 22; }
+
+/* contenido de las secciones */
+.pagina { -fx-background-color: -hr-fondo; }
+
+/* ---------- pantalla de inicio de sesion ---------- */
+.heroe { -fx-background-color: #e9c98f; }
+.heroe-velo-sup { -fx-background-color: linear-gradient(to bottom, rgba(27, 44, 32, 0.55), rgba(27, 44, 32, 0)); }
+.heroe-velo-inf { -fx-background-color: linear-gradient(to bottom, rgba(27, 44, 32, 0), rgba(27, 44, 32, 0.88) 38%, #1b2c20 100%); }
+.placa-logo { -fx-background-color: -hr-verde; -fx-background-radius: 14; -fx-padding: 6 12 6 12; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 12, 0, 0, 3); }
+.marca-nombre { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 34px; -fx-font-weight: bold; -fx-text-fill: -hr-dorado; }
+.heroe-ventaja { -fx-text-fill: -hr-crema; -fx-font-size: 12.5px; }
+.panel-acceso { -fx-background-color: -hr-fondo; }
+.titulo-login { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: -hr-verde; }
+.acceso-admin { -fx-background-color: white; -fx-background-radius: 16; -fx-padding: 22; -fx-border-color: -hr-borde; -fx-border-radius: 16; -fx-effect: dropshadow(gaussian, rgba(27, 44, 32, 0.10), 16, 0, 0, 4); }
+.acceso-huesped { -fx-background-color: -hr-verde; -fx-background-radius: 16; -fx-padding: 22; -fx-effect: dropshadow(gaussian, rgba(27, 44, 32, 0.25), 16, 0, 0, 4); }
+.acceso-etiqueta { -fx-background-color: #f7edd5; -fx-text-fill: -hr-dorado-osc; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 2 9 2 9; }
+.acceso-etiqueta-oscura { -fx-background-color: rgba(234, 178, 82, 0.18); -fx-text-fill: -hr-dorado; -fx-font-size: 10.5px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 2 9 2 9; }
+.acceso-titulo { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -hr-verde; }
+.acceso-titulo-claro { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: -hr-crema; }
+.acceso-texto-claro { -fx-text-fill: rgba(253, 235, 208, 0.80); }
+.icono-acceso { -fx-background-color: -hr-crema; -fx-background-radius: 12; -fx-min-width: 40; -fx-min-height: 40; -fx-pref-width: 40; -fx-pref-height: 40; -fx-alignment: CENTER; }
+.icono-acceso-oscuro { -fx-background-color: rgba(234, 178, 82, 0.18); }
+.icono-acceso-oscuro .ico { -fx-background-color: -hr-dorado; }
+
+/* ---------- top de habitaciones ---------- */
+.top-fila { -fx-background-color: white; -fx-background-radius: 12; -fx-padding: 12 18 12 14; -fx-border-color: -hr-borde; -fx-border-radius: 12; }
+.top-fila-1 { -fx-background-color: #fff3d6; -fx-border-color: -hr-dorado; -fx-effect: dropshadow(gaussian, rgba(234, 178, 82, 0.35), 12, 0, 0, 3); }
+.rank {
+    -fx-background-color: #f3e7c8; -fx-text-fill: -hr-verde; -fx-background-radius: 20;
+    -fx-min-width: 36; -fx-min-height: 36; -fx-alignment: center; -fx-font-weight: bold; -fx-font-size: 15px;
+}
+.rank-1 { -fx-background-color: -hr-dorado; -fx-text-fill: -hr-verde; }
+.rank-2, .rank-3 { -fx-background-color: -hr-verde; -fx-text-fill: -hr-crema; }
+.top-nombre { -fx-font-weight: bold; -fx-font-size: 14.5px; -fx-text-fill: -hr-verde; }
+.top-tipo { -fx-text-fill: -hr-suave; -fx-font-size: 12px; }
+.barra-top { -fx-background-color: #d9c595; -fx-background-radius: 6; }
+.barra-top-1 { -fx-background-color: linear-gradient(to right, #c8912c, #f2c372); }
+.top-valor { -fx-text-fill: -hr-suave; }
+.top-cifra { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: -hr-verde; }
+
+/* ---------- reportes ---------- */
+.chart { -fx-background-color: transparent; }
+.chart-plot-background { -fx-background-color: transparent; }
+.chart-vertical-grid-lines { -fx-stroke: transparent; }
+.chart-horizontal-grid-lines { -fx-stroke: #f0e5c8; }
+.chart-bar { -fx-bar-fill: -hr-dorado; -fx-background-radius: 6 6 0 0; }
+.chart-bar:hover { -fx-bar-fill: #f2c372; }
+.axis { -fx-tick-label-fill: -hr-suave; -fx-font-size: 11px; }
+.axis-tick-mark, .axis-minor-tick-mark { -fx-stroke: transparent; }
+.chart-title { -fx-text-fill: -hr-verde; -fx-font-weight: bold; -fx-font-size: 13px; }
+
+/* ---------- zona de huespedes (identidad propia: mas calida y de reserva) ---------- */
+.huesped-hero { -fx-background-color: linear-gradient(to bottom right, #1b2c20, #2d4a36); }
+.huesped-hero-titulo { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: -hr-crema; }
+.huesped-hero-texto { -fx-text-fill: rgba(253, 235, 208, 0.80); -fx-font-size: 14px; }
+.huesped-id { -fx-background-color: rgba(253, 235, 208, 0.10); -fx-background-radius: 14; -fx-padding: 14 16 14 16; -fx-border-color: rgba(234, 178, 82, 0.45); -fx-border-radius: 14; }
+.huesped-id .label { -fx-text-fill: -hr-crema; }
+.huesped-id .campo-etiqueta { -fx-text-fill: rgba(253, 235, 208, 0.70); }
+.huesped-id .saludo { -fx-text-fill: -hr-dorado; }
+.busqueda-card { -fx-background-color: white; -fx-background-radius: 16; -fx-padding: 16 20 16 20; -fx-border-color: -hr-borde; -fx-border-radius: 16; -fx-effect: dropshadow(gaussian, rgba(27, 44, 32, 0.12), 16, 0, 0, 5); }
+
+.tab-pane.pildoras > .tab-header-area > .tab-header-background { -fx-background-color: transparent; }
+.tab-pane.pildoras > .tab-header-area { -fx-padding: 0 0 8 0; }
+.tab-pane.pildoras > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: transparent; -fx-background-radius: 20; -fx-padding: 6 20 6 20; -fx-border-color: -hr-borde-fuerte; -fx-border-radius: 20;
+    -fx-background-insets: 0; -fx-cursor: hand;
+}
+.tab-pane.pildoras > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: -hr-crema; }
+.tab-pane.pildoras > .tab-header-area > .headers-region > .tab:selected { -fx-background-color: -hr-verde; -fx-border-color: -hr-verde; }
+.tab-pane.pildoras > .tab-header-area > .headers-region > .tab .tab-label { -fx-text-fill: -hr-verde; -fx-font-weight: bold; -fx-font-size: 13.5px; }
+.tab-pane.pildoras > .tab-header-area > .headers-region > .tab:selected .tab-label { -fx-text-fill: -hr-dorado; }
+.tab-pane.pildoras > .tab-header-area > .headers-region > .tab .focus-indicator { -fx-border-width: 0; }
+.tab-pane.pildoras > .tab-content-area { -fx-background-color: transparent; }
+.tab-pane.pildoras { -fx-tab-min-height: 34; }
+.tab-pane.pildoras > .tab-header-area > .headers-region { -fx-spacing: 8; }
+
+/* contenedor de secciones sin pestanas visibles: la navegacion la hace el menu lateral */
+.tab-pane.sin-cabecera { -fx-tab-max-height: 0; -fx-tab-min-height: 0; -fx-background-color: transparent; }
+.tab-pane.sin-cabecera > .tab-header-area { -fx-max-height: 0; -fx-pref-height: 0; -fx-min-height: 0; -fx-padding: 0; visibility: hidden; -fx-opacity: 0; }
+.tab-pane.sin-cabecera > .tab-content-area { -fx-background-color: -hr-fondo; }
+
+/* tarjetas de habitacion y de reserva (zona de huespedes) */
+.hab-card { -fx-background-color: white; -fx-background-radius: 16; -fx-border-color: -hr-borde; -fx-border-radius: 16; -fx-effect: dropshadow(gaussian, rgba(27, 44, 32, 0.10), 14, 0, 0, 4); }
+.hab-card:hover { -fx-effect: dropshadow(gaussian, rgba(27, 44, 32, 0.22), 18, 0, 0, 6); -fx-border-color: -hr-dorado; }
+.hab-portada { -fx-background-color: linear-gradient(to bottom right, #1b2c20, #35563f); -fx-background-radius: 15 15 0 0; -fx-padding: 14 16 14 16; }
+.hab-numero { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: -hr-crema; }
+.hab-tipo { -fx-background-color: rgba(234, 178, 82, 0.20); -fx-text-fill: -hr-dorado; -fx-font-weight: bold; -fx-font-size: 11.5px; -fx-background-radius: 10; -fx-padding: 3 10 3 10; }
+.hab-ico-grande { -fx-background-color: rgba(234, 178, 82, 0.55); }
+.hab-cuerpo { -fx-padding: 14 16 16 16; }
+.hab-precio { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: -hr-verde; }
+.hab-dato { -fx-text-fill: -hr-suave; }
+.hab-total { -fx-text-fill: -hr-verde; -fx-font-weight: bold; }
+.vacio { -fx-background-color: white; -fx-background-radius: 16; -fx-border-color: -hr-borde-fuerte; -fx-border-radius: 16; -fx-border-style: dashed; -fx-padding: 28; }
+.vacio-titulo { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: -hr-verde; }
+.res-card { -fx-background-color: white; -fx-background-radius: 14; -fx-border-color: -hr-borde; -fx-border-radius: 14; -fx-padding: 0; -fx-effect: dropshadow(gaussian, rgba(27, 44, 32, 0.08), 12, 0, 0, 3); }
+.res-franja { -fx-background-radius: 14 0 0 14; -fx-min-width: 6; -fx-pref-width: 6; }
+.res-franja-ok { -fx-background-color: #3f9a62; }
+.res-franja-aviso { -fx-background-color: -hr-dorado; }
+.res-franja-malo { -fx-background-color: #c76a6a; }
+.res-franja-neutro { -fx-background-color: #b9b19c; }
+.res-titulo { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: -hr-verde; }
+.res-fechas { -fx-font-weight: bold; -fx-text-fill: -hr-verde; -fx-font-size: 14px; }
+.res-total { -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: -hr-verde; }
+
+/* ---------- ventanas emergentes (alertas y confirmaciones) ---------- */
+.dialog-pane { -fx-background-color: -hr-fondo; -fx-border-color: -hr-borde-fuerte; -fx-border-width: 1; }
+.dialog-pane > .header-panel { -fx-background-color: -hr-verde; -fx-padding: 14 20 14 20; }
+.dialog-pane > .header-panel .label { -fx-text-fill: -hr-crema; -fx-font-family: "Georgia", "Times New Roman", serif; -fx-font-size: 16px; -fx-font-weight: bold; }
+.dialog-pane > .content.label { -fx-padding: 18 22 14 8; -fx-font-size: 13.5px; -fx-text-fill: -hr-verde; }
+.dialog-pane > .button-bar > .container { -fx-background-color: transparent; -fx-padding: 6 18 16 18; }
+.dialog-pane > .button-bar .button { -fx-min-width: 96; }
+.dialog-pane > .button-bar .button:default { -fx-background-color: -hr-dorado; -fx-border-color: transparent; }
+.dialog-pane > .button-bar .button:default:hover { -fx-background-color: #f2c372; }
+.dialog-icono { -fx-background-radius: 22; -fx-min-width: 44; -fx-min-height: 44; -fx-pref-width: 44; -fx-pref-height: 44; -fx-alignment: CENTER; }
+.dialog-icono-info { -fx-background-color: #d6ecd9; }
+.dialog-icono-info .ico { -fx-background-color: #1f6a3a; }
+.dialog-icono-aviso { -fx-background-color: #fbe6b8; }
+.dialog-icono-aviso .ico { -fx-background-color: #9a6a10; }
+.dialog-icono-pregunta { -fx-background-color: -hr-crema; }
+.dialog-icono-pregunta .ico { -fx-background-color: -hr-dorado-osc; }
+
+/* ---------- iconos vectoriales (Material Design, Apache 2.0) ---------- */
+.ico { -fx-background-color: -hr-verde; -fx-min-width: 18; -fx-min-height: 18; -fx-pref-width: 18; -fx-pref-height: 18; -fx-max-width: 18; -fx-max-height: 18; }
+.ico-grande { -fx-min-width: 26; -fx-min-height: 26; -fx-pref-width: 26; -fx-pref-height: 26; -fx-max-width: 26; -fx-max-height: 26; }
+.ico-enorme { -fx-min-width: 44; -fx-min-height: 44; -fx-pref-width: 44; -fx-pref-height: 44; -fx-max-width: 44; -fx-max-height: 44; }
+.ico-pequeno { -fx-min-width: 14; -fx-min-height: 14; -fx-pref-width: 14; -fx-pref-height: 14; -fx-max-width: 14; -fx-max-height: 14; }
+.ico-dorado { -fx-background-color: -hr-dorado-osc; }
+.ico-claro { -fx-background-color: -hr-crema; }
+.ico-panel { -fx-shape: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"; }
+.ico-top { -fx-shape: "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"; }
+.ico-reservas { -fx-shape: "M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"; }
+.ico-clientes { -fx-shape: "M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"; }
+.ico-habitaciones { -fx-shape: "M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"; }
+.ico-comprobantes { -fx-shape: "M18 17H6v-2h12v2zm0-4H6v-2h12v2zm0-4H6V7h12v2zM3 22l1.5-1.5L6 22l1.5-1.5L9 22l1.5-1.5L12 22l1.5-1.5L15 22l1.5-1.5L18 22l1.5-1.5L21 22V2l-1.5 1.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2 4.5 3.5 3 2v20z"; }
+.ico-reportes { -fx-shape: "M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"; }
+.ico-trabajadores { -fx-shape: "M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"; }
+.ico-salir { -fx-shape: "M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"; }
+.ico-buscar { -fx-shape: "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"; }
+.ico-usuario { -fx-shape: "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"; }
+.ico-candado { -fx-shape: "M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"; }
+.ico-dinero { -fx-shape: "M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z"; }
+.ico-pendiente { -fx-shape: "M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"; }
+.ico-check { -fx-shape: "M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"; }
+.ico-persona { -fx-shape: "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"; }
+.ico-info { -fx-shape: "M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"; }
+.ico-alerta { -fx-shape: "M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"; }
+.ico-pregunta { -fx-shape: "M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"; }
+.ico-actualizar { -fx-shape: "M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"; }
+.ico-descargar { -fx-shape: "M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"; }
+.ico-llave { -fx-shape: "M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"; }
+.ico-calendario { -fx-shape: "M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"; }
+.ico-cama { -fx-shape: "M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"; }
+.hab-caption { -fx-text-fill: rgba(253, 235, 208, 0.65); -fx-font-size: 10.5px; -fx-font-weight: bold; }
